@@ -5,6 +5,8 @@ export default {
   // when testing backend
   testEnvironment: "node",
 
+  transform: {},
+
   // which test to run
   testMatch: ["<rootDir>/tests/**/*.test.js"],
 
