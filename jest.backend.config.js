@@ -12,5 +12,5 @@ export default {
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["controllers/*.js", "models/*.js", "routes/*.js", "helpers/*.js", "middlewares/*.js"],
+  collectCoverageFrom: ["controllers/*.js", "models/*.js", "routes/*.js", "helpers/*.js", "middlewares/*.js", "config/*.js"],
 };
