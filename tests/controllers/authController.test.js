@@ -10,7 +10,7 @@ jest.unstable_mockModule("../../helpers/authHelper", () => ({
   comparePassword: jest.fn(),
 }));
 
-const { registerController, loginController, forgotPasswordController, testController } = await import("../../controllers/authController");
+const authController = await import("../../controllers/authController");
 const authHelper = await import("../../helpers/authHelper");
 
 describe("Register Controller Test", () => {
@@ -45,7 +45,7 @@ describe("Register Controller Test", () => {
       ["answer", "Answer is Required"],
     ])("should return %s is required", async (field, message) => {
       delete req.body[field];
-      await registerController(req, res);
+      await authController.registerController(req, res);
       expect(res.send).toHaveBeenCalledWith({ message });
     });
   });
@@ -54,7 +54,7 @@ describe("Register Controller Test", () => {
     userModel.findOne = jest.fn().mockResolvedValue({ email: "test@mail.com" });
     userModel.prototype.save = jest.fn();
 
-    await registerController(req, res);
+    await authController.registerController(req, res);
     expect(userModel.prototype.save).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
@@ -67,7 +67,7 @@ describe("Register Controller Test", () => {
     userModel.findOne = jest.fn().mockResolvedValue(null);
     userModel.prototype.save = jest.fn().mockResolvedValue({...req.body, password: "hashedPassword"});
 
-    await registerController(req, res);
+    await authController.registerController(req, res);
     expect(userModel.prototype.save).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
@@ -80,7 +80,7 @@ describe("Register Controller Test", () => {
   test("error is handled", async () => {
     userModel.findOne = jest.fn().mockRejectedValue(new Error("Database error"));
 
-    await registerController(req, res);
+    await authController.registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
@@ -124,7 +124,7 @@ describe("Login Controller Test", () => {
       ["password"],
     ])("when %s is not provided", async (field) => {
       delete req.body[field];
-      await loginController(req, res);
+      await authController.loginController(req, res);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
         message: "Invalid email or password" 
@@ -134,7 +134,7 @@ describe("Login Controller Test", () => {
     it("when both email and passwords is not provided", async () => {
       delete req.body.email;
       delete req.body.password;
-      await loginController(req, res);
+      await authController.loginController(req, res);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
         message: "Invalid email or password" 
@@ -145,7 +145,7 @@ describe("Login Controller Test", () => {
   it("should return email is not registered", async () => {
     userModel.findOne = jest.fn().mockResolvedValue(null);
 
-    await loginController(req, res);
+    await authController.loginController(req, res);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
@@ -157,7 +157,7 @@ describe("Login Controller Test", () => {
     userModel.findOne = jest.fn().mockResolvedValue(mockUser);
     authHelper.comparePassword.mockResolvedValueOnce(false);
 
-    await loginController(req, res);
+    await authController.loginController(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
@@ -169,7 +169,7 @@ describe("Login Controller Test", () => {
     userModel.findOne = jest.fn().mockResolvedValue(mockUser);
     authHelper.comparePassword.mockResolvedValueOnce(true);
 
-    await loginController(req, res);
+    await authController.loginController(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
@@ -189,7 +189,7 @@ describe("Login Controller Test", () => {
   it("should handle error", async () => {
     userModel.findOne = jest.fn().mockRejectedValue(new Error("Database error"));
 
-    await loginController(req, res);
+    await authController.loginController(req, res);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
@@ -234,7 +234,7 @@ describe("Forgot Password Controller Test", () => {
       ["newPassword", "New Password is required"],
     ])("should return %s is required", async (field, message) => {
       delete req.body[field];
-      await forgotPasswordController(req, res);
+      await authController.forgotPasswordController(req, res);
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({ message });
     });
@@ -243,7 +243,7 @@ describe("Forgot Password Controller Test", () => {
   it("should return wrong email or answer", async () => {
     userModel.findOne = jest.fn().mockResolvedValue(null);
 
-    await forgotPasswordController(req, res);
+    await authController.forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
@@ -255,7 +255,7 @@ describe("Forgot Password Controller Test", () => {
     userModel.findOne = jest.fn().mockResolvedValue(mockUser);
     userModel.findByIdAndUpdate = jest.fn();
 
-    await forgotPasswordController(req, res);
+    await authController.forgotPasswordController(req, res);
     expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(mockUser._id, { password: "hashedPassword" });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
@@ -267,7 +267,7 @@ describe("Forgot Password Controller Test", () => {
   it("should handle error", async () => {
     userModel.findOne = jest.fn().mockRejectedValue(new Error("Database error"));
 
-    await forgotPasswordController(req, res);
+    await authController.forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
