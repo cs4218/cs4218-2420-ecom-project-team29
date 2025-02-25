@@ -1,16 +1,17 @@
 import { expect, jest } from "@jest/globals";
-import { registerController, loginController, forgotPasswordController, testController } from "../../controllers/authController";
 import userModel from "../../models/userModel";
-import { comparePassword } from "../../helpers/authHelper";
 
 jest.mock("jsonwebtoken", () => ({
   sign: jest.fn().mockReturnValue("token"),
 }));
 jest.mock("../../models/userModel");
-jest.mock("../../helpers/authHelper", () => ({
+jest.unstable_mockModule("../../helpers/authHelper", () => ({
   hashPassword: jest.fn().mockResolvedValue("hashedPassword"),
   comparePassword: jest.fn(),
 }));
+
+const { registerController, loginController, forgotPasswordController, testController } = await import("../../controllers/authController");
+const authHelper = await import("../../helpers/authHelper");
 
 describe("Register Controller Test", () => {
   let req, res;
@@ -154,7 +155,7 @@ describe("Login Controller Test", () => {
 
   it("should return invalid password", async () => {
     userModel.findOne = jest.fn().mockResolvedValue(mockUser);
-    comparePassword.mockResolvedValueOnce(false);
+    authHelper.comparePassword.mockResolvedValueOnce(false);
 
     await loginController(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
@@ -166,7 +167,7 @@ describe("Login Controller Test", () => {
 
   it("should return login successfully", async () => {
     userModel.findOne = jest.fn().mockResolvedValue(mockUser);
-    comparePassword.mockResolvedValueOnce(true);
+    authHelper.comparePassword.mockResolvedValueOnce(true);
 
     await loginController(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
