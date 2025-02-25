@@ -289,7 +289,7 @@ describe("Test controller Test", () => {
   });
 
   it("should return protected routes", () => {
-    testController(req, res);
+    authController.testController(req, res);
     expect(res.send).toHaveBeenCalledWith("Protected Routes");
   });
 
@@ -299,7 +299,7 @@ describe("Test controller Test", () => {
       throw error;
     });
 
-    testController(req, res);
+    authController.testController(req, res);
     expect(res.send).toHaveBeenCalledWith({ error });
   });
 });
