@@ -1,10 +1,9 @@
 import { jest } from '@jest/globals';
 import JWT from 'jsonwebtoken';
-import userModel from '../../models/userModel.js';
-import { requireSignIn, isAdmin } from '../../middlewares/authMiddleware.js';
+import userModel from '../../models/userModel';
+import { requireSignIn, isAdmin } from '../../middlewares/authMiddleware';
 
-jest.mock('jsonwebtoken');
-jest.mock('../../models/userModel.js');
+jest.mock('../../models/userModel');
 
 describe('Auth Middleware', () => {
   let req, res, next;
@@ -26,6 +25,7 @@ describe('Auth Middleware', () => {
   describe('requireSignIn', () => {
     it('should verify token and set user in request', async () => {
       const mockDecode = { _id: '123', name: 'John Doe' };
+      JWT.verify = jest.fn();
       JWT.verify.mockResolvedValue(mockDecode);
 
       await requireSignIn(req, res, next);
@@ -38,6 +38,7 @@ describe('Auth Middleware', () => {
     it('should handle token verification error', async () => {
       const error = new Error('Token verification failed');
       console.log = jest.fn();
+      JWT.verify = jest.fn();
       JWT.verify.mockImplementationOnce(() => {
         throw error;
       });
@@ -54,6 +55,7 @@ describe('Auth Middleware', () => {
     it('should allow access for admin user', async () => {
       req.user = { _id: '123' };
       const mockUser = { _id: '123', role: 1 };
+      userModel.findById = jest.fn();
       userModel.findById.mockResolvedValue(mockUser);
 
       await isAdmin(req, res, next);
@@ -65,6 +67,7 @@ describe('Auth Middleware', () => {
     it('should deny access for non-admin user', async () => {
       req.user = { _id: '123' };
       const mockUser = { _id: '123', role: 0 };
+      userModel.findById = jest.fn();
       userModel.findById.mockResolvedValue(mockUser);
 
       await isAdmin(req, res, next);
@@ -82,6 +85,7 @@ describe('Auth Middleware', () => {
       req.user = { _id: '123' };
       const error = new Error('Database error');
       console.log = jest.fn();
+      userModel.findById = jest.fn();
       userModel.findById.mockImplementationOnce(() => {
         throw error;
       });
