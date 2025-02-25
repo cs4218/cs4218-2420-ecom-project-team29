@@ -50,7 +50,6 @@ describe("Register Controller Test", () => {
   });
 
   test("user model is not saved for existing email", async () => {
-    // specify mock functionality
     userModel.findOne = jest.fn().mockResolvedValue({ email: "test@mail.com" });
     userModel.prototype.save = jest.fn();
 
@@ -64,7 +63,6 @@ describe("Register Controller Test", () => {
   });
 
   test("new user is saved successfully", async () => {
-    // specify mock functionality
     userModel.findOne = jest.fn().mockResolvedValue(null);
     userModel.prototype.save = jest.fn().mockResolvedValue({...req.body, password: "hashedPassword"});
 
@@ -79,7 +77,6 @@ describe("Register Controller Test", () => {
   });
 
   test("error is handled", async () => {
-    // specify mock functionality
     userModel.findOne = jest.fn().mockRejectedValue(new Error("Database error"));
 
     await registerController(req, res);
