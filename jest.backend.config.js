@@ -1,11 +1,9 @@
-export default {
+module.exports = {
   // display name
   displayName: "backend",
 
   // when testing backend
   testEnvironment: "node",
-
-  transform: {},
 
   // which test to run
   testMatch: ["<rootDir>/tests/**/*.test.js"],
