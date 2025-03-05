@@ -7,8 +7,8 @@ describe('User Model Test', () => {
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
+    process.env.MONGO_URL = mongoServer.getUri();
+    await mongoose.connect(process.env.MONGO_URL);
   });
 
   afterAll(async () => {
