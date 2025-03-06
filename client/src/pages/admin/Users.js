@@ -37,9 +37,10 @@ const Users = () => {
                   <div className="card m-2" style={{ width: "18rem" }} key={u._id}>
                     <div className="card-body">
                       <h5 className="card-title">{u.name}</h5>
-                      <p className="card-text">{"Email: " + u.email}</p>
-                      <p className="card-text">{"Address: " + u.address}</p>
-                      <p className="card-text">{"Role: " + u.role === 1 ? "Admin" : "User"}</p>
+                      <p className="card-text mb-0">{"Email: " + u.email}</p>
+                      <p className="card-text mb-0">{"Address: " + u.address}</p>
+                      <p className="card-text mb-0">{"Phone: " + u.phone}</p>
+                      <p className="card-text mb-0">{u.role === 1 ? "Role: Admin" : "Role: User"}</p>
                     </div>
                   </div>
               ))}
