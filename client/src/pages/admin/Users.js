@@ -11,11 +11,11 @@ const Users = () => {
   const getAllUsers = async () => {
     try {
       const { data } = await axios.get("/api/v1/user/all-users");
-      console.log(data);
+      // console.log(data);
       setUsers(data.users);
     } catch (error) {
       console.log(error);
-      toast.error("Someething Went Wrong");
+      toast.error("Something Went Wrong");
     }
   };
 
