@@ -7,44 +7,21 @@ import toast from 'react-hot-toast';
 import Users from './Users';
 
 
-// Mocking axios.post
+// mock modules
 jest.mock('axios');
-// Mocking react-hot-toast
 jest.mock('react-hot-toast');
 
-// Mock the useAuth hook
-jest.mock('../../context/auth', () => ({
-    useAuth: jest.fn(() => [null, jest.fn()]) // Mock useAuth hook to return null state and a mock function for setAuth
-}));
-
-// mock the useCart hook
-jest.mock('../../context/cart', () => ({
-    useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function for setCart
-}));
-
-// mock the useSearch hook
-jest.mock('../../context/search', () => ({
-    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
-}));
-
-// mock the getCategories hook
-jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
-
-
-window.matchMedia = window.matchMedia || function () {
-    return {
-        matches: false,
-        addListener: function () { },
-        removeListener: function () { }
-    };
-};
+// mock components
+jest.mock('../../components/Layout', () => ({ children }) => <div>{children}</div>);
+jest.mock('../../components/AdminMenu', () => () => <div>Admin Menu</div>);
+    
 
 describe('Users Component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    it('renders header only when no users', async () => {
+    it('renders header and admin menu only when no users', async () => {
         axios.get.mockResolvedValueOnce({ data: { users: [] } });
 
         const { getByText, getByPlaceholderText } = render(
@@ -55,8 +32,9 @@ describe('Users Component', () => {
             </MemoryRouter>
         );
 
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
         expect(getByText('All Users')).toBeInTheDocument();
+        expect(getByText('Admin Menu')).toBeInTheDocument();
+        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
         await waitFor(() => expect(document.querySelector('.card')).not.toBeInTheDocument());
     });
 
