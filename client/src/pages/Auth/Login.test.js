@@ -181,4 +181,21 @@ describe('Login Component', () => {
         fireEvent.click(getByText('Forgot Password'));
         expect(mockNavigate).toHaveBeenCalledWith('/forgot-password');
     });
+
+    it('should check if the email is valid', () => {
+        const { getByPlaceholderText, getByText } = render(
+            <MemoryRouter initialEntries={['/login']}>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        fireEvent.change(getByPlaceholderText('Enter Your Email'), { target: { value: 'invalid-email' } });
+        fireEvent.change(getByPlaceholderText('Enter Your Password'), { target: { value: 'password123' } });
+        fireEvent.click(getByText('LOGIN'));
+        
+        expect(axios.post).not.toHaveBeenCalled();
+    });
+    
 });
