@@ -36,19 +36,60 @@ describe("Register Controller Test", () => {
   });
 
   describe("Missing fields", () => {
-    it.each([
-      ["name", "Name is Required"],
-      ["email", "Email is Required"],
-      ["password", "Password is Required"],
-      ["phone", "Phone no is Required"],
-      ["address", "Address is Required"],
-      ["answer", "Answer is Required"],
-    ])("should return %s is required", async (field, message) => {
-      delete req.body[field];
-      await authController.registerController(req, res);
-      expect(res.send).toHaveBeenCalledWith({ message });
+    const isPresent = (bit) => bit === 0;
+  
+    function makeTestRow(b2, b1, b0) {
+      return {
+        name: isPresent(b0),
+        email: isPresent(b1),
+        password: isPresent(b2),
+        phone: isPresent(b0 ^ b1),
+        address: isPresent(b1 ^ b2),
+        answer: isPresent(b0 ^ b2),
+      };
+    }
+
+    let testCases = [];
+    for (let i = 0; i < 8; i++) {
+      const b0 = i & 1;
+      const b1 = (i >> 1) & 1;
+      const b2 = (i >> 2) & 1;
+      testCases.push(makeTestRow(b2, b1, b0));
+    }
+
+    // Remove the test case where all fields are present
+    // as they will be tested in the next test
+    testCases = testCases.filter(testCase => {
+      const allFieldsPresent = Object.values(testCase).every(Boolean);
+      return !allFieldsPresent;
     });
+  
+    it.each(testCases)(
+      "should handle missing fields correctly: %o",
+      async (fields) => {
+        const modifiedReq = {
+          body: Object.fromEntries(
+            Object.entries(fields)
+              .filter(([_, present]) => present)
+              .map(([key]) => [key, req.body[key]])
+          ),
+        };
+  
+        await authController.registerController(modifiedReq, res);
+  
+        for (const [key, present] of Object.entries(fields)) {
+          if (!present) {
+            expect(res.send).toHaveBeenCalledWith({
+              message: `${key.charAt(0).toUpperCase() + key.slice(1)} is Required`,
+            });
+            break;
+          }
+        }
+      }
+    );
   });
+  
+  
 
   test("user model is not saved for existing email", async () => {
     userModel.findOne = jest.fn().mockResolvedValue({ email: "test@mail.com" });
