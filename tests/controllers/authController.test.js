@@ -88,8 +88,6 @@ describe("Register Controller Test", () => {
       }
     );
   });
-  
-  
 
   test("user model is not saved for existing email", async () => {
     userModel.findOne = jest.fn().mockResolvedValue({ email: "test@mail.com" });
