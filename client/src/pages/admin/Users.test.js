@@ -29,11 +29,14 @@ jest.mock('../../context/search', () => ({
 // mock the getCategories hook
 jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
 
+// mock console.log
+console.log = jest.fn();
+
 
 describe('Users Component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        useAuth.mockReturnValue([{ token: "sampletoken"}, jest.fn()]); // Mock useAuth hook
+        useAuth.mockReturnValue([{ token: "sampletoken" }, jest.fn()]); // Mock useAuth hook
     });
 
     it('renders header and admin menu only when no users', async () => {
@@ -47,10 +50,12 @@ describe('Users Component', () => {
             </MemoryRouter>
         );
 
-        expect(getByText('All Users')).toBeInTheDocument();
-        expect(getByText('Admin Panel')).toBeInTheDocument();
-        await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
-        await waitFor(() => expect(document.querySelector('.card')).not.toBeInTheDocument());
+        await waitFor(() => {
+            expect(getByText('All Users')).toBeInTheDocument();
+            expect(getByText('Admin Panel')).toBeInTheDocument();
+            expect(axios.get).toHaveBeenCalledTimes(1);
+            expect(document.querySelector('.card')).not.toBeInTheDocument();
+        });
     });
 
     it('renders 1 user', async () => {
@@ -88,8 +93,8 @@ describe('Users Component', () => {
             expect(getByText('Address: 123 Main St')).toBeInTheDocument();
             expect(getByText('Phone: 1234567890')).toBeInTheDocument();
             expect(getByText('Role: Admin')).toBeInTheDocument();
+            expect(document.querySelectorAll('.card').length).toBe(1)
         });
-        await waitFor(() => expect(document.querySelectorAll('.card').length).toBe(1));
 
     });
 
@@ -143,12 +148,13 @@ describe('Users Component', () => {
             expect(getByText('Address: 456 side St')).toBeInTheDocument();
             expect(getByText('Phone: 0987654321')).toBeInTheDocument();
             expect(getByText('Role: User')).toBeInTheDocument();
+
+            expect(document.querySelectorAll('.card').length).toBe(2)
         });
 
-        await waitFor(() => expect(document.querySelectorAll('.card').length).toBe(2));
     });
 
-    it('renders error message on failure ', async () => {
+    it('renders error message on failure', async () => {
         axios.get.mockRejectedValueOnce(new Error('Internal Server Error'));
 
         const { getByText, getByPlaceholderText } = render(
@@ -163,8 +169,8 @@ describe('Users Component', () => {
             expect(axios.get).toHaveBeenCalledTimes(1);
             expect(getByText('All Users')).toBeInTheDocument();
             expect(toast.error).toHaveBeenCalledWith('Something Went Wrong');
+            expect(document.querySelector('.card')).not.toBeInTheDocument()
         });
-        await waitFor(() => expect(document.querySelector('.card')).not.toBeInTheDocument());
     });
 
     it('no api calls when not authenticated', async () => {
