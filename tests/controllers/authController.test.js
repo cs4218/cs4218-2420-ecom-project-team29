@@ -10,6 +10,14 @@ jest.unstable_mockModule("../../helpers/authHelper", () => ({
   comparePassword: jest.fn(),
 }));
 
+const mockIsEmail = jest.fn().mockReturnValue(true);
+const mockIsMobilePhone = jest.fn().mockReturnValue(true);
+
+jest.mock("validator", () => ({
+  isEmail: mockIsEmail,
+  isMobilePhone: mockIsMobilePhone,
+}));
+
 const authController = await import("../../controllers/authController");
 const authHelper = await import("../../helpers/authHelper");
 
@@ -36,6 +44,21 @@ describe("Register Controller Test", () => {
   });
 
   describe("Missing fields", () => {
+    it.each([
+      ["name", "Name is Required"],
+      ["email", "Email is Required"],
+      ["password", "Password is Required"],
+      ["phone", "Phone no is Required"],
+      ["address", "Address is Required"],
+      ["answer", "Answer is Required"],
+    ])("should return %s is required", async (field, message) => {
+      delete req.body[field];
+      await authController.registerController(req, res);
+      expect(res.send).toHaveBeenCalledWith({ message });
+    });
+  });
+
+  describe("Missing fields (Pairwise)", () => {
     const isPresent = (bit) => bit === 0;
   
     function makeTestRow(b2, b1, b0) {
@@ -60,12 +83,18 @@ describe("Register Controller Test", () => {
     // Remove the test case where all fields are present
     // as they will be tested in the next test
     testCases = testCases.filter(testCase => {
-      const allFieldsPresent = Object.values(testCase).every(Boolean);
-      return !allFieldsPresent;
+      return Object.values(testCase).some(value => !value);
+    });
+
+    const formattedTestCases = testCases.map(fields => {
+      const missingFields = Object.keys(fields)
+        .filter((key) => !fields[key])
+        .join(", ");
+      return [missingFields, fields];
     });
   
-    it.each(testCases)(
-      "should handle missing fields correctly: %o",
+    it.each(formattedTestCases)(
+      "should handle missing fields correctly: [%s]",
       async (fields) => {
         const modifiedReq = {
           body: Object.fromEntries(
@@ -123,10 +152,26 @@ describe("Register Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Errro in Registeration",
+      message: "Error in Registration",
       error: new Error("Database error"),
     });
   });
+
+  test("invalid email", async () => {
+    mockIsEmail.mockReturnValueOnce(false);
+    req.body.email = "invalidEmail";
+    await authController.registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ message: "Invalid Email" });
+  });
+
+  test("invalid phone number", async () => {
+    mockIsMobilePhone.mockReturnValueOnce(false);
+    req.body.phone = "invalidPhoneNumber";
+    await authController.registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ message: "Invalid Phone Number" });
+  });
+  
+  
 });
 
 describe("Login Controller Test", () => {
@@ -188,7 +233,7 @@ describe("Login Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Email is not registerd",
+      message: "Email is not registered",
     });
   });
 
@@ -268,8 +313,8 @@ describe("Forgot Password Controller Test", () => {
 
   describe("Missing fields", () => {
     it.each([
-      ["email", "Emai is required"],
-      ["answer", "answer is required"],
+      ["email", "Email is required"],
+      ["answer", "Answer is required"],
       ["newPassword", "New Password is required"],
     ])("should return %s is required", async (field, message) => {
       delete req.body[field];
