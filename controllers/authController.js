@@ -170,6 +170,13 @@ export const updateProfileController = async (req, res) => {
     const { name, email, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
     //password
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: "User Not Found",
+        error: new Error("User Not Found"),
+      });
+    }
     if (password && password.length < 6) {
       return res.json({ error: "Password is required and at least 6 character long" });
     }
@@ -184,16 +191,23 @@ export const updateProfileController = async (req, res) => {
       },
       { new: true }
     );
+    if (!updatedUser) {
+      return res.status(400).send({
+        success: false,
+        message: "User Not Found",
+        error: new Error("User Not Found"),
+      });
+    }
     res.status(200).send({
       success: true,
-      message: "Profile Updated SUccessfully",
+      message: "Profile Updated Successfully",
       updatedUser,
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Update profile",
+      message: "Error While Updating Profile",
       error,
     });
   }
