@@ -14,7 +14,7 @@ jest.mock('axios');
 jest.mock('react-hot-toast');
 
 // mock the console.log
-global.console.log = jest.fn();
+console.log = jest.fn();
 
 // mock components
 jest.mock('../../components/AdminMenu', () => () => <div>Admin Menu</div>);
@@ -371,7 +371,7 @@ describe('AdminOrders Component', () => {
         );
 
         await waitFor(() => {
-            expect(axios.get).not.toHaveBeenCalledTimes(1);
+            expect(axios.get).not.toHaveBeenCalled();
         })
     });
 
