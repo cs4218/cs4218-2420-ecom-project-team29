@@ -3,6 +3,7 @@ import orderModel from "../models/orderModel.js";
 
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
+import { error } from "console";
 
 export const registerController = async (req, res) => {
   try {
@@ -202,6 +203,14 @@ export const updateProfileController = async (req, res) => {
 //orders
 export const getOrdersController = async (req, res) => {
   try {
+    if (!req.user || !req.user._id) {
+      res.status(400).send({
+        success: false,
+        message: "User ID is required",
+        error: new Error("No user found."),
+      });
+      return;
+    }
     const orders = await orderModel
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
@@ -211,7 +220,7 @@ export const getOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error while Getting Orders",
       error,
     });
   }
@@ -223,13 +232,13 @@ export const getAllOrdersController = async (req, res) => {
       .find({})
       .populate("products", "-photo")
       .populate("buyer", "name")
-      .sort({ createdAt: "-1" });
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error while Getting All Orders",
       error,
     });
   }
@@ -240,17 +249,52 @@ export const orderStatusController = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
+    const validStatus = [
+      "Not Processed",
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+    ];
+    if (!orderId) {
+      res.status(400).send({
+        success: false,
+        message: "Order ID is required",
+        error: new Error("Order ID is required"),
+      });
+    }
+    if (!status) {
+      res.status(400).send({
+        success: false,
+        message: "Status is required",
+        error: new Error("Status is required"),
+      });
+    }
+    if (!validStatus.includes(status)) {
+      res.status(400).send({
+        success: false,
+        message: "Invalid Status",
+        error: new Error("Invalid Status"),
+      });
+    }
     const orders = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
       { new: true }
     );
+    if (!orders) {
+      res.status(404).send({
+        success: false,
+        message: "No Order Found",
+        error: new Error("No Order Found"),
+      });
+    }
     res.json(orders);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Updateing Order",
+      message: "Error While Updating Order",
       error,
     });
   }
