@@ -9,6 +9,12 @@ describe('User Model Test', () => {
     mongoServer = await MongoMemoryServer.create();
     process.env.MONGO_URL = mongoServer.getUri();
     await mongoose.connect(process.env.MONGO_URL);
+    await userModel.createIndexes();
+  });
+
+  beforeEach(async () => {
+    await mongoose.connection.dropDatabase();
+    await userModel.createIndexes();
   });
 
   afterAll(async () => {
@@ -74,7 +80,7 @@ describe('User Model Test', () => {
 
     const duplicateUser = new userModel({
       name: 'Jane Doe',
-      email: user.email,
+      email: 'test@mail.com',
       password: 'password123',
       phone: '1234567890',
       address: '123 Main St',
