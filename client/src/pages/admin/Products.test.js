@@ -11,6 +11,9 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 jest.mock('axios');
 jest.mock('react-hot-toast');
 
+// mock the console.log
+console.log = jest.fn();
+
 jest.mock('../../context/auth', () => ({
     useAuth: jest.fn(),
 }));
