@@ -5,20 +5,35 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import '@testing-library/jest-dom/extend-expect';
 import toast from 'react-hot-toast';
 import Users from './Users';
-
+import { useAuth } from '../../context/auth';
 
 // mock modules
 jest.mock('axios');
 jest.mock('react-hot-toast');
 
-// mock components
-jest.mock('../../components/Layout', () => ({ children }) => <div>{children}</div>);
-jest.mock('../../components/AdminMenu', () => () => <div>Admin Menu</div>);
-    
+// Mock the useAuth hook
+jest.mock('../../context/auth', () => ({
+    useAuth: jest.fn() // Mock useAuth hook to return null state and a mock function for setAuth
+}));
+
+// mock the useCart hook
+jest.mock('../../context/cart', () => ({
+    useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function for setCart
+}));
+
+// mock the useSearch hook
+jest.mock('../../context/search', () => ({
+    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
+}));
+
+// mock the getCategories hook
+jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
+
 
 describe('Users Component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        useAuth.mockReturnValue([{ token: "sampletoken"}, jest.fn()]); // Mock useAuth hook
     });
 
     it('renders header and admin menu only when no users', async () => {
@@ -33,7 +48,7 @@ describe('Users Component', () => {
         );
 
         expect(getByText('All Users')).toBeInTheDocument();
-        expect(getByText('Admin Menu')).toBeInTheDocument();
+        expect(getByText('Admin Panel')).toBeInTheDocument();
         await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
         await waitFor(() => expect(document.querySelector('.card')).not.toBeInTheDocument());
     });
@@ -150,6 +165,24 @@ describe('Users Component', () => {
             expect(toast.error).toHaveBeenCalledWith('Something Went Wrong');
         });
         await waitFor(() => expect(document.querySelector('.card')).not.toBeInTheDocument());
+    });
+
+    it('no api calls when not authenticated', async () => {
+        useAuth.mockReturnValueOnce([null, jest.fn()]); // Mock useAuth hook to return null state and a mock function for setAuth
+        axios.get.mockResolvedValueOnce({ data: { users: [] } });
+
+
+        const { getByText, getByPlaceholderText } = render(
+            <MemoryRouter initialEntries={['/users']}>
+                <Routes>
+                    <Route path="/users" element={<Users />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(axios.get).not.toHaveBeenCalled();
+        });
     });
 
 });
