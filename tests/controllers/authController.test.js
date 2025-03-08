@@ -76,7 +76,7 @@ describe("Update Profile Controller", () => {
     );
   });
 
-  /** ✅ Test case: Updating individual fields */
+  // Test each attribute individually
   it.each([
     [{ name: "New Name" }, "name"],
     [{ password: "newPassword123" }, "password"],
@@ -168,7 +168,6 @@ describe("Update Profile Controller", () => {
     );
   });
 
-  /** ✅ Test case: Password validation error */
   it("should return error if password is too short", async () => {
     req.body.password = "short";
 
@@ -179,7 +178,6 @@ describe("Update Profile Controller", () => {
     });
   });
 
-  /** ✅ Test case: User not found */
   it("should return error when user is not found", async () => {
     userModel.findById.mockResolvedValue(null);
 
@@ -193,7 +191,6 @@ describe("Update Profile Controller", () => {
     });
   });
 
-  /** ✅ Test case: Database error */
   it("should return error when there are database errors", async () => {
     userModel.findById.mockRejectedValue(new Error("Database error"));
     const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
