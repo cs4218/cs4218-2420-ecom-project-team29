@@ -10,7 +10,7 @@ const Users = () => {
   //getall users
   const getAllUsers = async () => {
     try {
-      const { data } = await axios.get("/api/v1/user/all-users");
+      const { data } = await axios.get("/api/v1/auth/all-users");
       // console.log(data);
       setUsers(data.users);
     } catch (error) {
