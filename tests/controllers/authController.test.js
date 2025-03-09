@@ -68,7 +68,7 @@ describe("getOrders Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "User ID is required",
+      message: "UserId is required",
       error: expect.any(Error),
     });
   });
@@ -82,7 +82,7 @@ describe("getOrders Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "User ID is required",
+      message: "UseriD is required",
       error: expect.any(Error),
     });
   });
@@ -107,7 +107,7 @@ describe("getOrders Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error while Getting Orders",
+      message: "Error while getting orders",
       error: expect.any(Error),
     });
     expect(logSpy).toBeCalledWith(error);
@@ -204,7 +204,7 @@ describe("getAllOrders Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error while Getting All Orders",
+      message: "Error while getting all orders",
       error: expect.any(Error),
     });
     expect(logSpy).toBeCalledWith(error);
@@ -281,7 +281,7 @@ describe("orderStatus Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Order ID is required",
+      message: "OrderId is required",
       error: expect.any(Error),
     });
   });
@@ -294,7 +294,7 @@ describe("orderStatus Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "No Order Found",
+      message: "No order found",
       error: expect.any(Error),
     });
   });
@@ -308,7 +308,7 @@ describe("orderStatus Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Invalid Status",
+      message: "Invalid status",
       error: expect.any(Error),
     });
   });
@@ -334,7 +334,7 @@ describe("orderStatus Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error While Updating Order",
+      message: "Error while updating order",
       error: expect.any(Error),
     });
   });

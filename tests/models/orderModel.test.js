@@ -160,7 +160,7 @@ describe("Order Model Tests", () => {
       // expect an error to be thrown
       expect(error).toBeDefined();
       expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(error.message).toContain("Buyer User ID is required");
+      expect(error.message).toContain("Buyer userId is required");
       expect(error.name).toBe("ValidationError");
     }
   })

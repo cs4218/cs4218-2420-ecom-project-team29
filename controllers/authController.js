@@ -206,7 +206,7 @@ export const getOrdersController = async (req, res) => {
     if (!req.user || !req.user._id) {
       res.status(400).send({
         success: false,
-        message: "User ID is required",
+        message: "UserId is required",
         error: new Error("No user found."),
       });
       return;
@@ -220,7 +220,7 @@ export const getOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error while Getting Orders",
+      message: "Error while getting orders",
       error,
     });
   }
@@ -238,7 +238,7 @@ export const getAllOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error while Getting All Orders",
+      message: "Error while getting all orders",
       error,
     });
   }
@@ -260,7 +260,7 @@ export const orderStatusController = async (req, res) => {
       res.status(400).send({
         success: false,
         message: "Order ID is required",
-        error: new Error("Order ID is required"),
+        error: new Error("OrderId is required"),
       });
     }
     if (!status) {
@@ -274,7 +274,7 @@ export const orderStatusController = async (req, res) => {
       res.status(400).send({
         success: false,
         message: "Invalid Status",
-        error: new Error("Invalid Status"),
+        error: new Error("Invalid status"),
       });
     }
     const orders = await orderModel.findByIdAndUpdate(
@@ -285,8 +285,8 @@ export const orderStatusController = async (req, res) => {
     if (!orders) {
       res.status(404).send({
         success: false,
-        message: "No Order Found",
-        error: new Error("No Order Found"),
+        message: "No order found",
+        error: new Error("No order found"),
       });
     }
     res.json(orders);
@@ -294,7 +294,7 @@ export const orderStatusController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error While Updating Order",
+      message: "Error while updating order",
       error,
     });
   }

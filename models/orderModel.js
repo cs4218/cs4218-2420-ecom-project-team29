@@ -25,7 +25,7 @@ const orderSchema = new mongoose.Schema(
     buyer: {
       type: mongoose.ObjectId,
       ref: "users",
-      required: [true, "Buyer User ID is required"],
+      required: [true, "Buyer userId is required"],
     },
     status: {
       type: String,
