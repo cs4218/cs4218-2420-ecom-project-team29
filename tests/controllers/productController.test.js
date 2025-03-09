@@ -737,3 +737,142 @@ describe('productPhotoController Tests', () => {
     });
 });
 
+
+describe('productFiltersController Tests', () => {
+    let req, res, mockProducts, mockCategories;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        console.log = jest.fn();
+
+        req = {
+            body: {
+                checked: [],
+                radio: []
+            }
+        };
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn().mockReturnThis(),
+        };
+
+        mockCategories = Array.from({ length: 2 }, (_, index) => ({
+            _id: `${index + 1}`, 
+            name: `Category ${index + 1}`,
+            slug: `category-${index + 1}`,
+        }));
+
+        mockProducts = Array.from({ length: 13 }, (_, index) => ({
+            _id: `${index + 1}`, 
+            name: `Product ${index + 1}`,
+            slug: `product-${index + 1}`,
+            description: `Description for product ${index + 1}`,
+            price: 100 + index, 
+            category: mockCategories[index % 2],
+            quantity: 10 + index,
+            photo: "some-photo",
+            shipping: index % 2 === 0, 
+            createdAt: new Date(2025, 2, 20, 10, 25, 0 - index),
+            updatedAt: new Date(2025, 2, 20, 10, 25, 0 - index),
+        }));
+    });
+
+ 
+
+    describe('Try Branch Tests', () => {
+        it('should return all products when no filters applied', async () => {
+            req.body = { checked: [], radio: [] };
+            productModel.find = jest.fn().mockResolvedValue(mockProducts);
+
+            await productFiltersController(req, res);
+
+            expect(productModel.find).toHaveBeenCalledWith({});
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({
+                success: true,
+                products: mockProducts
+            });
+        });
+
+        it('should filter by selected categories', async () => {
+            req.body = { 
+                checked: ['drinks', 'snacks'],
+                radio: []
+            };
+            const filteredProducts = mockProducts.slice(0, 2);
+            productModel.find = jest.fn().mockResolvedValue(filteredProducts);
+
+            await productFiltersController(req, res);
+
+            expect(productModel.find).toHaveBeenCalledWith({
+                category: ['drinks', 'snacks']
+            });
+        });
+
+        it('should filter by selected price range', async () => {
+            req.body = {
+                checked: [],
+                radio: [0, 19]
+            };
+            const filteredProducts = mockProducts.slice(0, 3);
+            productModel.find = jest.fn().mockResolvedValue(filteredProducts);
+
+            await productFiltersController(req, res);
+
+            expect(productModel.find).toHaveBeenCalledWith({
+                price: { $gte: 0, $lte: 19 }
+            });
+        });
+
+        it('should apply both category and price filters when both are provided', async () => {
+            req.body = {
+                checked: ['drinks'],
+                radio: [20, 39]
+            };
+            const filteredProducts = [mockProducts[0]];
+
+            productModel.find = jest.fn().mockResolvedValue(filteredProducts);
+
+            await productFiltersController(req, res);
+
+            expect(productModel.find).toHaveBeenCalledWith({
+                category: ['drinks'],
+                price: { $gte: 20, $lte: 39 }
+            });
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith({
+                success: true,
+                products: filteredProducts
+            });
+        });
+    });
+
+    describe('Catch Branch Tests', () => {
+        it('should handle database errors', async () => {
+            const error = new Error('Database error');
+            productModel.find = jest.fn().mockRejectedValue(error);
+
+            await productFiltersController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith({
+                success: false,
+                message: "Error while filtering products",
+                error: error
+            });
+        });
+
+        it('should handle missing request body parameters', async () => {
+            req.body = {};  
+
+            await productFiltersController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.send).toHaveBeenCalledWith({
+                success: false,
+                message: "Error while filtering products",
+                error: expect.any(Error)
+            });
+        });
+    });
+});
