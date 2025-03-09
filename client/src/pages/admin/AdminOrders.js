@@ -10,11 +10,11 @@ const { Option } = Select;
 
 const AdminOrders = () => {
   const [status, setStatus] = useState([
-    "Not Process",
+    "Not Processed",
     "Processing",
     "Shipped",
-    "deliverd",
-    "cancel",
+    "Delivered",
+    "Cancelled",
   ]);
   const [changeStatus, setCHangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
@@ -25,6 +25,7 @@ const AdminOrders = () => {
       setOrders(data);
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong");
     }
   };
 
@@ -40,6 +41,7 @@ const AdminOrders = () => {
       getOrders();
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong");
     }
   };
   return (
@@ -52,14 +54,14 @@ const AdminOrders = () => {
           <h1 className="text-center">All Orders</h1>
           {orders?.map((o, i) => {
             return (
-              <div className="border shadow">
+              <div className="border shadow" key={i}>
                 <table className="table">
                   <thead>
                     <tr>
                       <th scope="col">#</th>
                       <th scope="col">Status</th>
                       <th scope="col">Buyer</th>
-                      <th scope="col"> date</th>
+                      <th scope="col">Date</th>
                       <th scope="col">Payment</th>
                       <th scope="col">Quantity</th>
                     </tr>
@@ -69,7 +71,8 @@ const AdminOrders = () => {
                       <td>{i + 1}</td>
                       <td>
                         <Select
-                          bordered={false}
+                          data-testid={`statusId-${o._id}`}
+                          variant="borderless"
                           onChange={(value) => handleChange(o._id, value)}
                           defaultValue={o?.status}
                         >
@@ -81,7 +84,7 @@ const AdminOrders = () => {
                         </Select>
                       </td>
                       <td>{o?.buyer?.name}</td>
-                      <td>{moment(o?.createAt).fromNow()}</td>
+                      <td>{moment(o?.createdAt).fromNow()}</td>
                       <td>{o?.payment.success ? "Success" : "Failed"}</td>
                       <td>{o?.products?.length}</td>
                     </tr>
