@@ -71,7 +71,7 @@ describe("Update Profile Controller", () => {
     expect(res.send).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-        message: "Profile Updated Successfully",
+        message: "Profile updated successfully",
       })
     );
   });
@@ -163,7 +163,7 @@ describe("Update Profile Controller", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Profile Updated Successfully",
+      message: "Profile updated successfully",
       updatedUser: mockUser,
     });
   });
@@ -186,7 +186,7 @@ describe("Update Profile Controller", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Profile Updated Successfully",
+      message: "Profile updated successfully",
       updatedUser: mockUser,
     });
   });
@@ -199,8 +199,8 @@ describe("Update Profile Controller", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "User Not Found",
-      error: new Error("User Not Found"),
+      message: "User not found",
+      error: new Error("User not found"),
     });
   });
 
@@ -225,8 +225,8 @@ describe("Update Profile Controller", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "User Not Found",
-      error: new Error("User Not Found"),
+      message: "User not found",
+      error: new Error("User not found"),
     });
   });
 
@@ -239,7 +239,7 @@ describe("Update Profile Controller", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error While Updating Profile",
+      message: "Error while updating profile",
       error: new Error("Database error"),
     });
 

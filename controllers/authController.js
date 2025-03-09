@@ -173,8 +173,8 @@ export const updateProfileController = async (req, res) => {
     if (!user) {
       return res.status(400).send({
         success: false,
-        message: "User Not Found",
-        error: new Error("User Not Found"),
+        message: "User not found",
+        error: new Error("User not found"),
       });
     }
     if (password && password.length < 6) {
@@ -199,20 +199,20 @@ export const updateProfileController = async (req, res) => {
     if (!updatedUser) {
       return res.status(400).send({
         success: false,
-        message: "User Not Found",
-        error: new Error("User Not Found"),
+        message: "User not found",
+        error: new Error("User not found"),
       });
     }
     res.status(200).send({
       success: true,
-      message: "Profile Updated Successfully",
+      message: "Profile updated successfully",
       updatedUser,
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error While Updating Profile",
+      message: "Error while updating profile",
       error,
     });
   }
