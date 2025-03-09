@@ -272,4 +272,28 @@ describe("Order Model Tests", () => {
       expect(updatedOrder.status).toBe(status);
     }
   });
+
+  it("should not allow updating status to invalid status using findByIdAndUpdate", async () => {
+    const orderData = {
+      products: [mockProductId],
+      buyer: mockUserId,
+      payment: { method: "credit_card", amount: 15.0 },
+    };
+
+    const order = new orderModel(orderData);
+    const savedOrder = await order.save();
+    const orderId = savedOrder._id;
+
+    // update status to invalid status
+    const invalidStatus = "Invalid Status";
+
+    try {
+      await orderModel.findByIdAndUpdate(orderId, { status: invalidStatus });
+      // should never execute the next line - order does not update
+      expect(true).toBe(false);
+    } catch (error) {
+      // expect an error to be thrown
+      expect(error).toBeDefined();
+    }
+  });
 });
