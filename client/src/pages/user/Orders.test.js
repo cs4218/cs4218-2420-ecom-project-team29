@@ -31,22 +31,22 @@ describe("Orders Component", () => {
       _id: "Order1",
       status: "Not Processed",
       buyer: { name: "Green" },
-      createdAt: new Date().toISOString(),
+      createdAt: "2023-01-15T10:00:00Z",
       payment: { success: true },
       products: [
         {
           _id: "Product1",
           name: "Test Product Name",
-          description: "Testing Product Description",
+          description: "Exactly thirty characters long",
           price: 100,
         },
       ],
     },
     {
       _id: "Order2",
-      status: "Not Processed",
+      status: "Processing",
       buyer: { name: "Green" },
-      createdAt: new Date().toISOString() - 1000,
+      createdAt: "2023-01-15T11:40:00Z",
       payment: { success: false },
       products: [
         {
@@ -54,7 +54,7 @@ describe("Orders Component", () => {
           name: "Test Product Name 2",
           description:
             "Testing Product Description 2 that is realllllllyyy supppppppperrrr duppppppperrrr longggggggggggg !!! 1123456789 !@#$%^&*(){}|:",
-          price: 200,
+          price: 200.11,
         },
       ],
     },
@@ -65,20 +65,20 @@ describe("Orders Component", () => {
       _id: "Order1",
       status: "Not Processed",
       buyer: { name: "Green" },
-      createdAt: new Date().toISOString(),
+      createdAt: "2023-01-13T11:40:00Z",
       payment: { success: true },
       products: [
         {
           _id: "Product1",
           name: "First Product",
-          description: "Testing Product Description",
+          description: "1st descr",
           price: 100,
         },
         {
           _id: "Product2",
           name: "Second Product",
-          description: "Testing Product Description 2",
-          price: 200,
+          description: "This is the description of the second product",
+          price: 200.2,
         },
       ],
     },
@@ -90,13 +90,27 @@ describe("Orders Component", () => {
 
     // Axios mock
     axios.get.mockResolvedValue({ data: mockOrders });
+
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2023-01-15T12:00:00Z"));
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should fetch and display data correctly for 1 order and multiple products in an order", async () => {
+  it("should display headers correctly", async () => {
+    render(
+      <MemoryRouter>
+        <Orders />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(screen.getByText("All Orders")).toBeInTheDocument();
+    });
+  });
+
+  it("should fetch and display orders data correctly for 1 order, multiple products in an order and having product description of both <30 and >30 char", async () => {
     axios.get.mockResolvedValueOnce({ data: mockOrdersMoreThanOneProduct });
     render(
       <MemoryRouter>
@@ -109,12 +123,20 @@ describe("Orders Component", () => {
       expect(screen.getByText("Not Processed")).toBeInTheDocument(); // Check Status
       expect(screen.getByText("Green")).toBeInTheDocument(); // Buyer name
       expect(screen.getByText("Success")).toBeInTheDocument(); // Payment status
-      expect(screen.getByText("First Product")).toBeInTheDocument(); // Product name
+      expect(screen.getByText("First Product")).toBeInTheDocument(); // 1st Product name
+      expect(screen.getByText(/Price : 100\.00/)).toBeInTheDocument(); // 1st Product price
+      expect(screen.getByText("1st descr")).toBeInTheDocument(); // 1st Product description
       expect(screen.getByText("Second Product")).toBeInTheDocument(); // 2nd Product name
+      expect(screen.getByText(/Price : 200\.20/)).toBeInTheDocument(); // 2nd Product price
+      //screen.debug();
+      expect(
+        screen.getByText("This is the description of the...")
+      ).toBeInTheDocument();
+      expect(screen.getByText("2 days ago")).toBeInTheDocument(); // Order date
     });
   });
 
-  it("should fetch and display data correctly for more than 1 order", async () => {
+  it("should fetch and display all data correctly for more than 1 order", async () => {
     render(
       <MemoryRouter>
         <Orders />
@@ -123,31 +145,51 @@ describe("Orders Component", () => {
 
     await waitFor(() => {
       expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/orders");
-      expect(screen.getAllByText("Not Processed").length).toBe(2); // Check Status
+      expect(screen.getAllByText("Not Processed").length).toBe(1); // Check Status
+      expect(screen.getAllByText("Processing").length).toBe(1);
       expect(screen.getAllByText("Green").length).toBe(2); // Buyer name
-      expect(screen.getByText("Success")).toBeInTheDocument(); // Payment status
-      expect(screen.getByText("Test Product Name")).toBeInTheDocument(); // Product name
+
+      // Payment Status
+      expect(screen.getByText("Success")).toBeInTheDocument();
       expect(screen.getByText("Failed")).toBeInTheDocument(); // Payment status
+
+      // Date details
+      expect(screen.getByText("20 minutes ago")).toBeInTheDocument(); // Order date
+      expect(screen.getByText("2 hours ago")).toBeInTheDocument(); // Order date
+
+      // Check product details
+      expect(screen.getByText("Test Product Name")).toBeInTheDocument(); // Product name
+      expect(screen.getByText(/Price : 100\.00/)).toBeInTheDocument(); // Product price
+      expect(
+        screen.getByText("Exactly thirty characters long")
+      ).toBeInTheDocument(); // Product description
       expect(screen.getByText("Test Product Name 2")).toBeInTheDocument(); // 2nd Product name
+      expect(screen.getByText(/Price : 200\.11/)).toBeInTheDocument(); // 2nd Product price
+      expect(
+        screen.getByText("Testing Product Description 2 ...")
+      ).toBeInTheDocument(); // 2nd Product description
     });
   });
 
-  // should test whether the headers are displayed correctly
-  it("should display headers correctly", async () => {
-    render(
-      <MemoryRouter>
-        <Orders />
-      </MemoryRouter>
-    );
-    await waitFor(() => {
-      expect(screen.getByText("All Orders")).toBeInTheDocument();
-    }
-    );
-  });
+  it("should have failed payment status when no payment in order", async () => {
+    const mockOrdersNoPayment = [
+      {
+        _id: "Order1",
+        status: "Not Processed",
+        buyer: { name: "Green" },
+        createdAt: new Date().toISOString(),
+        products: [
+          {
+            _id: "Product1",
+            name: "Test Product Name",
+            description: "Testing Product Description",
+            price: 100,
+          },
+        ],
+      },
+    ];
 
-  it("should have no table when no orders but user is authenticated", async () => {
-    axios.get.mockResolvedValueOnce({ data: [] });
-
+    axios.get.mockResolvedValueOnce({ data: mockOrdersNoPayment });
     render(
       <MemoryRouter>
         <Orders />
@@ -157,7 +199,30 @@ describe("Orders Component", () => {
     expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/orders");
 
     await waitFor(() => {
-      expect(screen.queryByRole("table")).not.toBeInTheDocument();
+      expect(screen.getByText("Not Processed")).toBeInTheDocument(); // Check Status
+      expect(screen.getByText("Green")).toBeInTheDocument(); // Buyer name
+      expect(screen.getByText("Failed")).toBeInTheDocument(); // Payment status
+      expect(screen.getByText("Test Product Name")).toBeInTheDocument(); // Product name
+      expect(screen.getByText(/Price : 100\.00/)).toBeInTheDocument(); // Product price
+      expect(
+        screen.getByText("Testing Product Description")
+      ).toBeInTheDocument(); // Product description
+    });
+  });
+
+  it("should handle no orders", async () => {
+    axios.get.mockResolvedValueOnce({ data: [] });
+    render(
+      <MemoryRouter>
+        <Orders />
+      </MemoryRouter>
+    );
+
+    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/orders");
+
+    await waitFor(() => {
+      expect(screen.getByText("All Orders")).toBeInTheDocument();
+      expect(screen.getByText("No Orders Yet.")).toBeInTheDocument();
     });
   });
 
