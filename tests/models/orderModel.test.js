@@ -165,6 +165,30 @@ describe("Order Model Tests", () => {
     }
   })
 
+
+  // Payment Tests
+  it("should not create a order with no payment", async () => {
+    const orderData = {
+      products: [mockProductId],
+      buyer: mockUserId,
+      status: "Processing",
+    };
+
+    const order = new orderModel(orderData);
+
+    try {
+      await order.save();
+      // should never execute the next line - order does not save
+      expect(true).toBe(false);
+    } catch (error) {
+      // expect an error to be thrown
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(error.message).toContain("Payment is required.");
+      expect(error.name).toBe("ValidationError");
+    }
+  });
+
   // Status Tests
 
   it('should set default status to "Not Processed" when not provided', async () => {
