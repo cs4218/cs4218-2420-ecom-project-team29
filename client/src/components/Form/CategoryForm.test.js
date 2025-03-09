@@ -1,39 +1,32 @@
-import "@testing-library/jest-dom";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import CategoryForm from "./CategoryForm"; // Adjust the import path accordingly
+import CategoryForm from "./CategoryForm";
+import "@testing-library/jest-dom";
 
 const setValue = jest.fn();
 const handleSubmit = jest.fn();
-const categoryFormMock = <CategoryForm setValue={setValue} value="" handleSubmit={handleSubmit} />
+const mockedCategoryForm = <CategoryForm setValue={setValue} value="" handleSubmit={handleSubmit} />
 
 describe("CategoryForm Component", () => {
 
-  it("renders with empty input and submit button", () => {
-
-    const { getByText, getByPlaceholderText } = render(categoryFormMock);
+  it("Renders with empty input and submit button", () => {
+    const { getByText, getByPlaceholderText } = render(mockedCategoryForm);
 
     expect(getByPlaceholderText("Enter new category")).toBeInTheDocument();
     expect(getByPlaceholderText("Enter new category")).toHaveValue('');
     expect(getByText("Submit")).toBeInTheDocument();
   });
 
-  it("updates the input value when typing", () => {
-
-    const { getByPlaceholderText } = render(categoryFormMock);
-
+  it("Updates the input value when typing", () => {
+    const { getByPlaceholderText } = render(mockedCategoryForm);
     fireEvent.change(getByPlaceholderText("Enter new category"), { target: { value: "category ABC" } });
-
     expect(setValue).toHaveBeenCalledWith("category ABC");
   });
 
 
-  it("submits the form when click submit button", () => {
-
-    const { getByText } = render(categoryFormMock);
-
+  it("Submits the form when click submit button", () => {
+    const { getByText } = render(mockedCategoryForm);
     fireEvent.submit(getByText("Submit"));
-
     expect(handleSubmit).toHaveBeenCalledTimes(1);
   });
   

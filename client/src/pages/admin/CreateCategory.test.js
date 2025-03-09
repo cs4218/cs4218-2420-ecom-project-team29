@@ -8,15 +8,13 @@ import CreateCategory from "./CreateCategory";
 jest.mock("axios");
 jest.mock("react-hot-toast");
 
-// mock console.log
+
 console.log = jest.fn();
 
 jest.mock("../../components/Layout", () => ({ children }) => (
     <div>{children}</div>
 ));
-
 jest.mock("../../components/AdminMenu", () => () => <div>Mock AdminMenu</div>);
-
 jest.mock("../../components/Form/CategoryForm", () =>
     ({ handleSubmit, setValue, value }) =>
     (
@@ -39,7 +37,7 @@ describe("CreateCategory Component", () => {
         jest.clearAllMocks();
     });
 
-    it("error when cannot get categories", async () => {
+    it("Error when cannot get categories", async () => {
         axios.get.mockResolvedValue(new Error('Internal Server Error'));
         render(<CreateCategory />);
 
@@ -48,7 +46,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it("header and current categories are listed", async () => {
+    it("Header and current categories are listed", async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         const { getByText } = render(<CreateCategory />);
 
@@ -58,7 +56,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it("creates a new category", async () => {
+    it("Create a new category", async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.post.mockResolvedValue({ data: { success: true } });
 
@@ -73,7 +71,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it("render error message when cant create new category", async () => {
+    it("Render error message when cant create new category with error", async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.post.mockResolvedValue(new Error('Internal Server Error'));
 
@@ -88,7 +86,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('updates a category', async () => {
+    it('Updates a category', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue({ data: { success: true } });
 
@@ -104,7 +102,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('dont updates a category when close modal', async () => {
+    it('Dont update category when only close modal', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue({ data: { success: true } });
 
@@ -119,7 +117,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('render error message when cant update new category', async () => {
+    it('Render error message when cant update new category with error', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue(new Error('Internal Server Error'));
 
@@ -135,7 +133,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('delete a category', async () => {
+    it('Delete a category', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.delete.mockResolvedValue({ data: { success: true } });
 
@@ -148,7 +146,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('render error message when cant delete category with error', async () => {
+    it('Render error message when cant delete category with error', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.delete.mockResolvedValue(new Error('Internal Server Error'));
 
@@ -161,7 +159,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('render error message when cant delete category wtih no data', async () => {
+    it('Render error message when cant delete category wtih no success', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.delete.mockResolvedValue({ data: { success: false, message: "error message" } });
 
@@ -174,7 +172,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('render error message when cant update new category with no data', async () => {
+    it('Render error message when cant update new category with no success', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue({ data: { success: false, message: "error message" } });
 

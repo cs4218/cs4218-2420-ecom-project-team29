@@ -76,7 +76,7 @@ const UpdateProduct = () => {
       productData.append("category", category);
       const { data } = await axios.put(`/api/v1/product/update-product/${id}`, productData);
       if (data?.success) {
-        toast.success("Product Updated Successfully");
+        toast.success("Product updated successfully");
         navigate("/dashboard/admin/products");
       } else {
         toast.error(data?.message);
@@ -94,7 +94,7 @@ const UpdateProduct = () => {
       if (!answer || answer.toLowerCase() !== "yes") return;
       const { data } = await axios.delete(`/api/v1/product/delete-product/${id}`);
       if (data?.success) {
-        toast.success("Product Deleted Successfully");
+        toast.success("Product deleted successfully");
         navigate("/dashboard/admin/products");
       } else {
         toast.error(data?.message);

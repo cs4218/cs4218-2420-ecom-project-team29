@@ -26,7 +26,7 @@ describe("createCategoryController", () => {
         jest.clearAllMocks();
     });
 
-    it("success create w 201", async () => {
+    it("Success creating category with status 201", async () => {
         req.body = { name: "category1" };
         categoryModel.findOne = jest.fn().mockResolvedValue(false); // no existing category
         categoryModel.prototype.save = jest.fn().mockResolvedValue(true);
@@ -40,7 +40,7 @@ describe("createCategoryController", () => {
         });
     })
 
-    it("success create existing category w 200", async () => {
+    it("Success creating existing category with status 200", async () => {
         req.body = { name: "category1" };
         categoryModel.findOne = jest.fn().mockResolvedValue(true); // existing category
         await createCategoryController(req, res);
@@ -48,11 +48,11 @@ describe("createCategoryController", () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith({
             success: true,
-            message: "Category Already Exisits",
+            message: "Category already exists",
         });
     })
 
-    it("error when missing name", async () => {
+    it("Error when missing name with status 401", async () => {
         req.body = {};
         await createCategoryController(req, res);
 
@@ -62,7 +62,7 @@ describe("createCategoryController", () => {
         });
     })
 
-    it("error when save fails", async () => {
+    it("Error when save method fails with status 500", async () => {
         req.body = { name: "category1" };
         categoryModel.findOne = jest.fn().mockResolvedValue(false); // no existing category
         categoryModel.prototype.save = jest.fn().mockRejectedValue(new Error("Internal Server Error"));
@@ -71,12 +71,12 @@ describe("createCategoryController", () => {
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith({
             success: false,
-            message: "Error in Category",
+            message: "Error in category",
             error: new Error("Internal Server Error"),
         });
     })
 
-    it("error when find fails", async () => {
+    it("Error when find method fails with status 500", async () => {
         req.body = { name: "category1" };
         categoryModel.findOne = jest.fn().mockRejectedValue(new Error("Internal Server Error"));
         await createCategoryController(req, res);
@@ -84,7 +84,7 @@ describe("createCategoryController", () => {
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith({
             success: false,
-            message: "Error in Category",
+            message: "Error in category",
             error: new Error("Internal Server Error"),
         });
     })
@@ -97,7 +97,7 @@ describe("updateCategoryController", () => {
         jest.clearAllMocks();
     });
 
-    it("success update", async () => {
+    it("Success updating category with status 200", async () => {
         req.body = { name: "category1" };
         req.params.id = "1";
         categoryModel.findByIdAndUpdate = jest.fn().mockResolvedValue(true);
@@ -106,12 +106,12 @@ describe("updateCategoryController", () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith({
             success: true,
-            message: "Category Updated Successfully",
+            message: "Category updated successfully",
             category: true,
         });
     });
 
-    it("error update", async () => {
+    it("Error updating category with status 500", async () => {
         req.body = { name: "category1" };
         req.params.id = "1";
         categoryModel.findByIdAndUpdate = jest.fn().mockRejectedValue(new Error("Internal Server Error"));
@@ -133,7 +133,7 @@ describe("deleteCategoryController", () => {
         jest.clearAllMocks();
     });
 
-    it("success delete", async () => {
+    it("Success deleting category with status 200", async () => {
         req.params.id = "1";
         categoryModel.findByIdAndDelete = jest.fn().mockResolvedValue(true);
         await deleteCategoryCOntroller(req, res);
@@ -141,11 +141,11 @@ describe("deleteCategoryController", () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith({
             success: true,
-            message: "Category Deleted Successfully",
+            message: "Category deleted successfully",
         });
     });
 
-    it("error delete", async () => {
+    it("Error deleting category with status 500", async () => {
         req.params.id = "1";
         categoryModel.findByIdAndDelete = jest.fn().mockRejectedValue(new Error("Internal Server Error"));
         await deleteCategoryCOntroller(req, res);

@@ -10,7 +10,7 @@ export const createCategoryController = async (req, res) => {
     if (existingCategory) {
       return res.status(200).send({
         success: true,
-        message: "Category Already Exisits",
+        message: "Category already exists",
       });
     }
     const category = await new categoryModel({
@@ -27,7 +27,7 @@ export const createCategoryController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error in Category",
+      message: "Error in category",
     });
   }
 };
@@ -44,7 +44,7 @@ export const updateCategoryController = async (req, res) => {
     );
     res.status(200).send({
       success: true,
-      message: "Category Updated Successfully",
+      message: "Category updated successfully",
       category,
     });
   } catch (error) {
@@ -102,7 +102,7 @@ export const deleteCategoryCOntroller = async (req, res) => {
     await categoryModel.findByIdAndDelete(id);
     res.status(200).send({
       success: true,
-      message: "Category Deleted Successfully",
+      message: "Category deleted successfully",
     });
   } catch (error) {
     console.log(error);

@@ -9,7 +9,6 @@ import { MemoryRouter } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
 
-
 jest.mock("axios");
 jest.mock("react-hot-toast");
 jest.mock("react-router-dom", () => ({
@@ -17,37 +16,23 @@ jest.mock("react-router-dom", () => ({
     useNavigate: jest.fn(),
     useParams: jest.fn(),
 }));
-// mock components
-jest.mock('../../components/AdminMenu', () => () => <div>Admin Menu</div>);
-
-// Mock the useAuth hook
+jest.mock('../../components/AdminMenu', () => () => <div>Admin Panel</div>);
 jest.mock("../../context/auth", () => ({
     useAuth: jest.fn(),
 }));
-
-// mock the useCart hook
 jest.mock('../../context/cart', () => ({
-    useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function for setCart
+    useCart: jest.fn(() => [null, jest.fn()])
 }));
-
-// mock the useSearch hook
 jest.mock('../../context/search', () => ({
-    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
+    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()])
 }));
-
-// mock the getCategories hook
 jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
-
 jest.mock("../../components/Layout", () => ({ children }) => (
     <div>{children}</div>
 ));
 
-jest.mock("../../components/AdminMenu", () => () => <div>Mock AdminMenu</div>);
-
 console.log = jest.fn();
 
-
-// mock antd Select component
 jest.mock("antd", () => {
     const antd = jest.requireActual("antd");
     const SelectMock = ({ children, "data-testid": testId, onChange, placeholder }) => (
@@ -81,7 +66,7 @@ const mockProduct = {
     category: { _id: "2", name: "Books" },
 };
 
-// const mockNavigate = jest.fn();
+
 describe("UpdateProduct Component", () => {
 
     beforeEach(() => {
@@ -90,7 +75,7 @@ describe("UpdateProduct Component", () => {
         useCategory.mockReturnValue(mockCategories);
     });
 
-    it("should render correct product details", async () => {
+    it("Render correct product details", async () => {
         axios.get.mockResolvedValue({ data: { success: true, product: mockProduct } });
 
         const { getByPlaceholderText } = render(
@@ -109,7 +94,7 @@ describe("UpdateProduct Component", () => {
 
     });
 
-    it("error if can't get product", async () => {
+    it("Error if api error", async () => {
         axios.get.mockRejectedValueOnce(new Error("Internal Server Error"));
 
         render(
@@ -123,7 +108,7 @@ describe("UpdateProduct Component", () => {
         });
     })
 
-    it("error if can't get api success is false", async () => {
+    it("Error if get api not successful", async () => {
         axios.get.mockResolvedValue({ data: { success: false, message: "Error message" } });
 
         render(
@@ -137,7 +122,7 @@ describe("UpdateProduct Component", () => {
         });
     })
 
-    it("it should update product if ok", async () => {
+    it("Update product successfully", async () => {
         axios.get.mockResolvedValue({ data: { success: true, product: mockProduct } });
         axios.put.mockResolvedValue({ data: { success: true } });
 
@@ -152,11 +137,11 @@ describe("UpdateProduct Component", () => {
 
         await waitFor(() => {
             expect(axios.put).toHaveBeenCalled()
-            expect(toast.success).toHaveBeenCalledWith("Product Updated Successfully");
+            expect(toast.success).toHaveBeenCalledWith("Product updated successfully");
         });
     });
 
-    it("toast error if update api not success", async () => {
+    it("Error if update api not successful", async () => {
         axios.get.mockResolvedValue({ data: { success: true, product: mockProduct } });
         axios.put.mockResolvedValue({ data: { success: false, message: "Error message" } });
 
@@ -175,7 +160,7 @@ describe("UpdateProduct Component", () => {
         });
     });
 
-    it("should not delete product when cancel", async () => {
+    it("Should not delete product when cancel", async () => {
         axios.get.mockResolvedValue({ data: { success: true, product: mockProduct } });
         axios.delete.mockResolvedValue({ data: { success: true } });
 
@@ -189,11 +174,10 @@ describe("UpdateProduct Component", () => {
             window.prompt = jest.fn(() => 'no')
             fireEvent.click(getByTestId("delete-product-btn"));
             expect(axios.delete).not.toHaveBeenCalled()
-            // expect(toast.success).toHaveBeenCalledWith("Product Deleted Successfully");
         });
     });
 
-    it("should delete product when yes", async () => {
+    it("Should delete product when yes", async () => {
         axios.get.mockResolvedValue({ data: { success: true, product: mockProduct } });
         axios.delete.mockResolvedValue({ data: { success: true } });
 
@@ -207,11 +191,11 @@ describe("UpdateProduct Component", () => {
             window.prompt = jest.fn(() => 'yes')
             fireEvent.click(getByTestId("delete-product-btn"));
             expect(axios.delete).toHaveBeenCalled()
-            expect(toast.success).toHaveBeenCalledWith("Product Deleted Successfully");
+            expect(toast.success).toHaveBeenCalledWith("Product deleted successfully");
         });
     });
 
-    it("should error delete product is unsuccessful", async () => {
+    it("Error if api is unsuccessful", async () => {
         axios.get.mockResolvedValue({ data: { success: true, product: mockProduct } });
         axios.delete.mockResolvedValue({ data: { success: false, message: "Error message" } });
 

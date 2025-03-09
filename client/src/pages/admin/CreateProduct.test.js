@@ -10,27 +10,19 @@ jest.mock("axios");
 jest.mock("react-hot-toast");
 
 jest.mock("../../context/auth", () => ({
-    useAuth: jest.fn(() => [null, jest.fn()]), // Mock useAuth hook to return null state and a mock function for setAuth
+    useAuth: jest.fn(() => [null, jest.fn()]), 
 }));
-
 jest.mock("../../context/cart", () => ({
-    useCart: jest.fn(() => [null, jest.fn()]), // Mock useCart hook to return null state and a mock function
+    useCart: jest.fn(() => [null, jest.fn()]),
 }));
-
-// mock the useSearch hook
 jest.mock('../../context/search', () => ({
-    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
+    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) 
 }));
-
 jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
-
-
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual("react-router-dom"),
     useNavigate: () => jest.fn(),
 }));
-
-// mock antd Select component
 jest.mock("antd", () => {
     const antd = jest.requireActual("antd");
     const SelectMock = ({ children, "data-testid": testId, onChange, placeholder }) => (
@@ -55,16 +47,15 @@ jest.mock("antd", () => {
 
 const mockCategories = [{ _id: "1", name: "Cars" }, { _id: "2", name: "Books" }];
 
-//mock console.log
 console.log = jest.fn();
 
 describe("CreateProduct Component", () => {
+
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-
-    it("render toast.error if cant get categories", async () => {
+    it("Render error if cant get categories", async () => {
         axios.get.mockRejectedValueOnce(new Error("Internal Server Error"));
 
         render(
@@ -78,7 +69,7 @@ describe("CreateProduct Component", () => {
         );
     });
 
-    it('should render all categories and form fields', async () => {
+    it('Render all categories and form fields', async () => {
         axios.get.mockResolvedValueOnce({ data: { success: true, category: mockCategories } });
 
         const { getByPlaceholderText, getByTestId, getByText } = render(
@@ -101,9 +92,9 @@ describe("CreateProduct Component", () => {
         });
     });
 
-    it("should create a product successfully", async () => {
+    it("Create a product successfully", async () => {
         axios.get.mockResolvedValueOnce({ data: { success: true, category: mockCategories } });
-        axios.post.mockResolvedValueOnce({ data: { success: true, message: "Product Created Successfully" } });
+        axios.post.mockResolvedValueOnce({ data: { success: true, message: "Product created successfully" } });
         URL.createObjectURL = jest.fn().mockReturnValue("test-url");
         const { getByPlaceholderText, getByTestId } = render(
             <MemoryRouter>
@@ -124,11 +115,11 @@ describe("CreateProduct Component", () => {
         await waitFor(() => {
             expect(axios.post).toHaveBeenCalledWith("/api/v1/product/create-product", expect.any(FormData));
             expect(axios.post).toHaveBeenCalledTimes(1);
-            expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
+            expect(toast.success).toHaveBeenCalledWith("Product created successfully");
         });
     });
 
-    it('should render error toast if api not successful', async () => {
+    it('Render error toast if api not successful', async () => {
         axios.get.mockResolvedValueOnce({ data: { success: true, category: mockCategories } });
         axios.post.mockResolvedValueOnce({ data: { success: false, message: "Error message" } });
 
@@ -147,7 +138,7 @@ describe("CreateProduct Component", () => {
         });
     });
 
-    it('should render error toast if api error', async () => {
+    it('Render error toast if api error', async () => {
         axios.get.mockResolvedValueOnce({ data: { success: true, category: mockCategories } });
         axios.post.mockRejectedValueOnce(new Error('Internal Server Error'));
 
