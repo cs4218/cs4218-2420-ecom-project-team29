@@ -59,7 +59,6 @@ describe("getOrders Controller Test", () => {
     expect(res.status).not.toHaveBeenCalled();
   });
 
-
   it("should return error status 400 when no user in request", async () => {
     req.user = undefined;
     console.log(req.user);
@@ -119,6 +118,8 @@ describe("getOrders Controller Test", () => {
 describe("getAllOrders Controller Test", () => {
   let req, res;
 
+  let mockSortedOrders, mockUnsortedOrders, mockQuery;
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -129,7 +130,25 @@ describe("getAllOrders Controller Test", () => {
       send: jest.fn(),
     };
 
-    const mockSort = jest.fn().mockImplementation(() => [
+    mockSortedOrders = [
+      {
+        _id: "order2",
+        products: [
+          { name: "Product 2", price: 200 },
+          { name: "Product 3", price: 300 },
+        ],
+        buyer: { _id: "user2", name: "Blue" },
+        createdAt: new Date("2024-03-02T10:00:00Z"),
+      },
+      {
+        _id: "order1",
+        products: [{ name: "Product 1", price: 100 }],
+        buyer: { _id: "user1", name: "Green" },
+        createdAt: new Date("2024-03-01T10:00:00Z"),
+      },
+    ];
+
+    mockUnsortedOrders = [
       {
         _id: "order1",
         products: [{ name: "Product 1", price: 100 }],
@@ -145,53 +164,32 @@ describe("getAllOrders Controller Test", () => {
         buyer: { _id: "user2", name: "Blue" },
         createdAt: new Date("2024-03-02T10:00:00Z"),
       },
-    ]);
+    ];
 
-    const mockPopulateBuyer = jest.fn().mockImplementation(() => ({
-      sort: mockSort,
-    }));
+    mockQuery = {
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockImplementation(function (sortCriteria) {
+        const orders = mockUnsortedOrders.slice();
+        if (sortCriteria.createdAt === -1) {
+          orders.sort((a, b) => b.createdAt - a.createdAt);
+        }
+        console.log(orders);
+        return Promise.resolve(orders);
+      }),
+    };
 
-    const mockPopulate = jest.fn().mockImplementation(() => ({
-      populate: mockPopulateBuyer,
-    }));
-    orderModel.find.mockImplementation(() => ({
-      populate: mockPopulate,
-    }));
+    orderModel.find = jest.fn().mockReturnValue(mockQuery);
   });
 
-  it("should fetch all orders in descending order of createdAt", async () => {
+  it("should fetch all orders in descending order", async () => {
     await getAllOrdersController(req, res);
 
     expect(orderModel.find).toHaveBeenCalledWith({});
-    expect(orderModel.find().populate).toHaveBeenCalledWith(
-      "products",
-      "-photo"
-    );
-    expect(orderModel.find().populate().populate).toHaveBeenCalledWith(
-      "buyer",
-      "name"
-    );
-    expect(orderModel.find().populate().populate().sort).toHaveBeenCalledWith({
-      createdAt: -1,
-    });
+    expect(mockQuery.populate).toHaveBeenCalledWith("products", "-photo");
+    expect(mockQuery.populate).toHaveBeenCalledWith("buyer", "name");
+    expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: -1 });
 
-    expect(res.json).toHaveBeenCalledWith([
-      {
-        _id: "order1",
-        products: [{ name: "Product 1", price: 100 }],
-        buyer: { _id: "user1", name: "Green" },
-        createdAt: expect.any(Date),
-      },
-      {
-        _id: "order2",
-        products: [
-          { name: "Product 2", price: 200 },
-          { name: "Product 3", price: 300 },
-        ],
-        buyer: { _id: "user2", name: "Blue" },
-        createdAt: expect.any(Date),
-      },
-    ]);
+    expect(res.json).toHaveBeenCalledWith(mockSortedOrders);
   });
 
   it("should return 500 error status when there is a database error", async () => {
