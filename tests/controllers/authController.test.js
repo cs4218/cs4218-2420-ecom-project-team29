@@ -45,12 +45,12 @@ describe("Register Controller Test", () => {
 
   describe("Missing fields", () => {
     it.each([
-      ["name", "Name is Required"],
-      ["email", "Email is Required"],
-      ["password", "Password is Required"],
-      ["phone", "Phone no is Required"],
-      ["address", "Address is Required"],
-      ["answer", "Answer is Required"],
+      ["name", "Name is required"],
+      ["email", "Email is required"],
+      ["password", "Password is required"],
+      ["phone", "Phone no is required"],
+      ["address", "Address is required"],
+      ["answer", "Answer is required"],
     ])("should return %s is required", async (field, message) => {
       delete req.body[field];
       await authController.registerController(req, res);
@@ -109,7 +109,7 @@ describe("Register Controller Test", () => {
         for (const [key, present] of Object.entries(fields)) {
           if (!present) {
             expect(res.send).toHaveBeenCalledWith({
-              message: `${key.charAt(0).toUpperCase() + key.slice(1)} is Required`,
+              message: `${key.charAt(0).toUpperCase() + key.slice(1)} is required`,
             });
             break;
           }
@@ -118,8 +118,8 @@ describe("Register Controller Test", () => {
     );
   });
 
-  test("user model is not saved for existing email", async () => {
-    userModel.findOne = jest.fn().mockResolvedValue({ email: "test@mail.com" });
+  it("user model is not saved for existing email", async () => {
+    userModel.findOne = jest.fn().mockResolvedValue({ email: "it@mail.com" });
     userModel.prototype.save = jest.fn();
 
     await authController.registerController(req, res);
@@ -127,11 +127,11 @@ describe("Register Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Already Register please login",
+      message: "Already registered please login",
     });
   });
 
-  test("new user is saved successfully", async () => {
+  it("new user is saved successfully", async () => {
     userModel.findOne = jest.fn().mockResolvedValue(null);
     userModel.prototype.save = jest.fn().mockResolvedValue({...req.body, password: "hashedPassword"});
 
@@ -140,35 +140,35 @@ describe("Register Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "User Register Successfully",
+      message: "User registered successfully",
       user: { ...req.body, password: "hashedPassword" },
-    });
+    }); 
   });
 
-  test("error is handled", async () => {
+  it("error is handled", async () => {
     userModel.findOne = jest.fn().mockRejectedValue(new Error("Database error"));
 
     await authController.registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error in Registration",
+      message: "Error in registration",
       error: new Error("Database error"),
     });
   });
 
-  test("invalid email", async () => {
+  it("invalid email", async () => {
     mockIsEmail.mockReturnValueOnce(false);
     req.body.email = "invalidEmail";
     await authController.registerController(req, res);
-    expect(res.send).toHaveBeenCalledWith({ message: "Invalid Email" });
+    expect(res.send).toHaveBeenCalledWith({ message: "Invalid email" });
   });
 
-  test("invalid phone number", async () => {
+  it("invalid phone number", async () => {
     mockIsMobilePhone.mockReturnValueOnce(false);
     req.body.phone = "invalidPhoneNumber";
     await authController.registerController(req, res);
-    expect(res.send).toHaveBeenCalledWith({ message: "Invalid Phone Number" });
+    expect(res.send).toHaveBeenCalledWith({ message: "Invalid phone number" });
   });
   
   
@@ -245,7 +245,7 @@ describe("Login Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Invalid Password",
+      message: "Invalid password",
     });
   });
 
@@ -257,7 +257,7 @@ describe("Login Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "login successfully",
+      message: "Logged in successfully",
       user: {
         _id: mockUser._id,
         name: mockUser.name,
@@ -315,7 +315,7 @@ describe("Forgot Password Controller Test", () => {
     it.each([
       ["email", "Email is required"],
       ["answer", "Answer is required"],
-      ["newPassword", "New Password is required"],
+      ["newPassword", "New password is required"],
     ])("should return %s is required", async (field, message) => {
       delete req.body[field];
       await authController.forgotPasswordController(req, res);
@@ -331,7 +331,7 @@ describe("Forgot Password Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Wrong Email Or Answer",
+      message: "Wrong email or answer",
     });
   });
 
@@ -344,7 +344,7 @@ describe("Forgot Password Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Password Reset Successfully",
+      message: "Password reset successfully",
     });
   });
 

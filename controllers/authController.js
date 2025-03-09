@@ -10,31 +10,31 @@ export const registerController = async (req, res) => {
     const { name, email, password, phone, address, answer } = req.body;
     //validations
     if (!name) {
-      return res.send({ message: "Name is Required" });
+      return res.send({ message: "Name is required" });
     }
     if (!email) {
-      return res.send({ message: "Email is Required" });
+      return res.send({ message: "Email is required" });
     }
     if (!password) {
-      return res.send({ message: "Password is Required" });
+      return res.send({ message: "Password is required" });
     }
     if (!phone) {
-      return res.send({ message: "Phone no is Required" });
+      return res.send({ message: "Phone no is required" });
     }
     if (!address) {
-      return res.send({ message: "Address is Required" });
+      return res.send({ message: "Address is required" });
     }
     if (!answer) {
-      return res.send({ message: "Answer is Required" });
+      return res.send({ message: "Answer is required" });
     }
 
     // check if email is valid
     if (!validator.isEmail(email)) {
-      return res.send({ message: "Invalid Email" });
+      return res.send({ message: "Invalid email" });
     }
     // check if phone is valid
     if (!validator.isMobilePhone(phone)) {
-      return res.send({ message: "Invalid Phone Number" });
+      return res.send({ message: "Invalid phone number" });
     }
 
     //check user
@@ -43,7 +43,7 @@ export const registerController = async (req, res) => {
     if (exisitingUser) {
       return res.status(200).send({
         success: false,
-        message: "Already Register please login",
+        message: "Already registered please login",
       });
     }
     //register user
@@ -60,14 +60,14 @@ export const registerController = async (req, res) => {
 
     res.status(201).send({
       success: true,
-      message: "User Register Successfully",
+      message: "User registered successfully",
       user,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Error in Registration",
+      message: "Error in registration",
       error,
     });
   }
@@ -96,7 +96,7 @@ export const loginController = async (req, res) => {
     if (!match) {
       return res.status(200).send({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid password",
       });
     }
     //token
@@ -105,7 +105,7 @@ export const loginController = async (req, res) => {
     });
     res.status(200).send({
       success: true,
-      message: "login successfully",
+      message: "Logged in successfully",
       user: {
         _id: user._id,
         name: user.name,
@@ -138,7 +138,7 @@ export const forgotPasswordController = async (req, res) => {
       res.status(400).send({ message: "Answer is required" });
     }
     if (!newPassword) {
-      res.status(400).send({ message: "New Password is required" });
+      res.status(400).send({ message: "New password is required" });
     }
     //check
     const user = await userModel.findOne({ email, answer });
@@ -146,14 +146,14 @@ export const forgotPasswordController = async (req, res) => {
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: "Wrong Email Or Answer",
+        message: "Wrong email or answer",
       });
     }
     const hashed = await hashPassword(newPassword);
     await userModel.findByIdAndUpdate(user._id, { password: hashed });
     res.status(200).send({
       success: true,
-      message: "Password Reset Successfully",
+      message: "Password reset successfully",
     });
   } catch (error) {
     console.log(error);
