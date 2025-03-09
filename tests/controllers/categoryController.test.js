@@ -1,5 +1,5 @@
 import { expect, jest } from "@jest/globals";
-import { deleteCategoryCOntroller, updateCategoryController } from "../../controllers/categoryController";
+import { deleteCategoryCOntroller, updateCategoryController, createCategoryController } from "../../controllers/categoryController";
 import categoryModel from "../../models/categoryModel";
 
 
@@ -12,15 +12,84 @@ let req = {
 let res = {
     status: jest.fn().mockReturnThis(),
     send: jest.fn(),
-    json: jest.fn()
 };
 
 const mockCategories = [
     { name: "category1", slug: "category1" },
     { name: "category2", slug: "category2" },
-    { name: "category3", slug: "category3" },
-    { name: "category4", slug: "category4" },
+    { name: "category3", slug: "category3" }
 ];
+
+describe("createCategoryController", () => {
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it("success create w 201", async () => {
+        req.body = { name: "category1" };
+        categoryModel.findOne = jest.fn().mockResolvedValue(false); // no existing category
+        categoryModel.prototype.save = jest.fn().mockResolvedValue(true);
+        await createCategoryController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            message: "New category created",
+            category: true,
+        });
+    })
+
+    it("success create existing category w 200", async () => {
+        req.body = { name: "category1" };
+        categoryModel.findOne = jest.fn().mockResolvedValue(true); // existing category
+        await createCategoryController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            message: "Category Already Exisits",
+        });
+    })
+
+    it("error when missing name", async () => {
+        req.body = {};
+        await createCategoryController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.send).toHaveBeenCalledWith({
+            message: "Name is required",
+        });
+    })
+
+    it("error when save fails", async () => {
+        req.body = { name: "category1" };
+        categoryModel.findOne = jest.fn().mockResolvedValue(false); // no existing category
+        categoryModel.prototype.save = jest.fn().mockRejectedValue(new Error("Internal Server Error"));
+        await createCategoryController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "Error in Category",
+            error: new Error("Internal Server Error"),
+        });
+    })
+
+    it("error when find fails", async () => {
+        req.body = { name: "category1" };
+        categoryModel.findOne = jest.fn().mockRejectedValue(new Error("Internal Server Error"));
+        await createCategoryController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "Error in Category",
+            error: new Error("Internal Server Error"),
+        });
+    })
+
+});
 
 describe("updateCategoryController", () => {
 
