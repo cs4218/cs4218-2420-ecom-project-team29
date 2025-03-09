@@ -4,7 +4,10 @@ import Layout from "./../../components/Layout";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/auth";
+
 const Products = () => {
+  const [auth] = useAuth();
   const [products, setProducts] = useState([]);
 
   //getall products
@@ -14,14 +17,15 @@ const Products = () => {
       setProducts(data.products);
     } catch (error) {
       console.log(error);
-      toast.error("Someething Went Wrong");
+      toast.error("Something Went Wrong");
     }
   };
 
   //lifecycle method
   useEffect(() => {
-    getAllProducts();
-  }, []);
+    if (auth?.token) getAllProducts();
+  }, [auth?.token]);
+
   return (
     <Layout>
       <div className="row">
@@ -36,6 +40,7 @@ const Products = () => {
                 key={p._id}
                 to={`/dashboard/admin/product/${p.slug}`}
                 className="product-link"
+                data-testid={`product-${p._id}`}
               >
                 <div className="card m-2" style={{ width: "18rem" }}>
                   <img

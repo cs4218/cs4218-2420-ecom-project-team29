@@ -31,3 +31,9 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          BRAINTREE_MERCHANT_ID: BRAINTREE_MERCHANT_ID
+          BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
+          BRAINTREE_PRIVATE_KEY: BRAINTREE_PRIVATE_KEY
+          JWT_SECRET: JWT_SECRET
+          
