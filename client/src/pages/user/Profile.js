@@ -17,13 +17,14 @@ const Profile = () => {
 
   //get user data
   useEffect(() => {
-    const { email, name, phone, address } = auth?.user;
-    setName(name || "");
-    setPhone(phone || "");
-    setEmail(email || "");
-    setAddress(address || "");
+    if (auth?.user) {
+      const { email, name, phone, address } = auth?.user;
+      setName(name || "");
+      setPhone(phone || "");
+      setEmail(email || "");
+      setAddress(address || "");
+    }
   }, [auth?.user]);
-
 
   // const handle form restore
   const handleRestore = () => {

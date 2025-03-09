@@ -79,11 +79,11 @@ beforeEach(() => {
   jest.clearAllMocks();
   toast.success.mockClear();
   toast.error.mockClear();
-  
+
   // Reset auth state before each test
   mockAuth = { user: testUser };
   mockSetAuth.mockClear();
-  
+
   // Reset localStorage mock
   localStorageMock.setItem("auth", JSON.stringify({ user: testUser }));
 });
@@ -101,7 +101,7 @@ describe("Profile", () => {
       screen.getByRole("heading", { name: "USER PROFILE" })
     ).toBeInTheDocument();
   });
-  
+
   it("should display all inputs and button", () => {
     render(
       <MemoryRouter>
@@ -133,7 +133,7 @@ describe("Profile", () => {
     expect(initialName).toBeInTheDocument();
     expect(initialName.value).toEqual(testUser.name);
   });
-  
+
   it("should display email of user", () => {
     render(
       <MemoryRouter>
@@ -145,7 +145,7 @@ describe("Profile", () => {
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail.value).toEqual(testUser.email);
   });
-  
+
   it("should not display password of user", () => {
     render(
       <MemoryRouter>
@@ -160,7 +160,7 @@ describe("Profile", () => {
     expect(initialPassword.value).toEqual("");
     expect(initialPassword.value).toHaveLength(0);
   });
-  
+
   it("should disable email input", () => {
     render(
       <MemoryRouter>
@@ -172,7 +172,7 @@ describe("Profile", () => {
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail).toBeDisabled();
   });
-  
+
   it("should display phone of user", () => {
     render(
       <MemoryRouter>
@@ -184,7 +184,7 @@ describe("Profile", () => {
     expect(initialPhone).toBeInTheDocument();
     expect(initialPhone.value).toEqual(testUser.phone);
   });
-  
+
   it("should display address of user", () => {
     render(
       <MemoryRouter>
@@ -232,7 +232,7 @@ describe("Profile", () => {
       expect(toast.success).toHaveBeenCalledWith(
         "Profile Updated Successfully"
       );
-      
+
       expect(mockSetAuth).toHaveBeenCalledWith(
         expect.objectContaining({ user: updatedUser })
       );
@@ -249,12 +249,12 @@ describe("Profile", () => {
       name: updated2FieldsUser.name,
       password: updated2FieldsUser.password,
     };
-    
-    axios.put.mockResolvedValueOnce({ 
-      data: { 
-        success: true, 
-        updatedUser: partiallyUpdatedUser 
-      } 
+
+    axios.put.mockResolvedValueOnce({
+      data: {
+        success: true,
+        updatedUser: partiallyUpdatedUser,
+      },
     });
 
     render(
@@ -275,12 +275,14 @@ describe("Profile", () => {
 
     await waitFor(() => {
       expect(axios.put).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith("Profile Updated Successfully");
+      expect(toast.success).toHaveBeenCalledWith(
+        "Profile Updated Successfully"
+      );
       expect(mockSetAuth).toHaveBeenCalledWith(
-        expect.objectContaining({ 
-          user: expect.objectContaining({ 
-            name: updated2FieldsUser.name 
-          })
+        expect.objectContaining({
+          user: expect.objectContaining({
+            name: updated2FieldsUser.name,
+          }),
         })
       );
     });
@@ -306,7 +308,7 @@ describe("Profile", () => {
     await waitFor(() => {
       expect(axios.put).toHaveBeenCalled();
       expect(toast.error).toHaveBeenCalledWith("database error");
-      
+
       expect(mockSetAuth).not.toHaveBeenCalled();
       expect(localStorageMock.setItem).not.toHaveBeenCalledWith(
         "auth",
@@ -410,13 +412,15 @@ describe("Profile", () => {
     fireEvent.click(updateButton);
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Phone number should contain only numbers");
-      
+      expect(toast.error).toHaveBeenCalledWith(
+        "Phone number should contain only numbers"
+      );
+
       expect(axios.put).not.toHaveBeenCalled();
     });
   });
 
-  it("should respect validation priority - name first, then address, then phone", async () => {
+  it("should display error toast based on validation priority - name first, then address, then phone", async () => {
     render(
       <MemoryRouter>
         <Profile />
@@ -441,7 +445,7 @@ describe("Profile", () => {
       expect(toast.error).toHaveBeenCalledWith("Name cannot be empty");
       expect(toast.error).not.toHaveBeenCalledWith("Address cannot be empty");
       expect(toast.error).not.toHaveBeenCalledWith("Phone cannot be empty");
-      
+
       expect(axios.put).not.toHaveBeenCalled();
     });
   });
@@ -466,9 +470,108 @@ describe("Profile", () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("Name cannot be empty");
       expect(toast.error).not.toHaveBeenCalledWith("Phone cannot be empty");
-      
+
       expect(axios.put).not.toHaveBeenCalled();
     });
-  }
-  );
+  });
+
+  it("should update form values when auth.user changes", async () => {
+    // First render with initial auth state
+    const { rerender } = render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByPlaceholderText("Enter Your Name").value).toBe(
+      testUser.name
+    );
+    expect(screen.getByPlaceholderText("Enter Your Phone").value).toBe(
+      testUser.phone
+    );
+    expect(screen.getByPlaceholderText("Enter Your Email").value).toBe(
+      testUser.email
+    );
+    expect(screen.getByPlaceholderText("Enter Your Address").value).toBe(
+      testUser.address
+    );
+
+    const updatedAuthUser = {
+      name: "Alice Smith",
+      email: "alice@example.com",
+      phone: "5551234567",
+      address: "123 New Street",
+    };
+
+    mockAuth = { user: updatedAuthUser };
+
+    rerender(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByPlaceholderText("Enter Your Name").value).toBe(
+      updatedAuthUser.name
+    );
+    expect(screen.getByPlaceholderText("Enter Your Phone").value).toBe(
+      updatedAuthUser.phone
+    );
+    expect(screen.getByPlaceholderText("Enter Your Email").value).toBe(
+      updatedAuthUser.email
+    );
+    expect(screen.getByPlaceholderText("Enter Your Address").value).toBe(
+      updatedAuthUser.address
+    );
+  });
+
+  it("should handle missing user data by using empty strings", async () => {
+    mockAuth = {
+      user: {
+        email: "partial@example.com",
+      },
+    };
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByPlaceholderText("Enter Your Name").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Phone").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Email").value).toBe(
+      "partial@example.com"
+    );
+    expect(screen.getByPlaceholderText("Enter Your Address").value).toBe("");
+  });
+
+  it("should handle null auth state", async () => {
+    mockAuth = null;
+
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByPlaceholderText("Enter Your Name").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Phone").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Email").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Address").value).toBe("");
+  });
+
+  it("should handle auth without user attribute", async () => {
+    mockAuth = { token: "some-token" };
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByPlaceholderText("Enter Your Name").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Phone").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Email").value).toBe("");
+    expect(screen.getByPlaceholderText("Enter Your Address").value).toBe("");
+  });
 });
