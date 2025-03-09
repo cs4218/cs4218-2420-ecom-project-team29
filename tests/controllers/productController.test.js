@@ -4,6 +4,7 @@ import productModel from "../../models/productModel";
 import fs from "fs";
 
 jest.mock("../../models/productModel");
+jest.mock("fs");
 
 let req = {
     body: {}, params: {}, fields: {}, files: {},
