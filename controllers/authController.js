@@ -178,7 +178,7 @@ export const updateProfileController = async (req, res) => {
       });
     }
     if (password && password.length < 6) {
-      return res.json({ error: "Password is required and at least 6 character long" });
+      return res.json({ error: "Password should be at least 6 character long" });
     }
     // check for phone number - all should be string of numbers 
     if (phone && !/^\d+$/.test(phone)) {

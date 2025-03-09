@@ -174,7 +174,7 @@ describe("Update Profile Controller", () => {
     await authController.updateProfileController(req, res);
 
     expect(res.json).toHaveBeenCalledWith({
-      error: "Password is required and at least 6 character long",
+      error: "Password should be at least 6 character long",
     });
   });
 
