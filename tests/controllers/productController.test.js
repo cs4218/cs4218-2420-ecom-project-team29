@@ -3,7 +3,6 @@ import { deleteProductController, createProductController, updateProductControll
 import productModel from "../../models/productModel";
 import fs from "fs";
 
-
 jest.mock("../../models/productModel");
 
 let req = {
@@ -32,6 +31,7 @@ describe("createProductController", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+
         req.fields = {
             name: "Product 1",
             description: "Product 1 description",
@@ -51,16 +51,13 @@ describe("createProductController", () => {
         fs.readFileSync = jest.fn().mockReturnValue(Buffer.from("data"));
     });
 
-    it("success create", async () => {
-
+    it("success creating product", async () => {
         productModel.prototype.save = jest.fn().mockResolvedValue(mockProduct);
-
         await createProductController(req, res);
-
         expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it("create error missing name", async () => {
+    it("create product error with missing name", async () => {
         req.fields.name = null
 
         await createProductController(req, res);
@@ -71,7 +68,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create error missing description", async () => {
+    it("create product error with missing description", async () => {
         req.fields.description = null
 
         await createProductController(req, res);
@@ -82,7 +79,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create error missing price", async () => {
+    it("create product error with missing price", async () => {
         req.fields.price = null
 
         await createProductController(req, res);
@@ -93,7 +90,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create error invalid price", async () => {
+    it("create product error with invalid price", async () => {
         req.fields.price = -1
 
         await createProductController(req, res);
@@ -104,7 +101,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create error missing category", async () => {
+    it("create product error with missing category", async () => {
         req.fields.category = null
 
         await createProductController(req, res);
@@ -115,7 +112,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create error missing quantity", async () => {
+    it("create product error with missing quantity", async () => {
         req.fields.quantity = null
 
         await createProductController(req, res);
@@ -126,7 +123,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create error invalid quantity", async () => {
+    it("create product error with invalid quantity", async () => {
         req.fields.quantity = -1
 
         await createProductController(req, res);
@@ -137,7 +134,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create error photo size", async () => {
+    it("create product error with photo size", async () => {
         req.files.photo.size = 1000001;
 
         await createProductController(req, res);
@@ -148,7 +145,7 @@ describe("createProductController", () => {
         });
     });
 
-    it("create missing photo wont crash", async () => {
+    it("create product with missing photo wont crash", async () => {
         req.files.photo = null;
 
         productModel.prototype.save = jest.fn().mockResolvedValue(mockProduct);
@@ -159,7 +156,7 @@ describe("createProductController", () => {
     });
 
 
-    it("create missing shipping wont crash", async () => {
+    it("create product with missing shipping wont crash", async () => {
         req.fields.shipping = null;
 
         productModel.prototype.save = jest.fn().mockResolvedValue(mockProduct);
@@ -169,7 +166,7 @@ describe("createProductController", () => {
         expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it("create error api", async () => {
+    it("create product with api error", async () => {
         productModel.prototype.save = jest.fn().mockRejectedValue(new Error("Internal Server Error"));
 
         await createProductController(req, res);
@@ -190,7 +187,7 @@ describe("deleteProductController", () => {
         jest.clearAllMocks();
     });
 
-    it("success delete", async () => {
+    it("success deleting product", async () => {
         req.params.pid = "1";
 
         productModel.findByIdAndDelete = jest.fn().mockReturnValue({
@@ -207,7 +204,7 @@ describe("deleteProductController", () => {
         });
     });
 
-    it("error delete", async () => {
+    it("deleting product error with api error", async () => {
         req.params.id = "1";
 
         productModel.findByIdAndDelete = jest.fn().mockReturnValue({
@@ -231,6 +228,7 @@ describe("updateProductController", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+
         req.fields = {
             name: "Product 1",
             description: "Product 1 description",
@@ -258,14 +256,14 @@ describe("updateProductController", () => {
         productModel.prototype.save = jest.fn().mockResolvedValue(mockProduct);
     });
 
-    it("success update", async () => {
+    it("Success updating product", async () => {
 
         await updateProductController(req, res);
 
         expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it("update error missing name", async () => {
+    it("update product error with missing name", async () => {
         req.fields.name = null;
 
         await updateProductController(req, res);
@@ -276,7 +274,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update error missing description", async () => {
+    it("update product error with missing description", async () => {
         req.fields.description = null;
 
         await updateProductController(req, res);
@@ -287,7 +285,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update error missing price", async () => {
+    it("update product error with missing price", async () => {
         req.fields.price = null;
 
         await updateProductController(req, res);
@@ -298,7 +296,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update error invalid price", async () => {
+    it("update product error with invalid price", async () => {
         req.fields.price = -1;
 
         await updateProductController(req, res);
@@ -309,7 +307,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update error missing category", async () => {
+    it("update product error with missing category", async () => {
         req.fields.category = null;
 
         await updateProductController(req, res);
@@ -320,7 +318,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update error missing quantity", async () => {
+    it("update product error with missing quantity", async () => {
         req.fields.quantity = null
 
         await updateProductController(req, res);
@@ -331,7 +329,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update error invalid quantity", async () => {
+    it("update product error with invalid quantity", async () => {
         req.fields.quantity = -1
 
         await updateProductController(req, res);
@@ -342,7 +340,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update error photo size", async () => {
+    it("update product error with photo size", async () => {
         req.files.photo.size = 1000001;
 
         await updateProductController(req, res);
@@ -353,7 +351,7 @@ describe("updateProductController", () => {
         });
     });
 
-    it("update missing photo wont crash", async () => {
+    it("update product with missing photo wont crash", async () => {
         req.files.photo = null;
 
         await updateProductController(req, res);
@@ -362,7 +360,7 @@ describe("updateProductController", () => {
     });
 
 
-    it("update missing shipping wont crash", async () => {
+    it("update product with missing shipping wont crash", async () => {
         req.fields.shipping = null;
 
         await updateProductController(req, res);
@@ -370,7 +368,7 @@ describe("updateProductController", () => {
         expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it("update error api", async () => {
+    it("update product with api error", async () => {
         req.params.pid = "1";
 
         productModel.findByIdAndUpdate = jest.fn().mockReturnValue({
