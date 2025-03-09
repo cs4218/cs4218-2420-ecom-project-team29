@@ -1,5 +1,18 @@
-import { expect, jest } from "@jest/globals";
-import { deleteProductController, createProductController, updateProductController, getProductController, getSingleProductController } from "../../controllers/productController";
+import { describe, expect, jest } from "@jest/globals";
+import { 
+    deleteProductController, 
+    createProductController, 
+    updateProductController, 
+    getProductController, 
+    getSingleProductController,
+    productPhotoController,
+    productFiltersController,
+    productCountController,
+    productListController,
+    searchProductController,
+    realtedProductController,
+    productCategoryController,
+ } from "../../controllers/productController";
 import productModel from "../../models/productModel";
 import fs from "fs";
 
@@ -626,6 +639,99 @@ describe('getSingleProductController Tests', () => {
                 success: false,
                 message: "Error while getting single product",
                 error: error,
+            });
+        });
+    });
+});
+
+
+describe('productPhotoController Tests', () => {
+    let req, res;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        console.log = jest.fn();
+
+        req = {
+            params: {
+                pid: '1'
+            }
+        };
+        
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn().mockReturnThis(),
+            set: jest.fn().mockReturnThis(),
+        };
+    });
+
+    describe('Try Branch Tests', () => {
+        it('should return photo when photo exists', async () => {
+            const mockPhoto = {
+                data: Buffer.from('mock-photo-data'),
+                contentType: 'image/jpeg'
+            };
+
+            productModel.findById = jest.fn().mockReturnValue({
+                select: jest.fn().mockResolvedValue({
+                    photo: mockPhoto
+                })
+            });
+
+            await productPhotoController(req, res);
+
+            expect(productModel.findById).toHaveBeenCalledWith('1');
+            expect(productModel.findById().select).toHaveBeenCalledWith('photo');
+         
+            expect(res.set).toHaveBeenCalledWith('Content-type', mockPhoto.contentType);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith(mockPhoto.data);
+        });
+
+        
+    });
+
+    describe('Catch Branch Tests', () => {
+        it('should handle database errors', async () => {
+            const error = new Error('Database error');
+            
+            productModel.findById = jest.fn().mockReturnValue({
+                select: jest.fn().mockRejectedValue(error)
+            });
+
+            await productPhotoController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith({
+                success: false,
+                message: "Error while getting photo",
+                error: error
+            });
+        });
+
+        it('should handle missing pid parameter', async () => {
+            req.params = {}; 
+
+            await productPhotoController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith({
+                success: false,
+                message: "Error while getting photo",
+                error: expect.any(Error)
+            });
+        });
+
+        it('should handle invalid pid format', async () => {
+            req.params = { pid: '' };  
+
+            await productPhotoController(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith({
+                success: false,
+                message: "Error while getting photo",
+                error: expect.any(Error)
             });
         });
     });
