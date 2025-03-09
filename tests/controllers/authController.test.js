@@ -79,7 +79,7 @@ describe("Update Profile Controller", () => {
   // Test each attribute individually
   it.each([
     [{ name: "New Name" }, "name"],
-    [{ password: "newPassword123" }, "password"],
+    [{ password: "6char!" }, "password"],
     [{ phone: "1234567890" }, "phone"],
     [{ address: "New Address" }, "address"],
   ])("should update only the %s field", async (updatedFields, fieldName) => {
@@ -93,7 +93,7 @@ describe("Update Profile Controller", () => {
     const expectedUpdate = { ...updatedFields };
 
     if (fieldName === "password") {
-      expectedUpdate.password = "hashed_newPassword123";
+      expectedUpdate.password = "hashed_6char!";
     }
 
     expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
@@ -168,13 +168,26 @@ describe("Update Profile Controller", () => {
     });
   });
 
-  it("should return error if password is too short", async () => {
+  it("should return error if password is too short (5 characters)", async () => {
     req.body.password = "short";
 
     await authController.updateProfileController(req, res);
 
     expect(res.json).toHaveBeenCalledWith({
       error: "Password is required and at least 6 character long",
+    });
+  });
+
+  it("should not return error if password has 0 characters but no update done", async () => {
+    req.body.password = "";
+
+    await authController.updateProfileController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Profile Updated Successfully",
+      updatedUser: mockUser,
     });
   });
 
