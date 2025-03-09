@@ -218,7 +218,7 @@ describe("Update Profile Controller", () => {
   });
 
   it("should return error when there are database errors", async () => {
-    userModel.findById.moTeckRejectedValue(new Error("Database error"));
+    userModel.findById.mockRejectedValue(new Error("Database error"));
     const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
     await authController.updateProfileController(req, res);
