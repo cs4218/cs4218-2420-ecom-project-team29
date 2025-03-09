@@ -46,6 +46,8 @@ describe("Order Model Tests", () => {
     "67c711658e64b7370fff9390"
   );
 
+  // Success Case
+
   it("should create a new order with valid data returned", async () => {
     const orderData = {
       products: [mockProductId],
@@ -65,7 +67,7 @@ describe("Order Model Tests", () => {
     expect(savedOrder.updatedAt).toBeDefined();
   });
 
-  it("should not create a new order with missing data", async () => {
+  it("should not create a new order with no data", async () => {
     const order = new orderModel();
 
     try {
@@ -78,6 +80,92 @@ describe("Order Model Tests", () => {
     }
   });
 
+  // Products Tests
+
+  it("should handle multiple products in an order", async () => {
+    const order = new orderModel({
+      products: [mockProductId1, mockProductId2, mockProductId3],
+      buyer: mockUserId,
+      payment: { method: "credit_card", amount: 89.97 },
+    });
+
+    const savedOrder = await order.save();
+
+    expect(savedOrder.products.length).toBe(3);
+    expect(savedOrder.products[0].toString()).toBe(mockProductId1.toString());
+    expect(savedOrder.products[1].toString()).toBe(mockProductId2.toString());
+    expect(savedOrder.products[2].toString()).toBe(mockProductId3.toString());
+  });
+
+  it("should not create a order with empty products", async () => {
+    const orderData = {
+      buyer: mockUserId,
+      payment: { method: "credit_card", amount: 29.99 },
+      status: "Processing",
+      products: [],
+    };
+
+    const order = new orderModel(orderData);
+
+    try {
+      await order.save();
+      // should never execute the next line - order does not save
+      expect(true).toBe(false);
+    } catch (error) {
+      // expect an error to be thrown
+      expect(error).toBeDefined();
+      expect(error.message).toContain("At least one product is required.");
+      expect(error.name).toBe("ValidationError");
+    }
+  });
+
+  it("should not create a order with no products", async () => {
+    const orderData = {
+      buyer: mockUserId,
+      payment: { method: "credit_card", amount: 29.99 },
+      status: "Processing",
+    };
+
+    const order = new orderModel(orderData);
+
+    try {
+      await order.save();
+      // should never execute the next line - order does not save
+      expect(true).toBe(false);
+    } catch (error) {
+      // expect an error to be thrown
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(error.message).toContain("At least one product is required.");
+      expect(error.name).toBe("ValidationError");
+    }
+  });
+
+  // Buyer Tests
+
+  it("should not create a order with no buyer", async () => {
+    const orderData = {
+      products: [mockProductId],
+      payment: { method: "credit_card", amount: 29.99 },
+      status: "Processing",
+    };
+
+    const order = new orderModel(orderData);
+
+    try {
+      await order.save();
+      // should never execute the next line - order does not save
+      expect(true).toBe(false);
+    } catch (error) {
+      // expect an error to be thrown
+      expect(error).toBeDefined();
+      expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(error.message).toContain("Buyer User ID is required");
+      expect(error.name).toBe("ValidationError");
+    }
+  })
+
+  // Status Tests
 
   it('should set default status to "Not Processed" when not provided', async () => {
     const orderData = {
@@ -116,22 +204,7 @@ describe("Order Model Tests", () => {
     }
   });
 
-  it("should handle multiple products in an order", async () => {
-    const order = new orderModel({
-      products: [mockProductId1, mockProductId2, mockProductId3],
-      buyer: mockUserId,
-      payment: { method: "credit_card", amount: 89.97 },
-    });
-
-    const savedOrder = await order.save();
-
-    expect(savedOrder.products.length).toBe(3);
-    expect(savedOrder.products[0].toString()).toBe(mockProductId1.toString());
-    expect(savedOrder.products[1].toString()).toBe(mockProductId2.toString());
-    expect(savedOrder.products[2].toString()).toBe(mockProductId3.toString());
-  });
-
-  test.each(["Processing", "Shipped", "Delivered", "Cancelled"])(
+  it.each(["Processing", "Shipped", "Delivered", "Cancelled"])(
     'should accept "%s" as a valid status value',
     async (statusValue) => {
       const mockUserId = new mongoose.Types.ObjectId();
@@ -166,36 +239,37 @@ describe("Order Model Tests", () => {
     }
   );
 
-  it('should allow updating status to any valid status  using findByIdAndUpdate', async () => {
+  // Update Status Tests
+
+  it("should allow updating status to any valid status using findByIdAndUpdate", async () => {
     // create order with default status - "Not Processed"
     const orderData = {
       products: [mockProductId],
       buyer: mockUserId,
-      payment: { method: 'credit_card', amount: 15.00 }
+      payment: { method: "credit_card", amount: 15.0 },
     };
-    
+
     const order = new orderModel(orderData);
     const savedOrder = await order.save();
     const orderId = savedOrder._id;
-    
-   // update status to each valid status
+
+    // update status to each valid status
     const validStatuses = [
-      'Not Processed',
-      'Processing', 
-      'Shipped',
-      'Delivered', 
-      'Cancelled'
+      "Not Processed",
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
     ];
-    
+
     for (const status of validStatuses) {
       const updatedOrder = await orderModel.findByIdAndUpdate(
-        orderId, 
-        { status: status }, 
+        orderId,
+        { status: status },
         { new: true }
       );
-      
+
       expect(updatedOrder.status).toBe(status);
     }
   });
-
 });
