@@ -46,7 +46,7 @@ describe("getOrders Controller Test", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    });
+  });
 
   it("should fetch orders only for the authenticated user", async () => {
     await getOrdersController(req, res);
@@ -59,25 +59,6 @@ describe("getOrders Controller Test", () => {
     expect(res.status).not.toHaveBeenCalled();
   });
 
-  it("should return error status 500 when there are errors from database", async () => {
-    const error = new Error("Database Error");
-    orderModel.find.mockImplementation(() => {
-      throw error;
-    });
-
-    // Mock console.log to check for error logging
-    const logSpy = jest.spyOn(console, "log");
-
-    await getOrdersController(req, res);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith({
-      success: false,
-      message: "Error while Getting Orders",
-      error: expect.any(Error),
-    });
-    expect(logSpy).toBeCalledWith(error);
-    logSpy.mockRestore();
-  });
 
   it("should return error status 400 when no user in request", async () => {
     req.user = undefined;
@@ -105,6 +86,33 @@ describe("getOrders Controller Test", () => {
       message: "User ID is required",
       error: expect.any(Error),
     });
+  });
+
+  it("should return empty array when no orders exists", async () => {
+    mockPopulateBuyer.mockResolvedValue([]);
+    await getOrdersController(req, res);
+
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  it("should return error status 500 when there are errors from database", async () => {
+    const error = new Error("Database Error");
+    orderModel.find.mockImplementation(() => {
+      throw error;
+    });
+
+    // Mock console.log to check for error logging
+    const logSpy = jest.spyOn(console, "log");
+
+    await getOrdersController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while Getting Orders",
+      error: expect.any(Error),
+    });
+    expect(logSpy).toBeCalledWith(error);
+    logSpy.mockRestore();
   });
 });
 
@@ -257,7 +265,6 @@ describe("orderStatus Controller Test", () => {
   });
 
   it("should update order status successfully with valid orderId and status", async () => {
-
     await orderStatusController(req, res);
 
     expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
