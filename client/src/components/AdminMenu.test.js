@@ -5,7 +5,8 @@ import AdminMenu from './AdminMenu';
 import '@testing-library/jest-dom/extend-expect';
 
 describe('AdminMenu component', () => {
-    test('renders AdminMenu', async () => {
+
+    it('Renders Admin Panel', async () => {
         const { getByText } = render(
             <Router>
                 <AdminMenu />
@@ -17,7 +18,7 @@ describe('AdminMenu component', () => {
         });
     });
 
-    test('renders correct menu items', () => {
+    it('Renders correct menu items', () => {
         const { getByText, container } = render(
             <Router>
                 <AdminMenu />
@@ -33,7 +34,7 @@ describe('AdminMenu component', () => {
         expect(getByText('Users')).toBeInTheDocument();
     });
 
-    test('renders correct links to menu items', () => {
+    it('Renders correct links to menu items', () => {
         const { getByText } = render(
             <Router>
                 <AdminMenu />
