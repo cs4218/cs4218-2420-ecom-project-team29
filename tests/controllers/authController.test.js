@@ -82,7 +82,7 @@ describe("getOrders Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "UseriD is required",
+      message: "UserId is required",
       error: expect.any(Error),
     });
   });

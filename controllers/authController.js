@@ -259,7 +259,7 @@ export const orderStatusController = async (req, res) => {
     if (!orderId) {
       res.status(400).send({
         success: false,
-        message: "Order ID is required",
+        message: "OrderId is required",
         error: new Error("OrderId is required"),
       });
     }
@@ -273,7 +273,7 @@ export const orderStatusController = async (req, res) => {
     if (!validStatus.includes(status)) {
       res.status(400).send({
         success: false,
-        message: "Invalid Status",
+        message: "Invalid status",
         error: new Error("Invalid status"),
       });
     }
