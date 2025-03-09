@@ -176,15 +176,27 @@ export const testController = (req, res) => {
   }
 };
 
-//update prfole
+//update profile
 export const updateProfileController = async (req, res) => {
   try {
     const { name, email, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
     //password
-    if (password && password.length < 6) {
-      return res.json({ error: "Passsword is required and 6 character long" });
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: "User not found",
+        error: new Error("User not found"),
+      });
     }
+    if (password && password.length < 6) {
+      return res.json({ error: "Password should be at least 6 character long" });
+    }
+    // check for phone number - all should be string of numbers 
+    if (phone && !/^\d+$/.test(phone)) {
+      return res.json({ error: "Phone number should contain only numbers" });
+    }
+  
     const hashedPassword = password ? await hashPassword(password) : undefined;
     const updatedUser = await userModel.findByIdAndUpdate(
       req.user._id,
@@ -196,16 +208,23 @@ export const updateProfileController = async (req, res) => {
       },
       { new: true }
     );
+    if (!updatedUser) {
+      return res.status(400).send({
+        success: false,
+        message: "User not found",
+        error: new Error("User not found"),
+      });
+    }
     res.status(200).send({
       success: true,
-      message: "Profile Updated SUccessfully",
+      message: "Profile updated successfully",
       updatedUser,
     });
   } catch (error) {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Update profile",
+      message: "Error while updating profile",
       error,
     });
   }
