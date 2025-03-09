@@ -29,7 +29,8 @@ const Orders = () => {
           </div>
           <div className="col-md-9">
             <h1 className="text-center">All Orders</h1>
-            {orders?.map((o, i) => {
+            {orders?.length !== 0 ? 
+            (orders?.map((o, i) => {
               return (
                 <div className="border shadow" key={o._id}>
                   <table className="table">
@@ -49,7 +50,7 @@ const Orders = () => {
                         <td>{o?.status}</td>
                         <td>{o?.buyer?.name}</td>
                         <td>{moment(o?.createdAt).fromNow()}</td>
-                        <td>{o?.payment.success ? "Success" : "Failed"}</td>
+                        <td>{o?.payment?.success ? "Success" : "Failed"}</td>
                         <td>{o?.products?.length}</td>
                       </tr>
                     </tbody>
@@ -68,15 +69,18 @@ const Orders = () => {
                         </div>
                         <div className="col-md-8">
                           <p>{p.name}</p>
-                          <p>{p.description.substring(0, 30)}</p>
-                          <p>Price : {p.price}</p>
+                          <p>{p.description.length > 30 ? p.description.substring(0, 30) + "..." : p.description}</p>
+
+                          <p>Price : {p.price.toFixed(2)}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
               );
-            })}
+            }))
+            : <h1 className="text-center">No Orders Yet.</h1>
+          }
           </div>
         </div>
       </div>
