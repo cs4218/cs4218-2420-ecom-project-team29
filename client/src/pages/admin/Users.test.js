@@ -7,42 +7,32 @@ import toast from 'react-hot-toast';
 import Users from './Users';
 import { useAuth } from '../../context/auth';
 
-// mock modules
 jest.mock('axios');
 jest.mock('react-hot-toast');
-
-// Mock the useAuth hook
 jest.mock('../../context/auth', () => ({
-    useAuth: jest.fn() // Mock useAuth hook to return null state and a mock function for setAuth
+    useAuth: jest.fn()
 }));
-
-// mock the useCart hook
 jest.mock('../../context/cart', () => ({
-    useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function for setCart
+    useCart: jest.fn(() => [null, jest.fn()])
 }));
-
-// mock the useSearch hook
 jest.mock('../../context/search', () => ({
-    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
+    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()])
 }));
-
-// mock the getCategories hook
 jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
-
-// mock console.log
 console.log = jest.fn();
 
 
 describe('Users Component', () => {
+
     beforeEach(() => {
         jest.clearAllMocks();
-        useAuth.mockReturnValue([{ token: "sampletoken" }, jest.fn()]); // Mock useAuth hook
+        useAuth.mockReturnValue([{ token: "sampletoken" }, jest.fn()]);
     });
 
-    it('renders header and admin menu only when no users', async () => {
+    it('Renders header and admin panel only when no users', async () => {
         axios.get.mockResolvedValueOnce({ data: { users: [] } });
 
-        const { getByText, getByPlaceholderText } = render(
+        const { getByText } = render(
             <MemoryRouter initialEntries={['/users']}>
                 <Routes>
                     <Route path="/users" element={<Users />} />
@@ -58,7 +48,7 @@ describe('Users Component', () => {
         });
     });
 
-    it('renders 1 user', async () => {
+    it('Renders 1 user', async () => {
         axios.get.mockResolvedValueOnce({
             data: {
                 countTotal: 1,
@@ -77,7 +67,7 @@ describe('Users Component', () => {
             }
         })
 
-        const { getByText, getByPlaceholderText } = render(
+        const { getByText } = render(
             <MemoryRouter initialEntries={['/users']}>
                 <Routes>
                     <Route path="/users" element={<Users />} />
@@ -98,7 +88,7 @@ describe('Users Component', () => {
 
     });
 
-    it('renders multiple users', async () => {
+    it('Renders multiple users', async () => {
         axios.get.mockResolvedValueOnce({
             data: {
                 countTotal: 1,
@@ -125,7 +115,7 @@ describe('Users Component', () => {
             }
         })
 
-        const { getByText, getByPlaceholderText } = render(
+        const { getByText } = render(
             <MemoryRouter initialEntries={['/users']}>
                 <Routes>
                     <Route path="/users" element={<Users />} />
@@ -154,10 +144,10 @@ describe('Users Component', () => {
 
     });
 
-    it('renders error message on failure', async () => {
+    it('Renders error message on server error', async () => {
         axios.get.mockRejectedValueOnce(new Error('Internal Server Error'));
 
-        const { getByText, getByPlaceholderText } = render(
+        const { getByText } = render(
             <MemoryRouter initialEntries={['/users']}>
                 <Routes>
                     <Route path="/users" element={<Users />} />
@@ -168,17 +158,16 @@ describe('Users Component', () => {
         await waitFor(() => {
             expect(axios.get).toHaveBeenCalledTimes(1);
             expect(getByText('All Users')).toBeInTheDocument();
-            expect(toast.error).toHaveBeenCalledWith('Something Went Wrong');
+            expect(toast.error).toHaveBeenCalledWith('Something went wrong');
             expect(document.querySelector('.card')).not.toBeInTheDocument()
         });
     });
 
-    it('no api calls when not authenticated', async () => {
-        useAuth.mockReturnValueOnce([null, jest.fn()]); // Mock useAuth hook to return null state and a mock function for setAuth
+    it('No api calls when not authenticated', async () => {
+        useAuth.mockReturnValueOnce([null, jest.fn()]);
         axios.get.mockResolvedValueOnce({ data: { users: [] } });
 
-
-        const { getByText, getByPlaceholderText } = render(
+        render(
             <MemoryRouter initialEntries={['/users']}>
                 <Routes>
                     <Route path="/users" element={<Users />} />

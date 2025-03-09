@@ -17,7 +17,7 @@ const Users = () => {
       setUsers(data.users);
     } catch (error) {
       console.log(error);
-      toast.error("Something Went Wrong");
+      toast.error("Something went wrong");
     }
   };
 
