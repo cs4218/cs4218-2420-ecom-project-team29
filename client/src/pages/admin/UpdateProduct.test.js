@@ -44,6 +44,8 @@ jest.mock("../../components/Layout", () => ({ children }) => (
 
 jest.mock("../../components/AdminMenu", () => () => <div>Mock AdminMenu</div>);
 
+console.log = jest.fn();
+
 
 // mock antd Select component
 jest.mock("antd", () => {
