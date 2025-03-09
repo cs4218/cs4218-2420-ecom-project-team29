@@ -30,10 +30,14 @@ export const createProductController = async (req, res) => {
         return res.status(500).send({ error: "Description is Required" });
       case !price:
         return res.status(500).send({ error: "Price is Required" });
+      case price < 0:
+        return res.status(500).send({ error: "Price should be greater than 0" });
       case !category:
         return res.status(500).send({ error: "Category is Required" });
       case !quantity:
         return res.status(500).send({ error: "Quantity is Required" });
+      case quantity < 0:
+        return res.status(500).send({ error: "Quantity should be greater than 0" });
       case photo && photo.size > 1000000:
         return res
           .status(500)
@@ -48,7 +52,7 @@ export const createProductController = async (req, res) => {
     await products.save();
     res.status(201).send({
       success: true,
-      message: "Product Created Successfully",
+      message: "Product created successfully",
       products,
     });
   } catch (error) {
