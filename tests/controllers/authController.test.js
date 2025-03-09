@@ -1,16 +1,12 @@
 import { expect, jest } from "@jest/globals";
 import userModel from "../../models/userModel";
-import {
-  getOrdersController,
-  getAllOrdersController,
-  orderStatusController,
-} from "../../controllers/authController";
 import orderModel from "../../models/orderModel.js";
 
 jest.mock("jsonwebtoken", () => ({
   sign: jest.fn().mockReturnValue("token"),
 }));
 jest.mock("../../models/userModel");
+jest.mock("../../models/orderModel", () => ({}));
 jest.unstable_mockModule("../../helpers/authHelper", () => ({
   hashPassword: jest.fn().mockResolvedValue("hashedPassword"),
   comparePassword: jest.fn(),
@@ -397,8 +393,6 @@ describe("Test controller Test", () => {
   });
 });
 
-
-jest.mock("../../models/orderModel", () => ({}));
 describe("getOrders Controller Test", () => {
   let req, res;
   const mockOrders = [
@@ -441,7 +435,7 @@ describe("getOrders Controller Test", () => {
   });
 
   it("should fetch orders only for the authenticated user", async () => {
-    await getOrdersController(req, res);
+    await authController.getOrdersController(req, res);
 
     expect(orderModel.find).toHaveBeenCalledWith({ buyer: "user1" });
     expect(orderModel.find).toHaveBeenCalledWith({ buyer: req.user._id });
@@ -455,7 +449,7 @@ describe("getOrders Controller Test", () => {
     req.user = undefined;
     console.log(req.user);
 
-    await getOrdersController(req, res);
+    await authController.getOrdersController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
@@ -469,7 +463,7 @@ describe("getOrders Controller Test", () => {
     req.user._id = undefined;
     console.log(req.user);
 
-    await getOrdersController(req, res);
+    await authController.getOrdersController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
@@ -481,7 +475,7 @@ describe("getOrders Controller Test", () => {
 
   it("should return empty array when no orders exists", async () => {
     mockPopulateBuyer.mockResolvedValue([]);
-    await getOrdersController(req, res);
+    await authController.getOrdersController(req, res);
 
     expect(res.json).toHaveBeenCalledWith([]);
   });
@@ -495,7 +489,7 @@ describe("getOrders Controller Test", () => {
     // Mock console.log to check for error logging
     const logSpy = jest.spyOn(console, "log");
 
-    await getOrdersController(req, res);
+    await authController.getOrdersController(req, res);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
@@ -574,7 +568,7 @@ describe("getAllOrders Controller Test", () => {
   });
 
   it("should fetch all orders in descending order", async () => {
-    await getAllOrdersController(req, res);
+    await authController.getAllOrdersController(req, res);
 
     expect(orderModel.find).toHaveBeenCalledWith({});
     expect(mockQuery.populate).toHaveBeenCalledWith("products", "-photo");
@@ -591,7 +585,7 @@ describe("getAllOrders Controller Test", () => {
     });
 
     const logSpy = jest.spyOn(console, "log");
-    await getAllOrdersController(req, res);
+    await authController.getAllOrdersController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
@@ -614,7 +608,7 @@ describe("getAllOrders Controller Test", () => {
       populate: mockPopulate,
     });
 
-    await getAllOrdersController(req, res);
+    await authController.getAllOrdersController(req, res);
 
     expect(res.json).toHaveBeenCalledWith([]);
   });
@@ -655,7 +649,7 @@ describe("orderStatus Controller Test", () => {
   });
 
   it("should update order status successfully with valid orderId and status", async () => {
-    await orderStatusController(req, res);
+    await authController.orderStatusController(req, res);
 
     expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
       "order1",
@@ -668,7 +662,7 @@ describe("orderStatus Controller Test", () => {
   it("should return 400 error if orderId is missing", async () => {
     req.params.orderId = undefined;
 
-    await orderStatusController(req, res);
+    await authController.orderStatusController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
@@ -681,7 +675,7 @@ describe("orderStatus Controller Test", () => {
   it("should return 404 if order not found", async () => {
     orderModel.findByIdAndUpdate.mockResolvedValue(null);
 
-    await orderStatusController(req, res);
+    await authController.orderStatusController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
@@ -695,7 +689,7 @@ describe("orderStatus Controller Test", () => {
     req.body.status = "Invalid state";
     orderModel.findByIdAndUpdate.mockRejectedValue(new Error("Invalid State"));
 
-    await orderStatusController(req, res);
+    await authController.orderStatusController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
@@ -708,7 +702,7 @@ describe("orderStatus Controller Test", () => {
   it("should return 400 if status is missing in request body", async () => {
     req.body.status = undefined;
 
-    await orderStatusController(req, res);
+    await authController.orderStatusController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
@@ -721,7 +715,7 @@ describe("orderStatus Controller Test", () => {
   it("should return 500 on database error", async () => {
     orderModel.findByIdAndUpdate.mockRejectedValue(new Error("Database Error"));
 
-    await orderStatusController(req, res);
+    await authController.orderStatusController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
