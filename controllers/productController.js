@@ -74,10 +74,18 @@ export const getProductController = async (req, res) => {
       .select("-photo")
       .limit(12)
       .sort({ createdAt: -1 });
+    if (!products.length) {
+      return res.status(200).send({
+        success: true,
+        countTotal: 0,
+        message: "No products found",
+        products: [],
+      });
+    }
     res.status(200).send({
       success: true,
       countTotal: products.length,
-      message: "All Products ",
+      message: "All products fetched",
       products,
     });
   } catch (error) {
@@ -85,7 +93,7 @@ export const getProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error in getting products",
-      error: error.message,
+      error,
     });
   }
 };
@@ -98,14 +106,14 @@ export const getSingleProductController = async (req, res) => {
       .populate("category");
     res.status(200).send({
       success: true,
-      message: "Single Product Fetched",
+      message: "Single product fetched",
       product,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Eror while getitng single product",
+      message: "Error while getting single product",
       error,
     });
   }

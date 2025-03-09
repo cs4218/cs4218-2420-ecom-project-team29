@@ -32,6 +32,7 @@ describe("createProductController", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        console.log = jest.fn();
 
         req.fields = {
             name: "Product 1",
@@ -186,6 +187,7 @@ describe("deleteProductController", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        console.log = jest.fn();
     });
 
     it("success deleting product", async () => {
@@ -229,6 +231,7 @@ describe("updateProductController", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        console.log = jest.fn();
 
         req.fields = {
             name: "Product 1",
@@ -465,7 +468,7 @@ describe('getProductController Tests', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                counTotal: 12,
+                countTotal: 12,
                 message: "All products fetched",
                 products: expectedProducts,
             });
@@ -485,7 +488,7 @@ describe('getProductController Tests', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                counTotal: 0,
+                countTotal: 0,
                 message: "No products found",
                 products: [],
             });
@@ -509,7 +512,7 @@ describe('getProductController Tests', () => {
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith({
                 success: false,
-                message: "Erorr in getting products",
+                message: "Error in getting products",
                 error: error,
             });
         });     
