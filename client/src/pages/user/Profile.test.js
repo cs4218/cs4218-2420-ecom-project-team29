@@ -1,11 +1,6 @@
 import React from "react";
 import axios from "axios";
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom/extend-expect";
 import toast from "react-hot-toast";
@@ -37,14 +32,16 @@ const updated2FieldsUser = {
 
 jest.mock("axios");
 jest.mock("react-hot-toast");
+
+let mockAuth = { user: testUser };
+const mockSetAuth = jest.fn((newAuth) => {
+  mockAuth = newAuth;
+});
+
 jest.mock("../../context/auth", () => ({
-  useAuth: jest.fn(() => [
-    {
-      user: testUser,
-    },
-    jest.fn(),
-  ]),
+  useAuth: jest.fn(() => [mockAuth, mockSetAuth]),
 }));
+
 jest.mock("../../context/cart", () => ({
   useCart: jest.fn(() => [null, jest.fn()]),
 }));
@@ -52,25 +49,43 @@ jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
 }));
 jest.mock("../../hooks/useCategory", () => () => [{ categories: [] }]);
-Object.defineProperty(window, "localStorage", {
-  value: {
-    setItem: jest.fn(),
-    getItem: jest.fn().mockReturnValue(
-      JSON.stringify({
-        user: {
-          name: "green",
-          email: "green@email.com",
-          phone: "9012345678",
-          address: "123 Greenvale Lane",
-        },
-      })
-    ),
-  },
-  writable: true,
-});
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store = {
+    auth: JSON.stringify({
+      user: {
+        name: "green",
+        email: "green@email.com",
+        phone: "9012345678",
+        address: "123 Greenvale Lane",
+      },
+    }),
+  };
+  return {
+    getItem: jest.fn((key) => store[key]),
+    setItem: jest.fn((key, value) => {
+      store[key] = value;
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+  };
+})();
+
+Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 beforeEach(() => {
+  jest.clearAllMocks();
   toast.success.mockClear();
+  toast.error.mockClear();
+  
+  // Reset auth state before each test
+  mockAuth = { user: testUser };
+  mockSetAuth.mockClear();
+  
+  // Reset localStorage mock
+  localStorageMock.setItem("auth", JSON.stringify({ user: testUser }));
 });
 
 describe("Profile", () => {
@@ -86,6 +101,7 @@ describe("Profile", () => {
       screen.getByRole("heading", { name: "USER PROFILE" })
     ).toBeInTheDocument();
   });
+  
   it("should display all inputs and button", () => {
     render(
       <MemoryRouter>
@@ -96,7 +112,7 @@ describe("Profile", () => {
     expect(screen.getByPlaceholderText("Enter Your Name")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter Your Email")).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText("Enter Your Password")
+      screen.getByPlaceholderText("Enter Your New Password")
     ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter Your Phone")).toBeInTheDocument();
     expect(
@@ -117,6 +133,7 @@ describe("Profile", () => {
     expect(initialName).toBeInTheDocument();
     expect(initialName.value).toEqual(testUser.name);
   });
+  
   it("should display email of user", () => {
     render(
       <MemoryRouter>
@@ -128,6 +145,7 @@ describe("Profile", () => {
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail.value).toEqual(testUser.email);
   });
+  
   it("should not display password of user", () => {
     render(
       <MemoryRouter>
@@ -135,11 +153,14 @@ describe("Profile", () => {
       </MemoryRouter>
     );
 
-    const initialPassword = screen.getByPlaceholderText("Enter Your Password");
+    const initialPassword = screen.getByPlaceholderText(
+      "Enter Your New Password"
+    );
     expect(initialPassword).toBeInTheDocument();
     expect(initialPassword.value).toEqual("");
     expect(initialPassword.value).toHaveLength(0);
   });
+  
   it("should disable email input", () => {
     render(
       <MemoryRouter>
@@ -151,6 +172,7 @@ describe("Profile", () => {
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail).toBeDisabled();
   });
+  
   it("should display phone of user", () => {
     render(
       <MemoryRouter>
@@ -162,6 +184,7 @@ describe("Profile", () => {
     expect(initialPhone).toBeInTheDocument();
     expect(initialPhone.value).toEqual(testUser.phone);
   });
+  
   it("should display address of user", () => {
     render(
       <MemoryRouter>
@@ -174,8 +197,7 @@ describe("Profile", () => {
     expect(initialAddress.value).toEqual(testUser.address);
   });
 
-  it("should update user profile when all fields are updated", async () => {
-    // ensure that axios returns a successful response with success and updatedUser with the required fields
+  it("should update user profile when all fields are updated and auth state updated", async () => {
     axios.put.mockResolvedValueOnce({
       data: { success: true, updatedUser: updatedUser },
     });
@@ -189,7 +211,7 @@ describe("Profile", () => {
     fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
       target: { value: updatedUser.name },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+    fireEvent.change(screen.getByPlaceholderText("Enter Your New Password"), {
       target: { value: updatedUser.password },
     });
     fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
@@ -210,11 +232,30 @@ describe("Profile", () => {
       expect(toast.success).toHaveBeenCalledWith(
         "Profile Updated Successfully"
       );
+      
+      expect(mockSetAuth).toHaveBeenCalledWith(
+        expect.objectContaining({ user: updatedUser })
+      );
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        "auth",
+        expect.stringContaining(updatedUser.name)
+      );
     });
   });
 
-  it("should update user profile when only 2 fields are updated", async () => {
-    axios.put.mockResolvedValueOnce({ data: { success: true } });
+  it("should update user profile when only 2 fields are updated and update state accordingly", async () => {
+    const partiallyUpdatedUser = {
+      ...testUser,
+      name: updated2FieldsUser.name,
+      password: updated2FieldsUser.password,
+    };
+    
+    axios.put.mockResolvedValueOnce({ 
+      data: { 
+        success: true, 
+        updatedUser: partiallyUpdatedUser 
+      } 
+    });
 
     render(
       <MemoryRouter>
@@ -225,19 +266,27 @@ describe("Profile", () => {
     fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
       target: { value: updated2FieldsUser.name },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+    fireEvent.change(screen.getByPlaceholderText("Enter Your New Password"), {
       target: { value: updated2FieldsUser.password },
     });
 
     const updateButton = screen.getByText("UPDATE");
     fireEvent.click(updateButton);
 
-    await waitFor(() => expect(axios.put).toHaveBeenCalled());
-
-    expect(toast.success).toHaveBeenCalledWith("Profile Updated Successfully");
+    await waitFor(() => {
+      expect(axios.put).toHaveBeenCalled();
+      expect(toast.success).toHaveBeenCalledWith("Profile Updated Successfully");
+      expect(mockSetAuth).toHaveBeenCalledWith(
+        expect.objectContaining({ 
+          user: expect.objectContaining({ 
+            name: updated2FieldsUser.name 
+          })
+        })
+      );
+    });
   });
 
-  it("should display toast error message on failed profile update from database", async () => {
+  it("should display toast error message on failed profile update from database without updating state", async () => {
     axios.put.mockResolvedValueOnce({ data: { error: "database error" } });
 
     render(
@@ -246,15 +295,27 @@ describe("Profile", () => {
       </MemoryRouter>
     );
 
+    // Change a field
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: "Changed Name" },
+    });
+
     const updateButton = screen.getByText("UPDATE");
     fireEvent.click(updateButton);
 
-    await waitFor(() => expect(axios.put).toHaveBeenCalled());
-
-    expect(toast.error).toHaveBeenCalledWith("database error");
+    await waitFor(() => {
+      expect(axios.put).toHaveBeenCalled();
+      expect(toast.error).toHaveBeenCalledWith("database error");
+      
+      expect(mockSetAuth).not.toHaveBeenCalled();
+      expect(localStorageMock.setItem).not.toHaveBeenCalledWith(
+        "auth",
+        expect.stringContaining("Changed Name")
+      );
+    });
   });
 
-  it("should display toast error message on failed profile update from error after getting successful response from database", async () => {
+  it("should display toast error message on failed profile update from error and not update state", async () => {
     axios.put.mockRejectedValueOnce({ message: "error" });
 
     render(
@@ -263,33 +324,151 @@ describe("Profile", () => {
       </MemoryRouter>
     );
 
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: "Changed Name" },
+    });
+
     const updateButton = screen.getByText("UPDATE");
     fireEvent.click(updateButton);
 
-    await waitFor(() => expect(axios.put).toHaveBeenCalled());
-
-    expect(toast.error).toHaveBeenCalledWith("Profile Update Failed");
+    await waitFor(() => {
+      expect(axios.put).toHaveBeenCalled();
+      expect(toast.error).toHaveBeenCalledWith("Profile Update Failed");
+      expect(mockSetAuth).not.toHaveBeenCalled();
+    });
   });
 
-  it("should display toast error message when password length less than 6", async () => {
-    axios.put.mockResolvedValueOnce({ data: { error: "Password is required and at least 6 character long" } });
+  it("should display toast error message when name is empty and reset input value", async () => {
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+    const nameInput = screen.getByPlaceholderText("Enter Your Name");
+    fireEvent.change(nameInput, { target: { value: "" } });
+
+    const updateButton = screen.getByText("UPDATE");
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Name cannot be empty");
+      expect(axios.put).not.toHaveBeenCalled();
+      expect(nameInput.value).toEqual(testUser.name);
+    });
+  });
+
+  it("should display toast error message when address is empty and reset input value", async () => {
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+    const addressInput = screen.getByPlaceholderText("Enter Your Address");
+    fireEvent.change(addressInput, { target: { value: "" } });
+
+    const updateButton = screen.getByText("UPDATE");
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Address cannot be empty");
+      expect(axios.put).not.toHaveBeenCalled();
+      expect(addressInput.value).toEqual(testUser.address);
+    });
+  });
+
+  it("should display toast error message when phone is empty and reset input value", async () => {
     render(
       <MemoryRouter>
         <Profile />
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
-      target: { value: "less6" },
+    const phoneInput = screen.getByPlaceholderText("Enter Your Phone");
+    fireEvent.change(phoneInput, { target: { value: "" } });
+
+    const updateButton = screen.getByText("UPDATE");
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Phone cannot be empty");
+      expect(axios.put).not.toHaveBeenCalled();
+      expect(phoneInput.value).toEqual(testUser.phone);
+    });
+  });
+
+  it("should validate phone number format and not submit when invalid", async () => {
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    const phoneInput = screen.getByPlaceholderText("Enter Your Phone");
+    fireEvent.change(phoneInput, { target: { value: "123abc456" } });
+
+    const updateButton = screen.getByText("UPDATE");
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Phone number should contain only numbers");
+      
+      expect(axios.put).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should respect validation priority - name first, then address, then phone", async () => {
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    // Make all fields empty
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: "" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Address"), {
+      target: { value: "" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
+      target: { value: "" },
     });
 
     const updateButton = screen.getByText("UPDATE");
     fireEvent.click(updateButton);
 
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
-        "Password is required and at least 6 character long"
-      )
-    );
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Name cannot be empty");
+      expect(toast.error).not.toHaveBeenCalledWith("Address cannot be empty");
+      expect(toast.error).not.toHaveBeenCalledWith("Phone cannot be empty");
+      
+      expect(axios.put).not.toHaveBeenCalled();
+    });
   });
+
+  it("should restore only empty field when one field is empty and another is valid", async () => {
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: "" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
+      target: { value: "1234567890" },
+    });
+
+    const updateButton = screen.getByText("UPDATE");
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Name cannot be empty");
+      expect(toast.error).not.toHaveBeenCalledWith("Phone cannot be empty");
+      
+      expect(axios.put).not.toHaveBeenCalled();
+    });
+  }
+  );
 });

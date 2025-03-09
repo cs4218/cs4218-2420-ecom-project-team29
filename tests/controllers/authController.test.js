@@ -161,11 +161,11 @@ describe("Update Profile Controller", () => {
     );
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: true,
-      })
-    );
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Profile Updated Successfully",
+      updatedUser: mockUser,
+    });
   });
 
   it("should return error if password is too short", async () => {
@@ -191,8 +191,34 @@ describe("Update Profile Controller", () => {
     });
   });
 
+  it("should not allow update of phone to non-number string", async () => {
+    req.body = {
+      phone: "fakephoneno",
+    };
+    authHelper.hashPassword.mockResolvedValue("hashedPassword");
+
+    await authController.updateProfileController(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Phone number should contain only numbers",
+    });
+  });
+
+  it("should return error when user is not found during update", async () => {
+    userModel.findByIdAndUpdate.mockResolvedValue(null);
+
+    await authController.updateProfileController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "User Not Found",
+      error: new Error("User Not Found"),
+    });
+  });
+
   it("should return error when there are database errors", async () => {
-    userModel.findById.mockRejectedValue(new Error("Database error"));
+    userModel.findById.moTeckRejectedValue(new Error("Database error"));
     const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
     await authController.updateProfileController(req, res);
