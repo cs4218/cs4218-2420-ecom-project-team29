@@ -104,6 +104,21 @@ describe("CreateCategory Component", () => {
         });
     });
 
+    it('dont updates a category when close modal', async () => {
+        axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
+        axios.put.mockResolvedValue({ data: { success: true } });
+
+        const { getByText, getByTestId } = render(<CreateCategory />);
+
+        await waitFor(async () => {
+            fireEvent.click(getByTestId("edit-button-2"));
+            const modal = screen.getByTestId("update-modal");
+            fireEvent.change(within(modal).getByRole("textbox"), { target: { value: "Updated Category" } });
+            fireEvent.click(within(modal).getByRole("button", { name: "Close" }));
+            expect(axios.put).not.toHaveBeenCalled();
+        });
+    });
+
     it('render error message when cant update new category', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue(new Error('Internal Server Error'));
@@ -133,7 +148,7 @@ describe("CreateCategory Component", () => {
         });
     });
 
-    it('render error message when cant delete category', async () => {
+    it('render error message when cant delete category with error', async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.delete.mockResolvedValue(new Error('Internal Server Error'));
 
@@ -143,6 +158,35 @@ describe("CreateCategory Component", () => {
             fireEvent.click(getByTestId("delete-button-2"));
             expect(axios.delete).toHaveBeenCalledWith("/api/v1/category/delete-category/2");
             expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+        });
+    });
+
+    it('render error message when cant delete category wtih no data', async () => {
+        axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
+        axios.delete.mockResolvedValue({ data: { success: false, message: "error message" } });
+
+        const { getByText, getByTestId } = render(<CreateCategory />);
+
+        await waitFor(async () => {
+            fireEvent.click(getByTestId("delete-button-2"));
+            expect(axios.delete).toHaveBeenCalledWith("/api/v1/category/delete-category/2");
+            expect(toast.error).toHaveBeenCalledWith("error message");
+        });
+    });
+
+    it('render error message when cant update new category with no data', async () => {
+        axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
+        axios.put.mockResolvedValue({ data: { success: false, message: "error message" } });
+
+        const { getByText, getByTestId } = render(<CreateCategory />);
+
+        await waitFor(async () => {
+            fireEvent.click(getByTestId("edit-button-2"));
+            const modal = screen.getByTestId("update-modal");
+            fireEvent.change(within(modal).getByRole("textbox"), { target: { value: "Updated Category" } });
+            fireEvent.click(within(modal).getByText("Submit"));
+            expect(axios.put).toHaveBeenCalledWith("/api/v1/category/update-category/2", { name: "Updated Category" });
+            expect(toast.error).toHaveBeenCalledWith("error message");
         });
     });
 
