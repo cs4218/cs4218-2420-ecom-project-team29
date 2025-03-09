@@ -1,5 +1,11 @@
 import { expect, jest } from "@jest/globals";
 import userModel from "../../models/userModel";
+import {
+  getOrdersController,
+  getAllOrdersController,
+  orderStatusController,
+} from "../../controllers/authController";
+import orderModel from "../../models/orderModel.js";
 
 jest.mock("jsonwebtoken", () => ({
   sign: jest.fn().mockReturnValue("token"),
@@ -26,6 +32,9 @@ describe("Register Controller Test", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    authHelper.hashPassword.mockClear(); 
+    authHelper.comparePassword.mockClear(); 
+
     req = {
       body: {
         name: "John Doe",
@@ -386,13 +395,8 @@ describe("Test controller Test", () => {
     authController.testController(req, res);
     expect(res.send).toHaveBeenCalledWith({ error });
   });
-import { expect, jest } from "@jest/globals";
-import {
-  getOrdersController,
-  getAllOrdersController,
-  orderStatusController,
-} from "../../controllers/authController";
-import orderModel from "../../models/orderModel.js";
+});
+
 
 jest.mock("../../models/orderModel", () => ({}));
 describe("getOrders Controller Test", () => {
