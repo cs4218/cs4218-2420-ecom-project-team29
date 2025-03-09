@@ -267,7 +267,7 @@ export const productListController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "error in per page ctrl",
+      message: "Error in per page ctrl",
       error,
     });
   }

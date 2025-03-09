@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1741553870624" clover="3.2.0">
-  <project timestamp="1741553870624" name="All files">
-    <metrics statements="361" coveredstatements="246" conditionals="114" coveredconditionals="84" methods="39" coveredmethods="23" elements="514" coveredelements="353" complexity="0" loc="361" ncloc="361" packages="6" files="13" classes="13"/>
+<coverage generated="1741559394601" clover="3.2.0">
+  <project timestamp="1741559394601" name="All files">
+    <metrics statements="361" coveredstatements="258" conditionals="114" coveredconditionals="86" methods="39" coveredmethods="25" elements="514" coveredelements="369" complexity="0" loc="361" ncloc="361" packages="6" files="13" classes="13"/>
     <package name="config">
       <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <file name="db.js" path="/Users/proglab/Documents/CS4218/Project_Milestone_1/cs4218-2420-ecom-project-team29/config/db.js">
@@ -14,7 +14,7 @@
       </file>
     </package>
     <package name="controllers">
-      <metrics statements="294" coveredstatements="214" conditionals="110" coveredconditionals="80" methods="31" coveredmethods="17"/>
+      <metrics statements="294" coveredstatements="226" conditionals="110" coveredconditionals="82" methods="31" coveredmethods="19"/>
       <file name="authController.js" path="/Users/proglab/Documents/CS4218/Project_Milestone_1/cs4218-2420-ecom-project-team29/controllers/authController.js">
         <metrics statements="119" coveredstatements="98" conditionals="68" coveredconditionals="46" methods="9" coveredmethods="7"/>
         <line num="9" count="1" type="stmt"/>
@@ -180,7 +180,7 @@
         <line num="109" count="1" type="stmt"/>
       </file>
       <file name="productController.js" path="/Users/proglab/Documents/CS4218/Project_Milestone_1/cs4218-2420-ecom-project-team29/controllers/productController.js">
-        <metrics statements="136" coveredstatements="87" conditionals="38" coveredconditionals="30" methods="17" coveredmethods="7"/>
+        <metrics statements="136" coveredstatements="99" conditionals="38" coveredconditionals="32" methods="17" coveredmethods="9"/>
         <line num="10" count="1" type="stmt"/>
         <line num="13" count="1" type="stmt"/>
         <line num="20" count="1" type="stmt"/>
@@ -264,19 +264,19 @@
         <line num="224" count="2" type="stmt"/>
         <line num="225" count="2" type="stmt"/>
         <line num="234" count="1" type="stmt"/>
-        <line num="235" count="0" type="stmt"/>
-        <line num="236" count="0" type="stmt"/>
-        <line num="237" count="0" type="stmt"/>
-        <line num="242" count="0" type="stmt"/>
-        <line num="243" count="0" type="stmt"/>
+        <line num="235" count="3" type="stmt"/>
+        <line num="236" count="3" type="stmt"/>
+        <line num="237" count="2" type="stmt"/>
+        <line num="242" count="1" type="stmt"/>
+        <line num="243" count="1" type="stmt"/>
         <line num="252" count="1" type="stmt"/>
-        <line num="253" count="0" type="stmt"/>
-        <line num="254" count="0" type="stmt"/>
-        <line num="255" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="256" count="0" type="stmt"/>
-        <line num="262" count="0" type="stmt"/>
-        <line num="267" count="0" type="stmt"/>
-        <line num="268" count="0" type="stmt"/>
+        <line num="253" count="4" type="stmt"/>
+        <line num="254" count="4" type="stmt"/>
+        <line num="255" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="256" count="4" type="stmt"/>
+        <line num="262" count="2" type="stmt"/>
+        <line num="267" count="2" type="stmt"/>
+        <line num="268" count="2" type="stmt"/>
         <line num="277" count="1" type="stmt"/>
         <line num="278" count="0" type="stmt"/>
         <line num="279" count="0" type="stmt"/>
