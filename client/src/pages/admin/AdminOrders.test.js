@@ -8,35 +8,23 @@ import AdminOrders from './AdminOrders';
 import { useAuth } from '../../context/auth';
 
 
-// mock modules
 jest.mock('axios');
 jest.mock('react-hot-toast');
 
-// mock the console.log
 console.log = jest.fn();
 
-// mock components
-jest.mock('../../components/AdminMenu', () => () => <div>Admin Menu</div>);
 
-// Mock the useAuth hook
+jest.mock('../../components/AdminMenu', () => () => <div>Admin Menu</div>);
 jest.mock("../../context/auth", () => ({
     useAuth: jest.fn(),
 }));
-
-// mock the useCart hook
 jest.mock('../../context/cart', () => ({
-    useCart: jest.fn(() => [null, jest.fn()]) // Mock useCart hook to return null state and a mock function for setCart
+    useCart: jest.fn(() => [null, jest.fn()]) 
 }));
-
-// mock the useSearch hook
 jest.mock('../../context/search', () => ({
-    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
+    useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()])
 }));
-
-// mock the getCategories hook
 jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
-
-// mock antd Select component
 jest.mock("antd", () => {
     const antd = jest.requireActual("antd");
     const SelectMock = ({ children, "data-testid": testId, onChange, ...props }) => (
@@ -82,15 +70,15 @@ const product2 = {
 }
 
 const paymentError = {
+    success: false,
     errors: [],
     params: [],
     message: 'Credit card number is not an accepted test number.',
-    success: false
 }
 
 const paymentSuccess = {
+    success: true,
     transaction: {},
-    success: true
 }
 
 
@@ -98,10 +86,10 @@ describe('AdminOrders Component', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        useAuth.mockReturnValue([{ token: "sampletoken" }, jest.fn()]); // Mock useAuth hook
+        useAuth.mockReturnValue([{ token: "sampletoken" }, jest.fn()]);
     });
 
-    it('renders header and admin menu only when no orders', async () => {
+    it('Renders header and admin menu only when no orders', async () => {
         axios.get.mockResolvedValueOnce({ data: [] });
 
         const { getByText } = render(
@@ -120,7 +108,7 @@ describe('AdminOrders Component', () => {
         })
     });
 
-    it('renders 1 order of 1 item', async () => {
+    it('Renders 1 order of 1 item', async () => {
         axios.get.mockResolvedValueOnce({
             data: [
                 {
@@ -148,18 +136,18 @@ describe('AdminOrders Component', () => {
             expect(axios.get).toHaveBeenCalledTimes(1);
             expect(getByText('All Orders')).toBeInTheDocument();
             expect(getByText('Admin Menu')).toBeInTheDocument();
-            expect(document.querySelectorAll('.container').length).toBe(1) // 1 order
+            expect(document.querySelectorAll('.container').length).toBe(1)
             expect(screen.getByTestId('statusId-1').value).toBe('Not Processed');
-            expect(getByText('somebuyer')).toBeInTheDocument(); // buyer
-            expect(getByText('Success')).toBeInTheDocument(); // payment
-            expect(document.querySelectorAll('.card').length).toBe(1) // 1 item
-            expect(getByText('hot choco')).toBeInTheDocument(); // product name
-            expect(getByText('hot drink')).toBeInTheDocument(); // product description
-            expect(getByText('Price : 4.8')).toBeInTheDocument(); // product price
+            expect(getByText('somebuyer')).toBeInTheDocument();
+            expect(getByText('Success')).toBeInTheDocument();
+            expect(document.querySelectorAll('.card').length).toBe(1)
+            expect(getByText('hot choco')).toBeInTheDocument();
+            expect(getByText('hot drink')).toBeInTheDocument(); 
+            expect(getByText('Price : 4.8')).toBeInTheDocument();
         });
     });
 
-    it('renders 1 order of multiple items', async () => {
+    it('Renders 1 order of multiple items', async () => {
         axios.get.mockResolvedValueOnce({
             data: [
                 {
@@ -187,21 +175,21 @@ describe('AdminOrders Component', () => {
             expect(axios.get).toHaveBeenCalledTimes(1);
             expect(getByText('All Orders')).toBeInTheDocument();
             expect(getByText('Admin Menu')).toBeInTheDocument();
-            expect(document.querySelectorAll('.container').length).toBe(1) // 1 order
+            expect(document.querySelectorAll('.container').length).toBe(1)
             expect(screen.getByTestId('statusId-1').value).toBe('Processing');
-            expect(getByText('buyer1')).toBeInTheDocument(); // buyer
-            expect(getByText('Failed')).toBeInTheDocument(); // payment
-            expect(document.querySelectorAll('.card').length).toBe(2) // 2 items
-            expect(getByText('hot choco')).toBeInTheDocument(); // product name
-            expect(getByText('hot drink')).toBeInTheDocument(); // product description
-            expect(getByText('Price : 4.8')).toBeInTheDocument(); // product price
-            expect(getByText('dog')).toBeInTheDocument(); // product name
-            expect(getByText('dog description')).toBeInTheDocument(); // product description
-            expect(getByText('Price : 123')).toBeInTheDocument(); // product price
+            expect(getByText('buyer1')).toBeInTheDocument();
+            expect(getByText('Failed')).toBeInTheDocument(); 
+            expect(document.querySelectorAll('.card').length).toBe(2) 
+            expect(getByText('hot choco')).toBeInTheDocument(); 
+            expect(getByText('hot drink')).toBeInTheDocument(); 
+            expect(getByText('Price : 4.8')).toBeInTheDocument(); 
+            expect(getByText('dog')).toBeInTheDocument(); 
+            expect(getByText('dog description')).toBeInTheDocument(); 
+            expect(getByText('Price : 123')).toBeInTheDocument();
         });
     });
 
-    it('renders multiple orders', async () => {
+    it('Renders multiple orders', async () => {
         axios.get.mockResolvedValueOnce({
             data: [
                 {
@@ -249,22 +237,22 @@ describe('AdminOrders Component', () => {
             expect(axios.get).toHaveBeenCalledTimes(1);
             expect(getByText('All Orders')).toBeInTheDocument();
             expect(getByText('Admin Menu')).toBeInTheDocument();
-            expect(document.querySelectorAll('.container').length).toBe(3) // 3 order
+            expect(document.querySelectorAll('.container').length).toBe(3)
             expect(screen.getByTestId('statusId-1').value).toBe('Shipped');
             expect(screen.getByTestId('statusId-2').value).toBe('Delivered');
             expect(screen.getByTestId('statusId-3').value).toBe('Cancelled');
-            expect(getByText('buyer1')).toBeInTheDocument(); // buyer
-            expect(getByText('buyer2')).toBeInTheDocument(); // buyer
-            expect(getByText('buyer3')).toBeInTheDocument(); // buyer
-            expect(getAllByText('Failed').length).toBe(3); // payment
-            expect(document.querySelectorAll('.card').length).toBe(3) // 3 items
-            expect(getAllByText('hot choco').length).toBe(3); // product name
-            expect(getAllByText('hot drink').length).toBe(3); // product description
-            expect(getAllByText('Price : 4.8').length).toBe(3); // product price
+            expect(getByText('buyer1')).toBeInTheDocument();
+            expect(getByText('buyer2')).toBeInTheDocument(); 
+            expect(getByText('buyer3')).toBeInTheDocument(); 
+            expect(getAllByText('Failed').length).toBe(3); 
+            expect(document.querySelectorAll('.card').length).toBe(3) 
+            expect(getAllByText('hot choco').length).toBe(3); 
+            expect(getAllByText('hot drink').length).toBe(3); 
+            expect(getAllByText('Price : 4.8').length).toBe(3); 
         });
     });
 
-    it('change order status', async () => {
+    it('Change order status', async () => {
         axios.get.mockResolvedValueOnce({
             data: [
                 {
@@ -304,7 +292,7 @@ describe('AdminOrders Component', () => {
 
     });
 
-    it('renders error message on failure to get orders', async () => {
+    it('Renders error message on failure to get orders', async () => {
         axios.get.mockRejectedValueOnce(new Error('Internal Server Error'));
 
         const { getByText } = render(
@@ -318,12 +306,12 @@ describe('AdminOrders Component', () => {
         await waitFor(() => {
             expect(axios.get).toHaveBeenCalledTimes(1);
             expect(getByText('All Orders')).toBeInTheDocument();
-            expect(toast.error).toHaveBeenCalledWith('Something Went Wrong');
+            expect(toast.error).toHaveBeenCalledWith('Something went wrong');
             expect(document.querySelector('.card')).not.toBeInTheDocument()
         });
     });
 
-    it('renders error message on failure to update order status', async () => {
+    it('Renders error message on failure to update order status', async () => {
         axios.get.mockResolvedValueOnce({
             data: [
                 {
@@ -340,7 +328,7 @@ describe('AdminOrders Component', () => {
         })
         axios.put.mockRejectedValueOnce(new Error('Internal Server Error'));
 
-        const { getByText } = render(
+        render(
             <MemoryRouter initialEntries={['/orders']}>
                 <Routes>
                     <Route path="/orders" element={<AdminOrders />} />
@@ -352,12 +340,12 @@ describe('AdminOrders Component', () => {
             expect(axios.get).toHaveBeenCalledTimes(1);
             const select = screen.getByTestId('statusId-1');
             fireEvent.change(select, { target: { value: 'Cancelled' } });
-            expect(toast.error).toHaveBeenCalledWith('Something Went Wrong');
+            expect(toast.error).toHaveBeenCalledWith('Something went wrong');
         });
     });
 
-    it('no api calls when not authenticated', async () => {
-        useAuth.mockReturnValueOnce([null, jest.fn()]); // Mock useAuth hook to return null state and a mock function for setAuth
+    it('No api calls when not authenticated', async () => {
+        useAuth.mockReturnValueOnce([null, jest.fn()]);
 
         axios.get.mockResolvedValueOnce({ data: [] });
 
