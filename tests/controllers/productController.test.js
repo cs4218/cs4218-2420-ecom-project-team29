@@ -1209,6 +1209,88 @@ describe('searchProductController Tests', () => {
 });
 
 
+describe('relatedProductController Tests', () => {
+    let req, res;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        console.log = jest.fn();
+
+        req = {
+            params: {
+                pid: '1', 
+                cid: '2'  
+            }
+        };
+        res = {
+            send: jest.fn(),
+            status: jest.fn().mockReturnThis()
+        };
+    });
+    
+    it("should return related products successfully", async () => {
+        const expectedProducts = [
+          {
+            _id: "2",
+            name: "Saltine Crackers",
+            slug: "saltine-crackers",
+            description: "Classic crispy crackers perfect for snacking",
+            price: 4,
+            category: { _id: "2", name: "Snacks", slug: "snacks" },
+            quantity: 20,
+            photo: "some-photo",
+            shipping: false,
+            createdAt: new Date(2025, 2, 20, 10, 24, 0),
+            updatedAt: new Date(2025, 2, 20, 10, 24, 0),
+          },
+          {
+            _id: "3",
+            name: "Bone Broth Soup",
+            slug: "bone-broth-soup",
+            description: "Nutritious sipping bone broth for healthy snacking",
+            price: 7,
+            category: { _id: "2", name: "Snacks", slug: "snacks" },
+            quantity: 12,
+            photo: "some-photo",
+            shipping: true,
+            createdAt: new Date(2025, 2, 20, 10, 23, 0),
+            updatedAt: new Date(2025, 2, 20, 10, 23, 0),
+          },
+        ];
+    
+        const mockPopulate = jest.fn().mockResolvedValue(expectedProducts);
+        const mockLimit = jest.fn().mockReturnValue({ populate: mockPopulate });
+        const mockSelect = jest.fn().mockReturnValue({ limit: mockLimit });
+        productModel.find = jest.fn().mockReturnValue({ select: mockSelect });
+    
+        await realtedProductController(req, res);
+    
+        expect(productModel.find).toHaveBeenCalledWith({
+          category: req.params.cid,
+          _id: { $ne: req.params.pid },
+        });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+          success: true,
+          products: expectedProducts,
+        });
+    
+        await realtedProductController(req, res);
+    
+        expect(productModel.find).toHaveBeenCalledWith({
+          category: req.params.cid,
+          _id: { $ne: req.params.pid },
+        });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+          success: true,
+          products: expectedProducts,
+        });
+    });
+
+    
+});
+
 describe('productCategoryController Tests', () => {
     let req, res;
 
