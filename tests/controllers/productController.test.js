@@ -14,9 +14,11 @@ import {
     productCategoryController,
  } from "../../controllers/productController";
 import productModel from "../../models/productModel";
+import categoryModel from "../../models/categoryModel";
 import fs from "fs";
 
 jest.mock("../../models/productModel");
+jest.mock("../../models/categoryModel");
 jest.mock("fs");
 
 let req = {
@@ -1207,108 +1209,84 @@ describe('searchProductController Tests', () => {
 });
 
 
-// describe('relatedProductController Tests', () => {
-//     let req, res;
+describe('productCategoryController Tests', () => {
+    let req, res;
 
-//     beforeEach(() => {
-//         jest.clearAllMocks();
-//         console.log = jest.fn();
+    beforeEach(() => {
+        jest.clearAllMocks();
 
-//         req = {
-//             params: {
-//                 pid: '1', 
-//                 cid: '2'  
-//             }
-//         };
-//         res = {
-//             send: jest.fn(),
-//             status: jest.fn().mockReturnThis()
-//         };
-//     });
+        req = {
+            params: {
+                slug: 'some-category-slug' 
+            }
+        };
+        res = {
+            send: jest.fn(),
+            status: jest.fn().mockReturnThis()
+        };
+    });
 
-//     it('should return related products successfully', async () => {
-//         const expectedProducts = [
-//             {
-//                 _id: '2',
-//                 name: 'Saltine Crackers',
-//                 slug: 'saltine-crackers',
-//                 description: 'Classic crispy crackers perfect for snacking',
-//                 price: 4,
-//                 category: { _id: '2', name: 'Snacks', slug: 'snacks' },
-//                 quantity: 20,
-//                 photo: "some-photo",
-//                 shipping: false,
-//                 createdAt: new Date(2025, 2, 20, 10, 24, 0),
-//                 updatedAt: new Date(2025, 2, 20, 10, 24, 0)
-//             },
-//             {
-//                 _id: '3',
-//                 name: 'Bone Broth Soup',
-//                 slug: 'bone-broth-soup',
-//                 description: 'Nutritious sipping bone broth for healthy snacking',
-//                 price: 7,
-//                 category: { _id: '2', name: 'Snacks', slug: 'snacks' },
-//                 quantity: 12,
-//                 photo: "some-photo",
-//                 shipping: true,
-//                 createdAt: new Date(2025, 2, 20, 10, 23, 0),
-//                 updatedAt: new Date(2025, 2, 20, 10, 23, 0)
-//             }
-//         ];
+    it('should return products by category successfully', async () => {
+        const mockCategory = { _id: '1', name: 'Snacks', slug: 'some-category-slug' };
+        const expectedProducts = [
+            {
+                _id: '2',
+                name: 'Saltine Crackers',
+                slug: 'saltine-crackers',
+                description: 'Classic crispy crackers perfect for snacking',
+                price: 3.99,
+                category: mockCategory,
+                quantity: 20,
+                photo: "some-photo",
+                shipping: false,
+                createdAt: new Date(2025, 2, 20, 10, 24, 0),
+                updatedAt: new Date(2025, 2, 20, 10, 24, 0)
+            },
+            {
+                _id: '3',
+                name: 'Bone Broth Soup',
+                slug: 'bone-broth-soup',
+                description: 'Nutritious sipping bone broth for healthy snacking',
+                price: 6.99,
+                category: mockCategory,
+                quantity: 12,
+                photo: "some-photo",
+                shipping: true,
+                createdAt: new Date(2025, 2, 20, 10, 23, 0),
+                updatedAt: new Date(2025, 2, 20, 10, 23, 0)
+            }
+        ];
 
-//         // productModel.find = jest.fn().mockReturnValue({
-//         //     select: jest.fn().mockReturnThis(),
-//         //     limit: jest.fn().mockResolvedValue(expectedProducts),
-//         //     populate: jest.fn().mockReturnThis()
-//         // });
+        categoryModel.findOne = jest.fn().mockResolvedValue(mockCategory);
+        productModel.find = jest.fn().mockReturnValue({
+            populate: jest.fn().mockResolvedValue(expectedProducts)
+        });
 
-//         const mockExec = jest.fn().mockResolvedValue(expectedProducts);
-//         const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
-//         const mockLimit = jest.fn().mockReturnValue({ populate: mockPopulate });
-//         const mockSelect = jest.fn().mockReturnValue({ limit: mockLimit });
-//         productModel.find = jest.fn().mockReturnValue({ select: mockSelect });
+        await productCategoryController(req, res);
 
-//         await realtedProductController(req, res);
+        expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: req.params.slug });
+        expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
 
-//         expect(productModel.find).toHaveBeenCalledWith({
-//             category: req.params.cid,
-//             _id: { $ne: req.params.pid },
-//         });
-//         expect(res.status).toHaveBeenCalledWith(200);
-//         expect(res.send).toHaveBeenCalledWith({
-//             success: true,
-//             products: expectedProducts,
-//         });
-//     });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            category: mockCategory,
+            products: expectedProducts,
+        });
+    });
 
-//     it('should handle errors while fetching related products', async () => {
-//         const databaseError = new Error('Database connection failed');
-    
+    it('should handle errors while fetching products by category', async () => {
+        const databaseError = new Error('Database connection failed');
 
-//         // productModel.find = jest.fn().mockReturnValue({
-//         //     select: jest.fn().mockRejectedValue(),
-//         //     limit: jest.fn().mockReturnThis(),
-//         //     populate: jest.fn().mockRejectedValue(databaseError)
-//         // });
-//         // productModel.find = jest.fn().mockReturnValue({
-//         //     select: jest.fn().mockRejectedValue(databaseError), // Mocking select to reject with the error
-//         //     limit: jest.fn().mockReturnThis(),
-//         //     populate: jest.fn().mockReturnValue(Promise.reject(databaseError)) // Ensure populate also rejects
-//         // });
-//         const mockExec = jest.fn().mockRejectedValue(databaseError);
-//         const mockPopulate = jest.fn().mockReturnValue({ exec: mockExec });
-//         const mockLimit = jest.fn().mockReturnValue({ populate: mockPopulate });
-//         const mockSelect = jest.fn().mockReturnValue({ limit: mockLimit });
-//         productModel.find = jest.fn().mockReturnValue({ select: mockSelect });
-        
+        categoryModel.findOne.mockRejectedValue(databaseError);
 
-//         await realtedProductController(req, res);
+        await productCategoryController(req, res);
 
-//         expect(res.status).toHaveBeenCalledWith(400);
-//         expect(res.send).toHaveBeenCalledWith({
-//             success: false,
-//             message: "Error while getting related products",
-//             error: databaseError,
-//         });
-//     });
-// });
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            error: databaseError,
+            message: "Error while getting products",
+        });
+    });
+});
