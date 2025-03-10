@@ -63,10 +63,12 @@ describe("Header component", () => {
   it("should render Header with main components", () => {
     const categories = [
       {
+        _id: "mock-category-id",
         name: "mock-category",
         slug: "mock-category-slug",
       },
       {
+        _id: "mock-category-2-id",
         name: "mock-category-2",
         slug: "mock-category-2-slug",
       },
@@ -118,31 +120,29 @@ describe("Header component", () => {
   });
 
   // test when there are no items in cart
-    it("should render Header with empty cart", () => {
-        const categories = [
-            {
-                name: "mock-category",
-                slug: "mock-category-slug",
-            }
-        ];
-        useCategory.mockReturnValue(categories);
-        
-        const cart = [];
-        useCart.mockReturnValue([cart]);
+  it("should render Header with empty cart", () => {
+    const categories = [
+      {
+        _id: "mock-category-id",
+        name: "mock-category",
+        slug: "mock-category-slug",
+      },
+    ];
+    useCategory.mockReturnValue(categories);
 
-        render(
-            <Router>
-                <Header />
-            </Router>
-        );
+    const cart = [];
+    useCart.mockReturnValue([cart]);
 
-        const badgeCount = screen.getByTitle("0");
-        expect(badgeCount).toBeInTheDocument();
-        expect(badgeCount.textContent).toBe("0");
-    });
+    render(
+      <Router>
+        <Header />
+      </Router>
+    );
 
-
-
+    const badgeCount = screen.getByTitle("0");
+    expect(badgeCount).toBeInTheDocument();
+    expect(badgeCount.textContent).toBe("0");
+  });
 
   it("should log out user that has been authenticated", () => {
     const setAuthMock = jest.fn();

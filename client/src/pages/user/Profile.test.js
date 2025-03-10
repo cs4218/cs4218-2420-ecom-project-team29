@@ -48,9 +48,8 @@ jest.mock("../../context/cart", () => ({
 jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
 }));
-jest.mock("../../hooks/useCategory", () => () => [{ categories: [] }]);
+jest.mock("../../hooks/useCategory", () => () => []);
 
-// Mock localStorage
 const localStorageMock = (() => {
   let store = {
     auth: JSON.stringify({
