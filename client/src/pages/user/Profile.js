@@ -21,7 +21,7 @@ const Profile = () => {
       const { email, name, phone, address } = auth?.user;
       setName(name || "");
       setPhone(phone || "");
-      setEmail(email || "");
+      setEmail(email);
       setAddress(address || "");
     }
   }, [auth?.user]);
