@@ -1288,6 +1288,24 @@ describe('relatedProductController Tests', () => {
         });
     });
 
+    it("should handle errors while fetching related products", async () => {
+        const databaseError = new Error("Database connection failed");
+    
+        const mockPopulate = jest.fn().mockRejectedValue(databaseError);
+        const mockLimit = jest.fn().mockReturnValue({ populate: mockPopulate });
+        const mockSelect = jest.fn().mockReturnValue({ limit: mockLimit });
+        productModel.find = jest.fn().mockReturnValue({ select: mockSelect });
+    
+        await realtedProductController(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          success: false,
+          message: "Error while getting related products",
+          error: databaseError,
+        });
+    });
+
     
 });
 
