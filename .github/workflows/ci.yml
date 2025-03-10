@@ -19,15 +19,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
-      - name: Install dependencies for client
-        working-directory: client
-        run: npm ci
-  
-      - name: Install dependencies for root
-        run: npm ci
+      - name: Install dependencies
+        run: npm ci  # Ensure all dependencies are installed properly
+
+      - name: Rebuild bcrypt
+        run: npm rebuild bcrypt --update-binary  # Ensures bcrypt works in CI
 
       - name: Run tests
         run: npm test
@@ -36,4 +35,3 @@ jobs:
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
           BRAINTREE_PRIVATE_KEY: BRAINTREE_PRIVATE_KEY
           JWT_SECRET: JWT_SECRET
-          
