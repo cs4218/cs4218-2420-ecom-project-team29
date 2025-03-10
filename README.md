@@ -18,4 +18,4 @@ npm run test
 
 ## Miletstone 1
 
-CI Workflow: https://github.com/cs4218/cs4218-2420-ecom-project-team29/actions/workflows/ci.yml
+CI Workflow: https://github.com/cs4218/cs4218-2420-ecom-project-team29/actions/runs/13755071518/job/38461143163
