@@ -259,7 +259,7 @@ export const productListController = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage)
       .sort({ createdAt: -1 });
-    res.status(200).send({
+    res.status(200).send({                                                                                                                                                                                                                                                                                                                                                                                                                                                          
       success: true,
       products,
     });
@@ -290,7 +290,7 @@ export const searchProductController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error In Search Product API",
+      message: "Error in search product API",
       error,
     });
   }
