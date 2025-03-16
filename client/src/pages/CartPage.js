@@ -69,7 +69,13 @@ const CartPage = () => {
       const { data } = await axios.get("/api/v1/product/get-product-details", {
         params: { ids: productIds.join(",") },
       });
-      setProducts(data.products);
+      // following the cart, match id and place product in the same index as cart
+      let products = [];
+      cartProductIds.forEach((item) => {
+        let product = data.products.find((p) => p._id === item._id);
+        products.push(product);
+      });
+      setProducts(products);
     } catch (error) {
       console.log(error);
     }
