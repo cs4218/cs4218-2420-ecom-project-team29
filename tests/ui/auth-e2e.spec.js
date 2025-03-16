@@ -14,8 +14,7 @@ const user = {
     phone: '1234567890',
     address: '123 Main St, Anytown, USA',
     role: 0,
-    answer: 'test',
-    dob: '1990-01-01'
+    answer: 'test'
 };
 
 async function createTestUser(email, password) {
@@ -45,7 +44,6 @@ async function fillRegistrationForm(page, userData) {
     await page.getByPlaceholder('Enter your password').fill(userData.password);
     await page.getByPlaceholder('Enter your phone').fill(userData.phone);
     await page.getByPlaceholder('Enter your address').fill(userData.address);
-    await page.getByPlaceholder('Enter your DOB').fill(userData.dob);
     await page.getByPlaceholder('What is your favorite sports').fill(userData.answer);
     await page.getByRole('button', { name: 'REGISTER' }).click();
 }
