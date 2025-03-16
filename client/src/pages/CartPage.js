@@ -4,7 +4,6 @@ import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import DropIn from "braintree-web-drop-in-react";
-import { AiFillWarning } from "react-icons/ai";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "../styles/CartStyles.css";
@@ -12,6 +11,7 @@ import "../styles/CartStyles.css";
 const CartPage = () => {
   const [auth, setAuth] = useAuth();
   const [cart, setCart] = useCart();
+  const [products, setProducts] = useState([]);
   const [clientToken, setClientToken] = useState("");
   const [instance, setInstance] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ const CartPage = () => {
   const totalPrice = () => {
     try {
       let total = 0;
-      cart?.map((item) => {
+      products?.map((item) => {
         total = total + item.price;
       });
       return total.toLocaleString("en-US", {
@@ -36,7 +36,7 @@ const CartPage = () => {
   const removeCartItem = (pid) => {
     try {
       let myCart = [...cart];
-      let index = myCart.findIndex((item) => item._id === pid);
+      let index = myCart.findIndex((item) => item === pid);
       myCart.splice(index, 1);
       setCart(myCart);
       localStorage.setItem("cart", JSON.stringify(myCart));
@@ -54,9 +54,35 @@ const CartPage = () => {
       console.log(error);
     }
   };
+
+  // get product details
+  const getProductDetails = async () => {
+    if (!cart?.length) {
+      setProducts([]);
+      return;
+    }
+    try {
+      // get product ids from cart in local storage
+      let cartProductIds = JSON.parse(localStorage.getItem("cart"));
+      let productIds = cartProductIds.map((item) => item._id);
+      // get product details from the server
+      const { data } = await axios.get("/api/v1/product/get-product-details", {
+        params: { ids: productIds.join(",") },
+      });
+      setProducts(data.products);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     getToken();
   }, [auth?.token]);
+
+  useEffect(() => {
+    getProductDetails();
+  }, [cart]);
+
 
   //handle payments
   const handlePayment = async () => {
@@ -89,7 +115,7 @@ const CartPage = () => {
               <p className="text-center">
                 {cart?.length
                   ? `You Have ${cart.length} items in your cart ${
-                      auth?.token ? "" : "please login to checkout !"
+                      auth?.token ? "" : "Please login to checkout!"
                     }`
                   : " Your Cart Is Empty"}
               </p>
@@ -99,7 +125,7 @@ const CartPage = () => {
         <div className="container ">
           <div className="row ">
             <div className="col-md-7  p-0 m-0">
-              {cart?.map((p) => (
+              {products?.map((p) => (
                 <div className="row card flex-row" key={p._id}>
                   <div className="col-md-4">
                     <img
@@ -162,25 +188,26 @@ const CartPage = () => {
                         })
                       }
                     >
-                      Plase Login to checkout
+                      Please login to checkout
                     </button>
                   )}
                 </div>
               )}
               <div className="mt-2">
-                {!clientToken || !auth?.token || !cart?.length ? (
+                {!clientToken || !auth?.token || !products?.length ? (
                   ""
                 ) : (
                   <>
                     <DropIn
                       options={{
                         authorization: clientToken,
-                        paypal: {
-                          flow: "vault",
-                        },
                       }}
                       onInstance={(instance) => setInstance(instance)}
                     />
+                    <div className="alert alert-warning">
+                       PayPal payment option is unavailable.
+                    </div>
+                    
 
                     <button
                       className="btn btn-primary"

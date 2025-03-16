@@ -6,6 +6,7 @@ import fs from "fs";
 import slugify from "slugify";
 import braintree from "braintree";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -114,6 +115,42 @@ export const getSingleProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error while getting single product",
+      error,
+    });
+  }
+};
+
+// get all product details with array of product's id
+export const getProductDetailsController = async (req, res) => {
+  const idsString = req.query.ids;
+  console.log(idsString);
+  if (!idsString) {
+    return res.status(400).send({
+      success: false,
+      message: "Ids are required",
+    });
+  }
+
+  const ids = idsString.split(",");
+  if (!ids.every(id => mongoose.Types.ObjectId.isValid(id))) {
+    return res.status(400).send({
+      success: false,
+      message: "Invalid product Id(s) provided",
+    });
+  }
+  try {
+    const products = await productModel.find({ _id: { $in: ids } });
+    console.log(products);
+    res.status(200).send({
+      success: true,
+      message: "Product details fetched successfully",
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while getting product details",
       error,
     });
   }
