@@ -399,32 +399,59 @@ export const braintreeTokenController = async (req, res) => {
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
+    
+    // Validate inputs
+    if (!nonce || !cart || !Array.isArray(cart) || cart.length === 0) {
+      return res.status(400).json({ 
+        ok: false, 
+        message: "Invalid payment information" 
+      });
+    }
+    
     let total = 0;
     cart.map((i) => {
       total += i.price;
     });
-    let newTransaction = gateway.transaction.sale(
-      {
-        amount: total,
-        paymentMethodNonce: nonce,
-        options: {
-          submitForSettlement: true,
-        },
-      },
-      function (error, result) {
-        if (result) {
-          const order = new orderModel({
-            products: cart,
-            payment: result,
-            buyer: req.user._id,
-          }).save();
-          res.json({ ok: true });
-        } else {
-          res.status(500).send(error);
-        }
-      }
-    );
+    
+    // Convert callback to Promise for cleaner async/await
+    const processTransaction = () => {
+      return new Promise((resolve, reject) => {
+        gateway.transaction.sale({
+          amount: total,
+          paymentMethodNonce: nonce,
+          options: {
+            submitForSettlement: true,
+          },
+        }, function(error, result) {
+          if (error) reject(error);
+          else resolve(result);
+        });
+      });
+    };
+    
+    const result = await processTransaction();
+    
+    if (result.success) {
+      const order = await new orderModel({
+        products: cart,
+        payment: result,
+        buyer: req.user._id,
+      }).save();
+      
+      return res.json({ ok: true });
+    } else {
+      return res.status(400).json({ 
+        ok: false, 
+        message: "Payment failed", 
+        result 
+      });
+    }
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ 
+      ok: false, 
+      message: "Internal server error",
+      error: error.message 
+    });
   }
 };

@@ -15,14 +15,18 @@ const CartPage = () => {
   const [clientToken, setClientToken] = useState("");
   const [instance, setInstance] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDropIn, setShowDropIn] = useState(true);
   const navigate = useNavigate();
 
   //total price
   const totalPrice = () => {
     let total = products.reduce((acc, item) => acc + item.price, 0);
-    return total.toLocaleString("en-US", { style: "currency", currency: "USD" });
+    return total.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
   };
-  
+
   //detele item
   const removeCartItem = (pid) => {
     try {
@@ -42,7 +46,7 @@ const CartPage = () => {
       const { data } = await axios.get("/api/v1/product/braintree/token");
       setClientToken(data?.clientToken);
     } catch (error) {
-      console.log(error);
+      console.log("Failed to load Braintree token: ", error);
     }
   };
 
@@ -70,7 +74,7 @@ const CartPage = () => {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     getToken();
@@ -80,26 +84,67 @@ const CartPage = () => {
     getProductDetails();
   }, [cart]);
 
-
   //handle payments
   const handlePayment = async () => {
-    try {
-      setLoading(true);
-      const { nonce } = await instance.requestPaymentMethod();
-      const { data } = await axios.post("/api/v1/product/braintree/payment", {
-        nonce,
-        cart,
+    setLoading(true);
+
+    // Get payment method nonce
+    instance
+      .requestPaymentMethod()
+      .then((paymentMethodResult) => {
+        const nonce = paymentMethodResult.nonce;
+        if (!nonce) {
+          throw new Error("Unable to get payment information");
+        }
+
+        // Process payment with endpoint
+        return axios.post("/api/v1/product/braintree/payment", {
+          nonce,
+          cart,
+        });
+      })
+      .then((response) => {
+        const { data } = response;
+        if (data.ok) {
+          localStorage.removeItem("cart");
+          setCart([]);
+          navigate("/dashboard/user/orders");
+          toast.success("Payment Completed Successfully");
+        } else {
+          // Handle server response with error
+          toast.error(data.message || "Payment failed");
+          resetDropIn();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error.name === "DropinError" || error.code) {
+          // Braintree-specific errors
+          toast.error(
+            `Something went wrong with your payment information. ${error.response?.data?.result?.message}.`
+          );
+        } else {
+          // Other errors
+          toast.error(
+            "Something went wrong. Payment failed. Please try again or contact the relevant personnel."
+          );
+        }
+
+        resetDropIn();
+      })
+      .finally(() => {
+        setLoading(false);
       });
-      setLoading(false);
-      localStorage.removeItem("cart");
-      setCart([]);
-      navigate("/dashboard/user/orders");
-      toast.success("Payment Completed Successfully ");
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
   };
+
+  // Function to reset the DropIn component
+  const resetDropIn = () => {
+    setShowDropIn(false);
+    setTimeout(() => {
+      setShowDropIn(true);
+    }, 100);
+  };
+
   return (
     <Layout>
       <div className=" cart-page">
@@ -123,7 +168,7 @@ const CartPage = () => {
           <div className="row">
             <div className="col-md-7  p-0 m-0">
               {products?.map((p) => (
-                <div className="row card flex-row" key={p._id}>
+                <div className="row card flex-row h-full" key={p._id}>
                   <div className="col-md-4">
                     <img
                       src={`/api/v1/product/product-photo/${p._id}`}
@@ -191,7 +236,10 @@ const CartPage = () => {
                 </div>
               )}
               <div className="mt-2">
-                {!clientToken || !auth?.token || !products?.length ? (
+                {!clientToken ||
+                !auth?.token ||
+                !products?.length ||
+                !showDropIn ? (
                   ""
                 ) : (
                   <>
@@ -202,9 +250,8 @@ const CartPage = () => {
                       onInstance={(instance) => setInstance(instance)}
                     />
                     <div className="alert alert-warning">
-                       PayPal payment option is unavailable.
+                      PayPal payment option is unavailable.
                     </div>
-                    
 
                     <button
                       className="btn btn-primary"
