@@ -11,6 +11,7 @@ const Orders = () => {
   const getOrders = async () => {
     try {
       const { data } = await axios.get("/api/v1/auth/orders");
+      console.log(data)
       setOrders(data);
     } catch (error) {
       console.log(error);
@@ -69,7 +70,7 @@ const Orders = () => {
                         </div>
                         <div className="col-md-8">
                           <p>{p.name}</p>
-                          <p>{p.description.length > 30 ? p.description.substring(0, 30) + "..." : p.description}</p>
+                          <p>{p.description}</p>
 
                           <p>Price : {p.price.toFixed(2)}</p>
                         </div>

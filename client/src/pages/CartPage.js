@@ -19,19 +19,10 @@ const CartPage = () => {
 
   //total price
   const totalPrice = () => {
-    try {
-      let total = 0;
-      products?.map((item) => {
-        total = total + item.price;
-      });
-      return total.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    let total = products.reduce((acc, item) => acc + item.price, 0);
+    return total.toLocaleString("en-US", { style: "currency", currency: "USD" });
   };
+  
   //detele item
   const removeCartItem = (pid) => {
     try {
@@ -128,8 +119,8 @@ const CartPage = () => {
             </h1>
           </div>
         </div>
-        <div className="container ">
-          <div className="row ">
+        <div className="container">
+          <div className="row">
             <div className="col-md-7  p-0 m-0">
               {products?.map((p) => (
                 <div className="row card flex-row" key={p._id}>
@@ -144,8 +135,8 @@ const CartPage = () => {
                   </div>
                   <div className="col-md-4">
                     <p>{p.name}</p>
-                    <p>{p.description.substring(0, 30)}</p>
-                    <p>Price : {p.price}</p>
+                    <p>{p.description}</p>
+                    <p>Price : {p.price.toFixed(2)}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">
                     <button
@@ -217,6 +208,7 @@ const CartPage = () => {
 
                     <button
                       className="btn btn-primary"
+                      data-testid="make-payment"
                       onClick={handlePayment}
                       disabled={loading || !instance || !auth?.user?.address}
                     >

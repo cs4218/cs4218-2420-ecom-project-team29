@@ -4,7 +4,7 @@ import "@testing-library/jest-dom";
 import CartPage from "../pages/CartPage";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
-import { useNavigate } from "react-router-dom";
+import { MemoryRouter, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // Mock the required dependencies
@@ -103,21 +103,21 @@ describe("CartPage", () => {
     axios.post.mockResolvedValue({ data: { success: true } });
   });
 
-  test("should have user name when authenticated", async () => {
+  it("should have user name when authenticated", async () => {
     render(<CartPage />);
     await waitFor(() => {
       expect(screen.getByText(/Hello Test User/i)).toBeInTheDocument();
     });
   });
 
-  test("should have cart summary with correct total price", async () => {
+  it("should have cart summary with correct total price", async () => {
     render(<CartPage />);
     await waitFor(() => {
       expect(screen.getByText(/Total : \$300/i)).toBeInTheDocument();
     });
   });
 
-  test('should have "Your Cart Is Empty" message when cart is empty', async () => {
+  it('should have "Your Cart Is Empty" message when cart is empty', async () => {
     useCart.mockReturnValue([[], mockSetCart]);
     render(<CartPage />);
     await waitFor(() => {
@@ -125,7 +125,7 @@ describe("CartPage", () => {
     });
   });
 
-  test("should show product details for items in cart", async () => {
+  it("should show product details for items in cart", async () => {
     render(<CartPage />);
     await waitFor(() => {
       expect(screen.getByText("Product 1")).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe("CartPage", () => {
     });
   });
 
-  test("should remove item from cart when Remove button is clicked", async () => {
+  it("should remove item from cart when Remove button is clicked", async () => {
     render(<CartPage />);
     await waitFor(() => {
       expect(screen.getAllByText("Remove").length).toBe(2);
@@ -145,7 +145,7 @@ describe("CartPage", () => {
     expect(window.localStorage.setItem).toHaveBeenCalled();
   });
 
-  test("should have braintree drop in when user is authenticated and has items in cart", async () => {
+  it("should have braintree drop in when user is authenticated and has items in cart", async () => {
     render(<CartPage />);
     await waitFor(() => {
       expect(screen.getByTestId("braintree-dropin")).toBeInTheDocument();
@@ -153,7 +153,7 @@ describe("CartPage", () => {
     });
   });
 
-  test("should process payment successfully when Make Payment button is clicked", async () => {
+  it("should process payment successfully when Make Payment button is clicked", async () => {
     render(<CartPage />);
     await waitFor(() => {
       expect(screen.getByText("Make Payment")).toBeInTheDocument();
@@ -175,9 +175,12 @@ describe("CartPage", () => {
     });
   });
 
-  test("should update address button for authenticated users", async () => {
+  it("should update address button for authenticated users", async () => {
     useAuth.mockReturnValue([
-      { token: "test-token", user: { name: "Test User", address: "123 Happy Street" } },
+      {
+        token: "test-token",
+        user: { name: "Test User", address: "123 Happy Street" },
+      },
       jest.fn(),
     ]);
 

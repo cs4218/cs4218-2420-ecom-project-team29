@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
 
+const productInOrderSchema = new mongoose.Schema({
+  _id: { type: mongoose.ObjectId, required: true }, 
+  name: { type: String, required: true },
+  description: { type: String },
+  price: { type: Number, required: true },
+}, { _id: false }); // Prevent Mongoose from adding a new _id
+
 const orderSchema = new mongoose.Schema(
   {
     products: {
-      type: [
-        {
-          type: mongoose.ObjectId,
-          ref: "Products",
-        },
-      ],
+      type: [productInOrderSchema], 
       validate: {
         validator: function (products) {
           return products && products.length >= 1;
@@ -18,10 +20,8 @@ const orderSchema = new mongoose.Schema(
     },
     payment: {
       type: Object,
-
       required: [true, "Payment is required."],
     },
-
     buyer: {
       type: mongoose.ObjectId,
       ref: "users",
