@@ -28,7 +28,7 @@ const loginToAccount = async (page, testInfo, isAdmin = false) => {
 }
 
 test.beforeAll(async () => {
-    await mongoose.connect(process.env.MONGO_URL);
+    await mongoose.connect(process.env.MONGO_URL_TEST);
 })
 
 test.afterAll(async () => {
