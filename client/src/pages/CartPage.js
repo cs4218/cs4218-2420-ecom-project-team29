@@ -34,7 +34,7 @@ const CartPage = () => {
       let index = myCart.findIndex((item) => item === pid);
       myCart.splice(index, 1);
       setCart(myCart);
-      localStorage.setItem("cart", JSON.stringify(myCart));
+      localStorage.setItem(`cart${auth.user.email}`, JSON.stringify(myCart));
     } catch (error) {
       console.log(error);
     }
@@ -58,16 +58,14 @@ const CartPage = () => {
     }
     try {
       // get product ids from cart in local storage
-      let cartProductIds = JSON.parse(localStorage.getItem("cart"));
-      let productIds = cartProductIds.map((item) => item._id);
+      let cartProductIds = JSON.parse(localStorage.getItem(`cart${auth.user.email}`));
       // get product details from the server
       const { data } = await axios.get("/api/v1/product/get-product-details", {
-        params: { ids: productIds.join(",") },
+        params: { ids: cartProductIds.join(",") },
       });
-      // following the cart, match id and place product in the same index as cart
       let products = [];
       cartProductIds.forEach((item) => {
-        let product = data.products.find((p) => p._id === item._id);
+        let product = data.products.find((p) => p._id === item);
         products.push(product);
       });
       setProducts(products);
@@ -84,10 +82,17 @@ const CartPage = () => {
     getProductDetails();
   }, [cart]);
 
+  useEffect(() => {
+    if(products?.length) {
+      console.log("products", products);
+    }
+  }, [products]);
+
   //handle payments
   const handlePayment = async () => {
     setLoading(true);
 
+    console.log("Handling Payment");
     // Get payment method nonce
     instance
       .requestPaymentMethod()
@@ -106,7 +111,8 @@ const CartPage = () => {
       .then((response) => {
         const { data } = response;
         if (data.ok) {
-          localStorage.removeItem("cart");
+          console.log("Auth User Email: ", auth.user.email);
+          localStorage.removeItem(`cart${auth.user.email}`);
           setCart([]);
           navigate("/dashboard/user/orders");
           toast.success("Payment Completed Successfully");
@@ -229,7 +235,7 @@ const CartPage = () => {
                         })
                       }
                     >
-                      Please login to checkout
+                      Please login to add to cart
                     </button>
                   )}
                 </div>

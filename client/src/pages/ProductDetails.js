@@ -3,10 +3,14 @@ import Layout from "./../components/Layout";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/ProductDetailsStyles.css";
+import { useAuth } from "../context/auth";
+import toast from "react-hot-toast";
 
 const ProductDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
+  const [auth] = useAuth();
+  const [cart, setCart] = useAuth();
   const [product, setProduct] = useState({});
   const [relatedProducts, setRelatedProducts] = useState([]);
 
@@ -41,7 +45,7 @@ const ProductDetails = () => {
     <Layout>
       <div className="row container product-details">
         <div className="col-md-6">
-          {product._id &&
+          {product._id && (
             <img
               src={`/api/v1/product/product-photo/${product._id}`}
               className="card-img-top"
@@ -49,7 +53,7 @@ const ProductDetails = () => {
               height="300"
               width={"350px"}
             />
-          }
+          )}
         </div>
         <div className="col-md-6 product-details-info">
           <h1 className="text-center">Product Details</h1>
@@ -57,13 +61,31 @@ const ProductDetails = () => {
           <h6>Name: {product.name}</h6>
           <h6>Description: {product.description}</h6>
           <h6>
-            Price: {product?.price?.toLocaleString("en-US", {
+            Price:{" "}
+            {product?.price?.toLocaleString("en-US", {
               style: "currency",
               currency: "USD",
             })}
           </h6>
           <h6>Category: {product?.category?.name}</h6>
-          <button className="btn btn-secondary ms-1">ADD TO CART</button>
+          <button
+            className="btn btn-dark ms-1"
+            onClick={() => {
+              if (!auth?.user?.email) {
+                toast.error("Please log in to add items to the cart");
+                return;
+              }
+
+              const userCartKey = `cart${auth.user.email}`;
+              const updatedCart = [...cart, product._id];
+
+              setCart(updatedCart);
+              localStorage.setItem(userCartKey, JSON.stringify(updatedCart));
+              toast.success("Item added to cart");
+            }}
+          >
+            ADD TO CART
+          </button>
         </div>
       </div>
       <hr />
@@ -101,18 +123,28 @@ const ProductDetails = () => {
                     More Details
                   </button>
                   {/* <button
-                  className="btn btn-dark ms-1"
-                  onClick={() => {
-                    setCart([...cart, p]);
-                    localStorage.setItem(
-                      "cart",
-                      JSON.stringify([...cart, p])
-                    );
-                    toast.success("Item Added to cart");
-                  }}
-                >
-                  ADD TO CART
-                </button> */}
+                      className="btn btn-dark ms-1"
+                      onClick={() => {
+                        if (!auth?.user?.email) {
+                          toast.error("Please log in to add items to the cart");
+                          return;
+                        }
+
+                        const userCartKey = `cart${auth.user.email}`;
+                        const updatedCart = [...cart, p._id];
+                        console.log(updatedCart);
+
+                        setCart(updatedCart);
+                        localStorage.setItem(
+                          userCartKey,
+                          JSON.stringify(updatedCart)
+                        );
+                        console.log("cart", cart);
+                        toast.success("Item added to cart");
+                      }}
+                    >
+                      ADD TO CART
+                    </button>*/}
                 </div>
               </div>
             </div>
