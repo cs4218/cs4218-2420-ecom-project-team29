@@ -162,21 +162,19 @@ describe("CartPage", () => {
   });
 
   it("should process payment successfully when Make Payment button is clicked", async () => {
-
     const localStorageMock = {
       getItem: jest.fn().mockReturnValue(JSON.stringify(["1", "2"])),
       setItem: jest.fn(),
       removeItem: jest.fn(),
     };
     Object.defineProperty(window, "localStorage", { value: localStorageMock });
-    
+
     // Mock the Braintree instance
     const mockInstance = {
       requestPaymentMethod: jest.fn().mockResolvedValue({
         nonce: "test-nonce", // This should match the expected nonce in the test
       }),
     };
-
 
     render(<CartPage />);
 
@@ -201,12 +199,27 @@ describe("CartPage", () => {
         "/api/v1/product/braintree/payment",
         {
           nonce: "test-nonce",
-          cart: ["1", "2"],
+          cart: [
+            {
+              _id: "1",
+              name: "Product 1",
+              description: "Description 1",
+              price: 100,
+            },
+            {
+              _id: "2",
+              name: "Product 2",
+              description: "Description 2",
+              price: 200,
+            },
+          ],
         }
       );
 
       // verify local storage was cleared
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith("cartgreen@gmail.com");
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+        "cartgreen@gmail.com"
+      );
       // Verify state cart was cleared
       expect(mockSetCart).toHaveBeenCalledWith([]);
 
