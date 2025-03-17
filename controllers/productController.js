@@ -409,10 +409,10 @@ export const brainTreePaymentController = async (req, res) => {
       });
     }
     
-    let total = 0;
-    cart.map((i) => {
-      total += i.price;
-    });
+    let total = cart.reduce((accumulator, item) => {
+      return accumulator + item.price;
+    }, 0);
+    console.log(total);
     
     // Convert callback to Promise for cleaner async/await
     const processTransaction = () => {

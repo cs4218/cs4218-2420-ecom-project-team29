@@ -105,7 +105,7 @@ const CartPage = () => {
         // Process payment with endpoint
         return axios.post("/api/v1/product/braintree/payment", {
           nonce,
-          cart,
+          cart: products,
         });
       })
       .then((response) => {
