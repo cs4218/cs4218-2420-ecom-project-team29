@@ -400,6 +400,7 @@ export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
     
+    
     // Validate inputs
     if (!nonce || !cart || !Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({ 

@@ -223,10 +223,9 @@ describe("CartPage", () => {
     // Mock the instance before clicking
     global.instance = mockInstance;
     
-    fireEvent.click(paymentButton);
-    
     // Check that the payment processing occurs
     await waitFor(() => {
+      fireEvent.click(paymentButton);
       // Verify the Braintree payment request was made
       expect(axios.post).toHaveBeenCalledWith('/api/v1/product/braintree/payment', {
         nonce: 'test-nonce',

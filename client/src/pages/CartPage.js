@@ -121,7 +121,7 @@ const CartPage = () => {
         if (error.name === "DropinError" || error.code) {
           // Braintree-specific errors
           toast.error(
-            `Something went wrong with your payment information. ${error.response?.data?.result?.message}.`
+            `Something went wrong with your payment information. ${error?.response?.data?.result?.message || ""}`
           );
         } else {
           // Other errors
@@ -130,20 +130,19 @@ const CartPage = () => {
           );
         }
 
-        resetDropIn();
+        resetDropIn(() => setLoading(false)); 
       })
-      .finally(() => {
-        setLoading(false);
-      });
   };
 
   // Function to reset the DropIn component
-  const resetDropIn = () => {
+  const resetDropIn = (callback) => {
     setShowDropIn(false);
     setTimeout(() => {
       setShowDropIn(true);
+      if (callback) callback();
     }, 100);
   };
+  
 
   return (
     <Layout>
