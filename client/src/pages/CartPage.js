@@ -4,7 +4,6 @@ import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import DropIn from "braintree-web-drop-in-react";
-import { AiFillWarning } from "react-icons/ai";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "../styles/CartStyles.css";
@@ -12,34 +11,30 @@ import "../styles/CartStyles.css";
 const CartPage = () => {
   const [auth, setAuth] = useAuth();
   const [cart, setCart] = useCart();
+  const [products, setProducts] = useState([]);
   const [clientToken, setClientToken] = useState("");
   const [instance, setInstance] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDropIn, setShowDropIn] = useState(true);
   const navigate = useNavigate();
 
   //total price
   const totalPrice = () => {
-    try {
-      let total = 0;
-      cart?.map((item) => {
-        total = total + item.price;
-      });
-      return total.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    let total = products.reduce((acc, item) => acc + item.price, 0);
+    return total.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
   };
+
   //detele item
   const removeCartItem = (pid) => {
     try {
       let myCart = [...cart];
-      let index = myCart.findIndex((item) => item._id === pid);
+      let index = myCart.findIndex((item) => item === pid);
       myCart.splice(index, 1);
       setCart(myCart);
-      localStorage.setItem("cart", JSON.stringify(myCart));
+      localStorage.setItem(`cart${auth.user.email}`, JSON.stringify(myCart));
     } catch (error) {
       console.log(error);
     }
@@ -51,32 +46,110 @@ const CartPage = () => {
       const { data } = await axios.get("/api/v1/product/braintree/token");
       setClientToken(data?.clientToken);
     } catch (error) {
+      console.log("Failed to load Braintree token: ", error);
+    }
+  };
+
+  // get product details
+  const getProductDetails = async () => {
+    if (!cart?.length) {
+      setProducts([]);
+      return;
+    }
+    try {
+      // get product ids from cart in local storage
+      let cartProductIds = JSON.parse(localStorage.getItem(`cart${auth.user.email}`));
+      // get product details from the server
+      const { data } = await axios.get("/api/v1/product/get-product-details", {
+        params: { ids: cartProductIds.join(",") },
+      });
+      let products = [];
+      cartProductIds.forEach((item) => {
+        let product = data.products.find((p) => p._id === item);
+        products.push(product);
+      });
+      setProducts(products);
+    } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
     getToken();
   }, [auth?.token]);
 
+  useEffect(() => {
+    getProductDetails();
+  }, [cart]);
+
+  useEffect(() => {
+    if(products?.length) {
+      console.log("products", products);
+    }
+  }, [products]);
+
   //handle payments
   const handlePayment = async () => {
-    try {
-      setLoading(true);
-      const { nonce } = await instance.requestPaymentMethod();
-      const { data } = await axios.post("/api/v1/product/braintree/payment", {
-        nonce,
-        cart,
-      });
-      setLoading(false);
-      localStorage.removeItem("cart");
-      setCart([]);
-      navigate("/dashboard/user/orders");
-      toast.success("Payment Completed Successfully ");
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
+    setLoading(true);
+
+    console.log("Handling Payment");
+    // Get payment method nonce
+    instance
+      .requestPaymentMethod()
+      .then((paymentMethodResult) => {
+        const nonce = paymentMethodResult.nonce;
+        if (!nonce) {
+          throw new Error("Unable to get payment information");
+        }
+
+        // Process payment with endpoint
+        return axios.post("/api/v1/product/braintree/payment", {
+          nonce,
+          cart: products,
+        });
+      })
+      .then((response) => {
+        const { data } = response;
+        if (data.ok) {
+          console.log("Auth User Email: ", auth.user.email);
+          localStorage.removeItem(`cart${auth.user.email}`);
+          setCart([]);
+          navigate("/dashboard/user/orders");
+          toast.success("Payment Completed Successfully");
+        } else {
+          // Handle server response with error
+          toast.error(data.message || "Payment failed");
+          resetDropIn();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error.name === "DropinError" || error.code) {
+          // Braintree-specific errors
+          toast.error(
+            `Something went wrong with your payment information. ${error?.response?.data?.result?.message || ""}`
+          );
+        } else {
+          // Other errors
+          toast.error(
+            "Something went wrong. Payment failed. Please try again or contact the relevant personnel."
+          );
+        }
+
+        resetDropIn(() => setLoading(false)); 
+      })
   };
+
+  // Function to reset the DropIn component
+  const resetDropIn = (callback) => {
+    setShowDropIn(false);
+    setTimeout(() => {
+      setShowDropIn(true);
+      if (callback) callback();
+    }, 100);
+  };
+  
+
   return (
     <Layout>
       <div className=" cart-page">
@@ -89,18 +162,18 @@ const CartPage = () => {
               <p className="text-center">
                 {cart?.length
                   ? `You Have ${cart.length} items in your cart ${
-                      auth?.token ? "" : "please login to checkout !"
+                      auth?.token ? "" : "Please login to checkout!"
                     }`
                   : " Your Cart Is Empty"}
               </p>
             </h1>
           </div>
         </div>
-        <div className="container ">
-          <div className="row ">
+        <div className="container">
+          <div className="row">
             <div className="col-md-7  p-0 m-0">
-              {cart?.map((p) => (
-                <div className="row card flex-row" key={p._id}>
+              {products?.map((p) => (
+                <div className="row card flex-row h-full" key={p._id}>
                   <div className="col-md-4">
                     <img
                       src={`/api/v1/product/product-photo/${p._id}`}
@@ -112,8 +185,8 @@ const CartPage = () => {
                   </div>
                   <div className="col-md-4">
                     <p>{p.name}</p>
-                    <p>{p.description.substring(0, 30)}</p>
-                    <p>Price : {p.price}</p>
+                    <p>{p.description}</p>
+                    <p>Price : {p.price.toFixed(2)}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">
                     <button
@@ -162,28 +235,32 @@ const CartPage = () => {
                         })
                       }
                     >
-                      Plase Login to checkout
+                      Please login to add to cart
                     </button>
                   )}
                 </div>
               )}
               <div className="mt-2">
-                {!clientToken || !auth?.token || !cart?.length ? (
+                {!clientToken ||
+                !auth?.token ||
+                !products?.length ||
+                !showDropIn ? (
                   ""
                 ) : (
                   <>
                     <DropIn
                       options={{
                         authorization: clientToken,
-                        paypal: {
-                          flow: "vault",
-                        },
                       }}
                       onInstance={(instance) => setInstance(instance)}
                     />
+                    <div className="alert alert-warning">
+                      PayPal payment option is unavailable.
+                    </div>
 
                     <button
                       className="btn btn-primary"
+                      data-testid="make-payment"
                       onClick={handlePayment}
                       disabled={loading || !instance || !auth?.user?.address}
                     >

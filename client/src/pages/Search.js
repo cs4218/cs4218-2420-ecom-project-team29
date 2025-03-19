@@ -1,7 +1,11 @@
 import React from "react";
 import Layout from "./../components/Layout";
 import { useSearch } from "../context/search";
+import { useAuth } from "../context/auth";
+import toast from "react-hot-toast";
 const Search = () => {
+  const [auth] = useAuth();
+  const [cart, setCart] = useAuth();
   const [values, setValues] = useSearch();
   return (
     <Layout title={"Search results"}>
@@ -28,7 +32,28 @@ const Search = () => {
                   </p>
                   <p className="card-text"> $ {p.price}</p>
                   <button className="btn btn-primary ms-1">More Details</button>
-                  <button className="btn btn-secondary ms-1">ADD TO CART</button>
+                  <button
+                    className="btn btn-dark ms-1"
+                    onClick={() => {
+                      if (!auth?.user?.email) {
+                        toast.error("Please log in to add items to the cart");
+                        return;
+                      }
+
+                      const userCartKey = `cart${auth.user.email}`;
+                      console.log(p._id);
+                      const updatedCart = [...cart, p._id];
+
+                      setCart(updatedCart);
+                      localStorage.setItem(
+                        userCartKey,
+                        JSON.stringify(updatedCart)
+                      );
+                      toast.success("Item added to cart");
+                    }}
+                  >
+                    ADD TO CART
+                  </button>
                 </div>
               </div>
             ))}
