@@ -133,20 +133,22 @@ test.describe("Order Tests for registered user", () => {
     testName,
     testDataDetails
   ) {
+    // add product to cart
     await page.goto(`${BASE_URL}/product/${testDataDetails.product1.slug}`);
     await page.getByRole("button", { name: "ADD TO CART" }).click();
 
+    // go to cart page
     await page.getByRole("link", { name: "Cart" }).click();
     await expect(page).toHaveURL(`${BASE_URL}/cart`);
 
-
+    // check header cart count (in red)
     await expect(page.getByTitle("1")).toBeVisible();
 
     await expect(page.locator(".col-md-7 > .row")).toBeVisible({
       timeout: 30000,
     });
 
-
+    // check cart page content
     await expect(
       page.getByRole("heading", {
         name: `Hello ${testDataDetails.user.name} You Have 1 item`,
@@ -165,6 +167,7 @@ test.describe("Order Tests for registered user", () => {
       `Price : ${testDataDetails.product1.price.toFixed(2)}`
     );
 
+    // fill up payment details
     await expect(page.getByText("Edit Choose a way to pay")).toBeVisible();
     await page.getByText("Pay with card Card Number").click();
     await page
@@ -201,13 +204,14 @@ test.describe("Order Tests for registered user", () => {
       .getByRole("textbox", { name: "Expiration Date" })
       .fill("1234");
     await page.getByTestId("make-payment").click();
-
     await page.waitForSelector(".cart-page", {
       state: "visible",
     });
 
+    // check navigation to order page
     await expect(page).toHaveURL(`${BASE_URL}/dashboard/user/orders`);
 
+    // check order details
     await expect(
       page.getByRole("heading", { name: "All Orders" })
     ).toBeVisible();
@@ -272,117 +276,18 @@ test.describe("Order Tests for registered user", () => {
     });
   });
 
-  // const incompleteOrderTestData = [
-  //   {
-  //     cardNo: "4111 1111 1111 1111",
-  //     cvv: "12",
-  //     testName: "visa payment",
-  //   },
-  //   {
-  //     cardNo: "2223000048400010",
-  //     cvv: "123",
-  //     testName: "mastercard payment",
-  //   }
-  // ];
-
-  // async function cartToPaymentFailure(
-  //   page,
-  //   cardNo,
-  //   cvv,
-  //   testName,
-  //   testDataDetails
-  // ) {
-  //   await page.goto(`${BASE_URL}/product/${testDataDetails.product1.slug}`);
-  //   await page.getByRole("button", { name: "ADD TO CART" }).click();
-
-  //   await page.getByRole("link", { name: "Cart" }).click();
-  //   await expect(page).toHaveURL(`${BASE_URL}/cart`);
-
-
-  //   await expect(page.getByTitle("1")).toBeVisible();
-
-  //   await expect(page.locator(".col-md-7 > .row")).toBeVisible({
-  //     timeout: 30000,
-  //   });
-
-
-  //   await expect(
-  //     page.getByRole("heading", {
-  //       name: `Hello ${testDataDetails.user.name} You Have 1 item`,
-  //     })
-  //   ).toBeVisible();
-  //   await expect(page.locator("h1")).toContainText(
-  //     `Hello ${testDataDetails.user.name}You Have 1 item in your cart`
-  //   );
-  //   await expect(page.getByRole("main")).toContainText(
-  //     testDataDetails.product1.name
-  //   );
-  //   await expect(page.getByRole("main")).toContainText(
-  //     testDataDetails.product1.description
-  //   );
-  //   await expect(page.getByRole("main")).toContainText(
-  //     `Price : ${testDataDetails.product1.price.toFixed(2)}`
-  //   );
-
-  //   await expect(page.getByText("Edit Choose a way to pay")).toBeVisible();
-  //   await page.getByText("Pay with card Card Number").click();
-  //   await page
-  //     .locator('iframe[name="braintree-hosted-field-number"]')
-  //     .contentFrame()
-  //     .getByRole("textbox", { name: "Credit Card Number" })
-  //     .click();
-  //   await expect(page.getByText("Pay with card Card Number")).toBeVisible();
-  //   await expect(page.getByText("PayPal payment option is")).toBeVisible();
-
-  //   await page
-  //     .locator('iframe[name="braintree-hosted-field-number"]')
-  //     .contentFrame()
-  //     .getByRole("textbox", { name: "Credit Card Number" })
-  //     .fill(cardNo);
-  //   await page
-  //     .locator('iframe[name="braintree-hosted-field-cvv"]')
-  //     .contentFrame()
-  //     .getByRole("textbox", { name: "CVV" })
-  //     .click();
-  //   await page
-  //     .locator('iframe[name="braintree-hosted-field-cvv"]')
-  //     .contentFrame()
-  //     .getByRole("textbox", { name: "CVV" })
-  //     .fill(cvv);
-  //   await page
-  //     .locator('iframe[name="braintree-hosted-field-expirationDate"]')
-  //     .contentFrame()
-  //     .getByRole("textbox", { name: "Expiration Date" })
-  //     .click();
-  //   await page
-  //     .locator('iframe[name="braintree-hosted-field-expirationDate"]')
-  //     .contentFrame()
-  //     .getByRole("textbox", { name: "Expiration Date" })
-  //     .fill("1234");
-  //   await page.getByTestId("make-payment").click();
-  //   await expect(page.getByText('Something went wrong with')).toBeVisible();
-  //   await expect(page.getByRole('status')).toContainText('Something went wrong with your payment information.');
-
-  // // stays at cart page
-  // await expect(page).toHaveURL(`${BASE_URL}/cart`);
-  // }
-
-
-  // incompleteOrderTestData.forEach((data) => {
-  //   test(`should not place order with ${data.testName} for added products in cart successfully `, async ({
-  //     page,
-  //   }) => {
-  //     await cartToPaymentFailure(
-  //       page,
-  //       data.cardNo,
-  //       data.cvv,
-  //       data.testName,
-  //       testData
-  //     );
-  //   });
-  // });
-
-
+  const incompleteOrderTestData = [
+    {
+      cardNo: "4111 1111 1111 1111",
+      cvv: "12",
+      testName: "visa payment",
+    },
+    {
+      cardNo: "2223000048400010",
+      cvv: "123",
+      testName: "mastercard payment",
+    },
+  ];
 
   test("should remove product from cart successfully", async ({ page }) => {
     await page.goto(`${BASE_URL}/product/${testData.product1.slug}`);
@@ -434,6 +339,115 @@ test.describe("Order Tests for registered user", () => {
       `Hello ${testData.user.name}You Have 1 item in your cart`
     );
     await expect(page.locator(".col-md-7 > .row")).toBeVisible();
+  });
+
+  // TODO: Add tests for multiple orders
+
+  // TODO: Add tests for add to cart in home page 
+
+  /** Failure Test Cases **/
+  async function cartToPaymentFailure(
+    page,
+    cardNo,
+    cvv,
+    testName,
+    testDataDetails
+  ) {
+    // navigate to product page
+    await page.goto(`${BASE_URL}/product/${testDataDetails.product1.slug}`);
+    await page.getByRole("button", { name: "ADD TO CART" }).click();
+
+    await page.getByRole("link", { name: "Cart" }).click();
+    await expect(page).toHaveURL(`${BASE_URL}/cart`);
+
+    // check header cart count (in red)
+    await expect(page.getByTitle("1")).toBeVisible();
+
+    // check cart page content
+    await expect(page.locator(".col-md-7 > .row")).toBeVisible({
+      timeout: 30000,
+    });
+
+    await expect(
+      page.getByRole("heading", {
+        name: `Hello ${testDataDetails.user.name} You Have 1 item`,
+      })
+    ).toBeVisible();
+    await expect(page.locator("h1")).toContainText(
+      `Hello ${testDataDetails.user.name}You Have 1 item in your cart`
+    );
+    await expect(page.getByRole("main")).toContainText(
+      testDataDetails.product1.name
+    );
+    await expect(page.getByRole("main")).toContainText(
+      testDataDetails.product1.description
+    );
+    await expect(page.getByRole("main")).toContainText(
+      `Price : ${testDataDetails.product1.price.toFixed(2)}`
+    );
+
+    // fill up payment details
+
+    await expect(page.getByText("Edit Choose a way to pay")).toBeVisible();
+    await page.getByText("Pay with card Card Number").click();
+    await page
+      .locator('iframe[name="braintree-hosted-field-number"]')
+      .contentFrame()
+      .getByRole("textbox", { name: "Credit Card Number" })
+      .click();
+    await expect(page.getByText("Pay with card Card Number")).toBeVisible();
+    await expect(page.getByText("PayPal payment option is")).toBeVisible();
+
+    await page
+      .locator('iframe[name="braintree-hosted-field-number"]')
+      .contentFrame()
+      .getByRole("textbox", { name: "Credit Card Number" })
+      .fill(cardNo);
+    await page
+      .locator('iframe[name="braintree-hosted-field-cvv"]')
+      .contentFrame()
+      .getByRole("textbox", { name: "CVV" })
+      .click();
+    await page
+      .locator('iframe[name="braintree-hosted-field-cvv"]')
+      .contentFrame()
+      .getByRole("textbox", { name: "CVV" })
+      .fill(cvv);
+    await page
+      .locator('iframe[name="braintree-hosted-field-expirationDate"]')
+      .contentFrame()
+      .getByRole("textbox", { name: "Expiration Date" })
+      .click();
+    await page
+      .locator('iframe[name="braintree-hosted-field-expirationDate"]')
+      .contentFrame()
+      .getByRole("textbox", { name: "Expiration Date" })
+      .fill("1234");
+    await page.getByTestId("make-payment").click();
+
+    // check error toast
+    const errorToast = page.getByText(
+      "Something went wrong with your payment information."
+    );
+    await errorToast.waitFor();
+    await expect(errorToast).toBeVisible();
+
+    // stays at cart page
+    await expect(page).toHaveURL(`${BASE_URL}/cart`);
+  }
+
+  incompleteOrderTestData.forEach((data) => {
+    test(`should not place order with ${data.testName} for added products in cart successfully `, async ({
+      page,
+    }) => {
+      await cartToPaymentFailure(
+        page,
+        data.cardNo,
+        data.cvv,
+        data.testName,
+        testData
+      );
+    });
   });
 
   test("should have processor declined error during payment", async ({
@@ -517,9 +531,10 @@ test.describe("Order Tests for registered user", () => {
     await page.getByTestId("make-payment").click();
     await expect(page.getByText("Something went wrong with")).toBeVisible();
     await expect(
-      page.getByText("Something went wrong with your payment information. Processor Network Unavailable - Try Again")
+      page.getByText(
+        "Something went wrong with your payment information. Processor Network Unavailable - Try Again"
+      )
     ).toBeVisible();
-    
 
     // stays at cart page
     await expect(page).toHaveURL(`${BASE_URL}/cart`);
@@ -622,6 +637,8 @@ test.describe("Order Tests for no user", () => {
   }) => {
     await page.goto(`${BASE_URL}/cart`);
     await expect(page).toHaveURL(`${BASE_URL}/cart`);
+
+    // check header cart count (in red)
     await expect(page.getByRole("superscript")).toContainText("0");
     await expect(page.locator("h1")).toContainText(
       "Hello Guest Your Cart Is Empty"
@@ -662,3 +679,7 @@ test.describe("Order Tests for no user", () => {
     );
   });
 });
+
+// TODO:Add test for login logout of cart behaviour
+
+// TODO: Add test for update address of user and check if it is reflected in cart page
