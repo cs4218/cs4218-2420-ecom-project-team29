@@ -58,7 +58,7 @@ describe("CreateCategory Component", () => {
 
     it("Create a new category", async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
-        axios.post.mockResolvedValue({ data: { success: true } });
+        axios.post.mockResolvedValue({ status: 201, data: { success: true } });
 
         const { getByPlaceholderText, getByText } = render(<CreateCategory />);
 
