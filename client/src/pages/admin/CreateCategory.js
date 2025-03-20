@@ -12,6 +12,7 @@ const CreateCategory = () => {
   const [visible, setVisible] = useState(false);
   const [selected, setSelected] = useState(null);
   const [updatedName, setUpdatedName] = useState("");
+  const [reload_categories, setReloadCategories] = useState(false);
   //handle Form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +23,8 @@ const CreateCategory = () => {
       if (data?.success) {
         if (status === 201) {
           toast.success(`${name} is created`);
-          window.location.reload(); // refresh page so header gets new categories
+          getAllCategory();
+          setReloadCategories(!reload_categories);
         } else { // message for duplicate category
           toast.success(data.message);
         }
@@ -31,7 +33,11 @@ const CreateCategory = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong in input form");
+      if (error.response?.status === 401) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
@@ -62,13 +68,14 @@ const CreateCategory = () => {
       );
       if (data.success) {
         toast.success(`${updatedName} is updated`);
-        window.location.reload(); // refresh page so header gets new categories
+        getAllCategory();
+        setReloadCategories(!reload_categories);
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         toast.error(error.response.data.message);
       } else {
         toast.error("Something went wrong");
@@ -83,7 +90,8 @@ const CreateCategory = () => {
       );
       if (data.success) {
         toast.success(`Category is deleted`);
-        window.location.reload(); // refresh page so header gets new categories
+        getAllCategory();
+        setReloadCategories(!reload_categories);
       } else {
         toast.error(data.message);
       }
@@ -92,7 +100,7 @@ const CreateCategory = () => {
     }
   };
   return (
-    <Layout title={"Dashboard - Create Category"}>
+    <Layout title={"Dashboard - Create Category"} reload_categories={reload_categories}>
       <div className="container-fluid m-3 p-3">
         <div className="row">
           <div className="col-md-3">
@@ -151,6 +159,7 @@ const CreateCategory = () => {
               onCancel={() => setVisible(false)}
               footer={null}
               open={visible}
+              title="Update Category"
             >
               <CategoryForm
                 value={updatedName}
