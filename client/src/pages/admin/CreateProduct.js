@@ -75,11 +75,15 @@ const CreateProduct = () => {
                 placeholder="Select a category"
                 size="large"
                 showSearch
-                className="form-select mb-3"
+                className="form-select mb-3 p-0"
                 onChange={(value) => {
                   setCategory(value);
                 }}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }
                 data-testid="category-select"
+                style={{ backgroundImage: "none" }}
               >
                 {categories?.map((c) => (
                   <Option key={c._id} value={c._id}>
@@ -155,11 +159,15 @@ const CreateProduct = () => {
                   placeholder="Select shipping"
                   size="large"
                   showSearch
-                  className="form-select mb-3"
+                  className="form-select mb-3 p-0"
                   onChange={(value) => {
                     setShipping(value);
                   }}
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
                   data-testid="shipping-select"
+                  style={{ backgroundImage: "none" }}
                 >
                   <Option value="0">No</Option>
                   <Option value="1">Yes</Option>
