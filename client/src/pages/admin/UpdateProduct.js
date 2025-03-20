@@ -33,7 +33,11 @@ const UpdateProduct = () => {
         setPrice(data.product.price);
         setQuantity(data.product.quantity);
         setShipping(data.product.shipping);
-        setCategory(data.product.category._id);
+        if (data.product.category) {
+          setCategory(data.product.category._id);
+        } else {
+          toast.error("Category for product not found");
+        }
       } else {
         toast.error(data?.message);
       }
