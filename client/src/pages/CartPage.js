@@ -58,6 +58,7 @@ const CartPage = () => {
     }
     try {
       // get product ids from cart in local storage
+      setLoading(true);
       let cartProductIds = JSON.parse(localStorage.getItem(`cart${auth.user.email}`));
       // get product details from the server
       const { data } = await axios.get("/api/v1/product/get-product-details", {
@@ -69,8 +70,10 @@ const CartPage = () => {
         products.push(product);
       });
       setProducts(products);
+      setLoading(false);
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   };
 
@@ -81,12 +84,6 @@ const CartPage = () => {
   useEffect(() => {
     getProductDetails();
   }, [cart]);
-
-  useEffect(() => {
-    if(products?.length) {
-      console.log("products", products);
-    }
-  }, [products]);
 
   //handle payments
   const handlePayment = async () => {
@@ -152,7 +149,7 @@ const CartPage = () => {
 
   return (
     <Layout>
-      <div className=" cart-page">
+      <div className="cart-page">
         <div className="row">
           <div className="col-md-12">
             <h1 className="text-center bg-light p-2 mb-1">
@@ -161,7 +158,7 @@ const CartPage = () => {
                 : `Hello  ${auth?.token && auth?.user?.name}`}
               <p className="text-center">
                 {cart?.length
-                  ? `You Have ${cart.length} items in your cart ${
+                  ? `You Have ${cart.length} ${cart.length === 1 ? "item" : "items"} in your cart ${
                       auth?.token ? "" : "Please login to checkout!"
                     }`
                   : " Your Cart Is Empty"}
@@ -172,13 +169,17 @@ const CartPage = () => {
         <div className="container">
           <div className="row">
             <div className="col-md-7  p-0 m-0">
-              {products?.map((p) => (
+              {loading ? (
+                <div className="text-center" data-testid="loading">
+                  <h2>Loading...</h2>
+                </div>
+                ) : (products && products?.map((p) => (
                 <div className="row card flex-row h-full" key={p._id}>
                   <div className="col-md-4">
                     <img
-                      src={`/api/v1/product/product-photo/${p._id}`}
+                      src={`/api/v1/product/product-photo/${p?._id}`}
                       className="card-img-top"
-                      alt={p.name}
+                      alt={p?.name}
                       width="100%"
                       height={"130px"}
                     />
@@ -197,7 +198,7 @@ const CartPage = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
             <div className="col-md-5 cart-summary ">
               <h2>Cart Summary</h2>

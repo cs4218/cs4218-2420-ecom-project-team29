@@ -5,12 +5,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../styles/ProductDetailsStyles.css";
 import { useAuth } from "../context/auth";
 import toast from "react-hot-toast";
+import { useCart } from "../context/cart";
 
 const ProductDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [auth] = useAuth();
-  const [cart, setCart] = useAuth();
+  const [cart, setCart] = useCart();
   const [product, setProduct] = useState({});
   const [relatedProducts, setRelatedProducts] = useState([]);
 
@@ -77,6 +78,7 @@ const ProductDetails = () => {
               }
 
               const userCartKey = `cart${auth.user.email}`;
+
               const updatedCart = [...cart, product._id];
 
               setCart(updatedCart);
