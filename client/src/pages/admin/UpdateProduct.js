@@ -55,7 +55,7 @@ const UpdateProduct = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something wwent wrong in getting category");
+      toast.error("Something went wrong in getting category");
     }
   };
 
@@ -90,8 +90,8 @@ const UpdateProduct = () => {
   //delete a product
   const handleDelete = async () => {
     try {
-      let answer = window.prompt("Are you sure want to delete this product ?");
-      if (!answer || answer.toLowerCase() !== "yes") return;
+      let answer = window.prompt("Are you sure want to delete this product? Type 'yes' to confirm");
+      if (!answer || answer !== "yes") return;
       const { data } = await axios.delete(`/api/v1/product/delete-product/${id}`);
       if (data?.success) {
         toast.success("Product deleted successfully");
@@ -119,12 +119,16 @@ const UpdateProduct = () => {
                 placeholder="Select a category"
                 size="large"
                 showSearch
-                className="form-select mb-3"
+                className="form-select mb-3 p-0"
                 onChange={(value) => {
                   setCategory(value);
                 }}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }
                 value={category}
                 data-testid="category-select"
+                style={{ backgroundImage: "none" }}
               >
                 {categories?.map((c) => (
                   <Option key={c._id} value={c._id}>
@@ -145,7 +149,7 @@ const UpdateProduct = () => {
                 </label>
               </div>
               <div className="mb-3">
-                {photo ? (
+                {photo && (
                   <div className="text-center">
                     <img
                       src={URL.createObjectURL(photo)}
@@ -154,7 +158,8 @@ const UpdateProduct = () => {
                       className="img img-responsive"
                     />
                   </div>
-                ) : (
+                )}
+                {id && (
                   <div className="text-center">
                     <img
                       src={`/api/v1/product/product-photo/${id}`}
@@ -208,12 +213,16 @@ const UpdateProduct = () => {
                   placeholder="Select shipping"
                   size="large"
                   showSearch
-                  className="form-select mb-3"
+                  className="form-select mb-3 p-0"
                   onChange={(value) => {
                     setShipping(value);
                   }}
-                  value={shipping ? "Yes" : "No"}
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                  value={shipping == 1 ? "Yes" : "No"}
                   data-testid="shipping-select"
+                  style={{ backgroundImage: "none" }}
                 >
                   <Option value="0">No</Option>
                   <Option value="1">Yes</Option>
