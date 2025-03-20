@@ -16,12 +16,16 @@ const CreateCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/api/v1/category/create-category", {
+      const { data, status } = await axios.post("/api/v1/category/create-category", {
         name,
       });
       if (data?.success) {
-        toast.success(`${name} is created`);
-        getAllCategory();
+        if (status === 201) {
+          toast.success(`${name} is created`);
+          window.location.reload(); // refresh page so header gets new categories
+        } else { // message for duplicate category
+          toast.success(data.message);
+        }
       } else {
         toast.error(data.message);
       }
@@ -58,15 +62,17 @@ const CreateCategory = () => {
       );
       if (data.success) {
         toast.success(`${updatedName} is updated`);
-        setSelected(null);
-        setUpdatedName("");
-        setVisible(false);
-        getAllCategory();
+        window.location.reload(); // refresh page so header gets new categories
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error("Something went wrong");
+      console.log(error);
+      if (error.response.status === 401) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
   //delete category
@@ -77,8 +83,7 @@ const CreateCategory = () => {
       );
       if (data.success) {
         toast.success(`Category is deleted`);
-
-        getAllCategory();
+        window.location.reload(); // refresh page so header gets new categories
       } else {
         toast.error(data.message);
       }
