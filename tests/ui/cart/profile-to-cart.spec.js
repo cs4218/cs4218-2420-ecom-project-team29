@@ -73,30 +73,34 @@ test.describe("Cart Tests for registered user with user's address", () => {
       testUserWithPassword.address
     );
   });
-  
+
   test("should show updated address of user in cart", async ({ page }) => {
     await page.goto(`${BASE_URL}/cart`);
-    await expect(page.getByRole('button', { name: testData.user1.name })).toBeVisible();
-    await page.getByRole('button', { name: testData.user1.name }).click();
-    await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
-    await page.getByRole('link', { name: 'Dashboard' }).click();
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-    await expect(page.getByRole('main')).toContainText('Profile');
-    await page.getByRole('link', { name: 'Profile' }).click();
-    await page.getByRole('textbox', { name: 'Enter Your Address' }).click();
-    await page.getByRole('textbox', { name: 'Enter Your Address' }).fill('New address 123 green');
-    await page.getByRole('button', { name: 'UPDATE' }).click();
-    await expect(page.getByText('Profile Updated Successfully')).toBeVisible();
-    await expect(page.getByRole('status')).toContainText('Profile Updated Successfully');
+    await expect(
+      page.getByRole("button", { name: testData.user1.name })
+    ).toBeVisible();
+    await page.getByRole("button", { name: testData.user1.name }).click();
+    await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
+    await page.getByRole("link", { name: "Dashboard" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Dashboard" })
+    ).toBeVisible();
+    await expect(page.getByRole("main")).toContainText("Profile");
+    await page.getByRole("link", { name: "Profile" }).click();
+    await page.getByRole("textbox", { name: "Enter Your Address" }).click();
+    await page
+      .getByRole("textbox", { name: "Enter Your Address" })
+      .fill("New address 123 green");
+    await page.getByRole("button", { name: "UPDATE" }).click();
+    await expect(page.getByText("Profile Updated Successfully")).toBeVisible();
+    await expect(page.getByRole("status")).toContainText(
+      "Profile Updated Successfully"
+    );
 
     await page.goto(`${BASE_URL}/cart`);
     await expect(
       page.getByRole("heading", { name: "Current Address" })
     ).toBeVisible();
-    await expect(page.locator("h5")).toContainText(
-      'New address 123 green'
-    );
+    await expect(page.locator("h5")).toContainText("New address 123 green");
   });
-
-
 });
