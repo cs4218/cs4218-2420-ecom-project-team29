@@ -24,8 +24,6 @@ test.describe("Cart Tests for registered user with user's address", () => {
   let testData;
   let testUserforDB;
   let testUserWithPassword;
-  //   let testUser2forDB;
-  //   let testUser2WithPassword;
 
   test.beforeEach(async ({ page }) => {
     await mongoose.connect(process.env.MONGO_URL_TEST);
@@ -47,26 +45,8 @@ test.describe("Cart Tests for registered user with user's address", () => {
 
     const savedUser = await userModel.create(testUserforDB);
 
-    // testUser2WithPassword = {
-    //   email: `bluetesting@email.com${Math.random()}`,
-    //   password: "password456",
-    //   name: "Testing CART User 2",
-    //   phone: "0987654321",
-    //   address: "456 Blue Street",
-    //   role: 0,
-    //   answer: "test",
-    // };
-    // // Set up initial test data
-    // testUser2forDB = {
-    //   ...testUser2WithPassword,
-    //   password: await bcrypt.hash(testUser2WithPassword.password, 10),
-    // };
-
-    // const savedUser2 = await userModel.create(testUser2forDB);
-
     testData = {
       user1: savedUser,
-      // user2: savedUser2,
     };
     console.log(testData);
     await page.goto(`${BASE_URL}/login`);
