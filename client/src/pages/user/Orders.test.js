@@ -124,10 +124,10 @@ describe("Orders Component", () => {
       expect(screen.getByText("Green")).toBeInTheDocument(); // Buyer name
       expect(screen.getByText("Success")).toBeInTheDocument(); // Payment status
       expect(screen.getByText("First Product")).toBeInTheDocument(); // 1st Product name
-      expect(screen.getByText(/Price : 100\.00/)).toBeInTheDocument(); // 1st Product price
+      expect(screen.getByText(/Price: 100\.00/)).toBeInTheDocument(); // 1st Product price
       expect(screen.getByText("1st descr")).toBeInTheDocument(); // 1st Product description
       expect(screen.getByText("Second Product")).toBeInTheDocument(); // 2nd Product name
-      expect(screen.getByText(/Price : 200\.20/)).toBeInTheDocument(); // 2nd Product price
+      expect(screen.getByText(/Price: 200\.20/)).toBeInTheDocument(); // 2nd Product price
       //screen.debug();
       expect(
         screen.getByText("This is the description of the second product")
@@ -159,12 +159,12 @@ describe("Orders Component", () => {
 
       // Check product details
       expect(screen.getByText("Test Product Name")).toBeInTheDocument(); // Product name
-      expect(screen.getByText(/Price : 100\.00/)).toBeInTheDocument(); // Product price
+      expect(screen.getByText(/Price: 100\.00/)).toBeInTheDocument(); // Product price
       expect(
         screen.getByText("Exactly thirty characters long")
       ).toBeInTheDocument(); // Product description
       expect(screen.getByText("Test Product Name 2")).toBeInTheDocument(); // 2nd Product name
-      expect(screen.getByText(/Price : 200\.11/)).toBeInTheDocument(); // 2nd Product price
+      expect(screen.getByText(/Price: 200\.11/)).toBeInTheDocument(); // 2nd Product price
       expect(
         screen.getByText("Testing Product Description 2")
       ).toBeInTheDocument(); // 2nd Product description
@@ -203,7 +203,7 @@ describe("Orders Component", () => {
       expect(screen.getByText("Green")).toBeInTheDocument(); // Buyer name
       expect(screen.getByText("Failed")).toBeInTheDocument(); // Payment status
       expect(screen.getByText("Test Product Name")).toBeInTheDocument(); // Product name
-      expect(screen.getByText(/Price : 100\.00/)).toBeInTheDocument(); // Product price
+      expect(screen.getByText(/Price: 100\.00/)).toBeInTheDocument(); // Product price
       expect(
         screen.getByText("Testing Product Description")
       ).toBeInTheDocument(); // Product description
