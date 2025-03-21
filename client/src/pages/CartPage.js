@@ -174,7 +174,7 @@ const CartPage = () => {
                   <h2>Loading...</h2>
                 </div>
                 ) : (products && products?.map((p) => (
-                <div className="row card flex-row h-full" key={p._id}>
+                <div className="row card flex-row h-full" key={p._id} data-testid={`cart-item-${p._id}`}>
                   <div className="col-md-4">
                     <img
                       src={`/api/v1/product/product-photo/${p?._id}`}
@@ -187,7 +187,7 @@ const CartPage = () => {
                   <div className="col-md-4">
                     <p>{p.name}</p>
                     <p>{p.description}</p>
-                    <p>Price : {p.price.toFixed(2)}</p>
+                    <p>Price: {p.price.toFixed(2)}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">
                     <button

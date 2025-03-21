@@ -126,63 +126,41 @@ test.describe("Order Tests for registered user", () => {
     );
   });
 
-  async function cartToPaymentSuccess(
-    page,
-    cardNo,
-    cvv,
-    testName,
-    testDataDetails
-  ) {
-    const cartItems = await page.evaluate((email) => {
-      return JSON.parse(localStorage.getItem(`cart${email}`));
-    }, testDataDetails.user.email);
-    // add product to cart
-    await page.goto(`${BASE_URL}/product/${testDataDetails.product1.slug}`);
-
+  async function addProductToCart(page, product, productNoInCart) {
+    await page.goto(`${BASE_URL}/product/${product.slug}`);
     // check that the button is not disabled before clicking
     await page.waitForFunction(() => {
       const button = document.querySelector("button.btn-dark");
       return button && !button.classList.contains("disabled");
     });
-
     await page.getByRole("button", { name: "ADD TO CART" }).click();
-
-    // go to cart page
+    await expect(page.getByTitle(productNoInCart)).toBeVisible();
+  }
+  async function checkProductInCart(page, product, productNoInCart) {
     await page.getByRole("link", { name: "Cart" }).click();
     await expect(page).toHaveURL(`${BASE_URL}/cart`);
-
-    // check header cart count (in red)
-    await expect(page.getByTitle("1")).toBeVisible();
 
     await page.waitForSelector('[data-testid="loading"]', {
       state: "hidden",
       timeout: 15000,
     });
+    // TODO: check for paypal dummy error
 
-    await expect(page.locator(".col-md-7 > .row")).toBeVisible({
-      timeout: 30000,
-    });
-
-    // check cart page content
-    await expect(
-      page.getByRole("heading", {
-        name: `Hello ${testDataDetails.user.name} You Have 1 item`,
-      })
-    ).toBeVisible();
-    await expect(page.locator("h1")).toContainText(
-      `Hello ${testDataDetails.user.name}You Have 1 item in your cart`
-    );
-    await expect(page.getByRole("main")).toContainText(
-      testDataDetails.product1.name
-    );
-    await expect(page.getByRole("main")).toContainText(
-      testDataDetails.product1.description
-    );
-    await expect(page.getByRole("main")).toContainText(
-      `Price : ${testDataDetails.product1.price.toFixed(2)}`
-    );
-
-    // fill up payment details
+    if (productNoInCart === "1") {
+      await expect(page.locator("h1")).toContainText(
+        `Hello ${testUserWithPassword.name}You Have ${productNoInCart} item in your cart`
+      );
+    } else if (productNoInCart === "0") {
+      await expect(page.locator("h1")).toContainText(
+        `Hello ${testUserWithPassword.name} Your Cart Is Empty`
+      );
+    } else {
+      await expect(page.locator("h1")).toContainText(
+        `Hello ${testUserWithPassword.name}You Have ${productNoInCart} items in your cart`
+      );
+    }
+  }
+  async function fillUpPaymentDetails(page, cardNo, cvv, expiryDate) {
     await expect(page.getByText("Edit Choose a way to pay")).toBeVisible();
     await page.getByText("Pay with card Card Number").click();
     await page
@@ -217,16 +195,14 @@ test.describe("Order Tests for registered user", () => {
       .locator('iframe[name="braintree-hosted-field-expirationDate"]')
       .contentFrame()
       .getByRole("textbox", { name: "Expiration Date" })
-      .fill("1234");
+      .fill(expiryDate);
     await page.getByTestId("make-payment").click();
     await page.waitForSelector(".cart-page", {
       state: "visible",
     });
+  }
 
-    // check navigation to order page
-    await expect(page).toHaveURL(`${BASE_URL}/dashboard/user/orders`);
-
-    // check order details
+  async function checkOrderDetails(page, testDataDetails) {
     await expect(
       page.getByRole("heading", { name: "All Orders" })
     ).toBeVisible();
@@ -245,8 +221,47 @@ test.describe("Order Tests for registered user", () => {
       testDataDetails.product1.description
     );
     await expect(page.getByRole("main")).toContainText(
-      `Price : ${testDataDetails.product1.price.toFixed(2)}`
+      `Price: ${testDataDetails.product1.price.toFixed(2)}`
     );
+  }
+
+  async function cartToPaymentSuccess(
+    page,
+    cardNo,
+    cvv,
+    testName,
+    testDataDetails
+  ) {
+    await addProductToCart(page, testDataDetails.product1, "1");
+
+    await checkProductInCart(page, testDataDetails.product1, "1");
+
+    // check cart page content of products
+    await expect(page.locator(".col-md-7 > .row")).toBeVisible({
+      timeout: 30000,
+    });
+    await expect(page.getByRole("main")).toContainText(
+      testDataDetails.product1.name
+    );
+    await expect(page.getByRole("main")).toContainText(
+      testDataDetails.product1.description
+    );
+    await expect(page.getByRole("main")).toContainText(
+      `Price: ${testDataDetails.product1.price.toFixed(2)}`
+    );
+
+    // fill up payment details
+
+    await fillUpPaymentDetails(page, cardNo, cvv, "1234");
+
+    // check navigation to order page
+    await expect(page).toHaveURL(`${BASE_URL}/dashboard/user/orders`);
+
+    // check order details
+    await checkOrderDetails(page, testDataDetails);
+
+    // check cart has no product left
+    await expect(page.getByTitle(0)).toBeVisible();
   }
 
   const validOrderTestData = [
@@ -305,42 +320,22 @@ test.describe("Order Tests for registered user", () => {
   ];
 
   test("should remove product from cart successfully", async ({ page }) => {
+    // add first product
     await page.goto(`${BASE_URL}/product/${testData.product1.slug}`);
     // check that the button is not disabled before clicking
-    await page.waitForFunction(() => {
-      const button = document.querySelector("button.btn-dark");
-      return button && !button.classList.contains("disabled");
-    });
+    await page.waitForSelector("button.btn-dark:not(.disabled)");
     await page.getByRole("button", { name: "ADD TO CART" }).click();
     await expect(page.getByTitle("1")).toBeVisible();
+    await checkProductInCart(page, testData.product1, "1");
 
-    // check that the button is not disabled before clicking
-    await page.waitForFunction(() => {
-      const button = document.querySelector("button.btn-dark");
-      return button && !button.classList.contains("disabled");
-    });
+    // add second product
     await page.goto(`${BASE_URL}/product/${testData.product2.slug}`);
+    await page.waitForSelector("button.btn-dark:not(.disabled)");
     await page.getByRole("button", { name: "ADD TO CART" }).click();
     await expect(page.getByTitle("2")).toBeVisible();
 
-    await page.getByRole("link", { name: "Cart" }).click();
-    await expect(page).toHaveURL(`${BASE_URL}/cart`);
-    await page.waitForSelector('[data-testid="loading"]', {
-      state: "hidden",
-      timeout: 15000,
-    });
+    await checkProductInCart(page, testData.product2, "2");
 
-    await expect(page.locator(".col-md-7 > div").first()).toBeVisible();
-    await expect(page.locator(".col-md-7 > div:nth-child(2)")).toBeVisible();
-
-    await expect(page.locator("h1")).toContainText(
-      "You Have 2 items in your cart"
-    );
-    await expect(
-      page.getByRole("heading", {
-        name: `Hello ${testData.user.name} You Have 2 items`,
-      })
-    ).toBeVisible();
     await expect(page.locator(".col-md-7")).toBeVisible();
     await expect(
       page
@@ -368,7 +363,128 @@ test.describe("Order Tests for registered user", () => {
 
   // TODO: Add tests for multiple orders
 
-  // TODO: Add tests for add to cart in home page
+  test("should place multiple orders successfully", async ({ page }) => {
+    await addProductToCart(page, testData.product1, "1");
+
+    await checkProductInCart(page, testData.product1, "1");
+
+    await expect(page.locator("h1")).toContainText(
+      "You Have 1 item in your cart"
+    );
+    await expect(page.getByRole("main")).toContainText(
+      `Total : $${testData.product1.price}`
+    );
+    await expect(page.locator("h1")).toContainText(
+      `Hello ${testData.user.name}You Have 1 item in your cart`
+    );
+
+    await fillUpPaymentDetails(page, "4111 1111 1111 1111", "123", "1234");
+
+    await expect(page).toHaveURL(`${BASE_URL}/dashboard/user/orders`);
+
+    await expect(
+      page.getByRole("heading", { name: "All Orders" })
+    ).toBeVisible();
+    await expect(page.getByRole("cell", { name: "1" }).first()).toBeVisible();
+    await expect(page.locator("tbody")).toContainText("Not Processed");
+    await expect(page.locator("tbody")).toContainText(
+      testData.user.name
+    );
+    await expect(page.locator("tbody")).toContainText("a few seconds ago");
+    await expect(page.locator("tbody")).toContainText("Success");
+    await expect(page.locator("tbody")).toContainText("1");
+    await expect(page.getByRole("main")).toContainText(
+      testData.product1.name
+    );
+    await expect(page.getByRole("main")).toContainText(
+      testData.product1.description
+    );
+    await expect(page.getByRole("main")).toContainText(
+      `Price: ${testData.product1.price.toFixed(2)}`
+    );
+
+    // check cart details page
+    await addProductToCart(page, testData.product1, "1");
+    await checkProductInCart(page, testData.product1, "1");
+    await addProductToCartFromHome(page, testData.product2, "2");
+    await checkProductInCart(page, testData.product2, "2");
+
+    await expect(page.getByTestId(`cart-item-${testData.product1._id}`)).toBeVisible();
+    await expect(page.getByTestId(`cart-item-${testData.product2._id}`)).toBeVisible();
+
+    await fillUpPaymentDetails(page, "2223000048400011", "183", "1234");
+    // check first order
+    await expect(
+      page.getByRole("columnheader", { name: "#" }).first()
+    ).toBeVisible();
+    await expect(page.getByRole("main")).toContainText("Not Processed");
+    await expect(page.getByRole("main")).toContainText(testData.user.name);
+    await expect(page.getByRole("main")).toContainText("a few seconds ago");
+    await expect(page.getByRole("main")).toContainText("Success");
+    await expect(page.getByRole("main")).toContainText("1");
+
+    // check second order
+    await expect(
+      page.getByRole("columnheader", { name: "#" }).nth(1)
+    ).toBeVisible();
+    await expect(page.getByRole("main")).toContainText("Not Processed");
+    await expect(page.getByRole("main")).toContainText(testData.user.name);
+    await expect(page.getByRole("main")).toContainText("a few seconds ago");
+    await expect(page.getByRole("main")).toContainText("Success");
+    await expect(page.getByRole("main")).toContainText("2");
+    await expect(
+      page.locator("div:nth-child(3) > .container > div").first()
+    ).toBeVisible();
+    await expect(page.locator(".container > div:nth-child(2)")).toBeVisible();
+    await expect(page.getByRole("main")).toContainText(
+      testData.product1.name
+    );
+    await expect(page.getByRole("main")).toContainText(
+      testData.product1.description
+    );
+    await expect(page.getByRole("main")).toContainText(`Price: ${testData.product1.price.toFixed(2)}`);
+  
+    await expect(page.getByRole("main")).toContainText(
+      testData.product2.name
+    );
+    await expect(page.getByRole("main")).toContainText(
+      testData.product2.description
+    );
+    await expect(page.getByRole("main")).toContainText(`Price: ${testData.product2.price.toFixed(2)}`);
+  });
+
+
+  async function addProductToCartFromHome(page, product, productNoInCart) {
+    await page.goto(`${BASE_URL}/`);
+
+    // check whether the button with testid exists:
+    await page.waitForSelector(`[data-testid="add-to-cart-${product.slug}"]`, {
+      state: "visible",
+    });
+
+    await page.getByTestId(`add-to-cart-${product.slug}`).click();
+
+    await expect(page.getByTitle(productNoInCart)).toBeVisible();
+  }
+
+  test("should add product to cart from home page", async ({ page }) => {
+    await addProductToCartFromHome(page, testData.product1, "1");
+
+    await checkProductInCart(page, testData.product1, "1");
+
+    // check for details in cart
+    await expect(page.getByRole("main")).toContainText(testData.product1.name);
+    await expect(page.getByRole("main")).toContainText(
+      testData.product1.description
+    );
+    await expect(page.getByRole("main")).toContainText(
+      `Price: ${testData.product1.price.toFixed(2)}`
+    );
+
+    await fillUpPaymentDetails(page, "4012888888881881", "103", "1234");
+
+    await expect(page).toHaveURL(`${BASE_URL}/dashboard/user/orders`);
+  });
 
   /** Failure Test Cases **/
   async function cartToPaymentFailure(
@@ -413,7 +529,7 @@ test.describe("Order Tests for registered user", () => {
       testDataDetails.product1.description
     );
     await expect(page.getByRole("main")).toContainText(
-      `Price : ${testDataDetails.product1.price.toFixed(2)}`
+      `Price: ${testDataDetails.product1.price.toFixed(2)}`
     );
 
     // fill up payment details
@@ -514,7 +630,7 @@ test.describe("Order Tests for registered user", () => {
       testData.product2.description
     );
     await expect(page.getByRole("main")).toContainText(
-      `Price : ${testData.product2.price.toFixed(2)}`
+      `Price: ${testData.product2.price.toFixed(2)}`
     );
 
     await expect(page.getByText("Edit Choose a way to pay")).toBeVisible();
@@ -717,4 +833,20 @@ test.describe("Order Tests for no user", () => {
 
 // TODO:Add test for login logout of cart behaviour
 
-// TODO: Add test for update address of user and check if it is reflected in cart page
+// case 1:
+// login and add item to cart
+// logout and check if cart is empty
+// login again with another account and check if cart is still empty
+// logout and check if cart is empty
+// login to first user and check if cart still has 1 item
+
+// case 2: (new browser?? so nothing in local storage)
+// login and add item to cart
+// logout and check if cart is empty
+// login again with another account and check if cart is still empty
+// add another item to cart
+// logout and check if cart is empty
+// login to first user and check if cart still has 1 item
+// login to second user and check if cart has the same item
+
+

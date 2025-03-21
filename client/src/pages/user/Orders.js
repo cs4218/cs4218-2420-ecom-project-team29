@@ -72,7 +72,7 @@ const Orders = () => {
                           <p>{p.name}</p>
                           <p>{p.description}</p>
 
-                          <p>Price : {p.price.toFixed(2)}</p>
+                          <p>Price: {p.price.toFixed(2)}</p>
                         </div>
                       </div>
                     ))}
