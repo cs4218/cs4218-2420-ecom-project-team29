@@ -70,7 +70,7 @@ const ProductDetails = () => {
           </h6>
           <h6>Category: {product?.category?.name}</h6>
           <button
-            className="btn btn-dark ms-1"
+            className={`btn btn-dark ms-1 ${product?.name ? "" : "disabled"}`}
             onClick={() => {
               if (!auth?.user?.email) {
                 toast.error("Please log in to add items to the cart");
@@ -125,7 +125,8 @@ const ProductDetails = () => {
                     More Details
                   </button>
                   {/* <button
-                      className="btn btn-dark ms-1"
+                      className={`btn btn-dark ms-1 ${product?.name ? "" : "disabled"}`}
+
                       onClick={() => {
                         if (!auth?.user?.email) {
                           toast.error("Please log in to add items to the cart");

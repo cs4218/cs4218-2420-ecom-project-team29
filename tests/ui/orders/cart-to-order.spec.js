@@ -133,8 +133,18 @@ test.describe("Order Tests for registered user", () => {
     testName,
     testDataDetails
   ) {
+    const cartItems = await page.evaluate((email) => {
+      return JSON.parse(localStorage.getItem(`cart${email}`));
+    }, testDataDetails.user.email);
     // add product to cart
     await page.goto(`${BASE_URL}/product/${testDataDetails.product1.slug}`);
+
+    // check that the button is not disabled before clicking
+    await page.waitForFunction(() => {
+      const button = document.querySelector("button.btn-dark");
+      return button && !button.classList.contains("disabled");
+    });
+
     await page.getByRole("button", { name: "ADD TO CART" }).click();
 
     // go to cart page
@@ -143,6 +153,11 @@ test.describe("Order Tests for registered user", () => {
 
     // check header cart count (in red)
     await expect(page.getByTitle("1")).toBeVisible();
+
+    await page.waitForSelector('[data-testid="loading"]', {
+      state: "hidden",
+      timeout: 15000,
+    });
 
     await expect(page.locator(".col-md-7 > .row")).toBeVisible({
       timeout: 30000,
@@ -291,9 +306,19 @@ test.describe("Order Tests for registered user", () => {
 
   test("should remove product from cart successfully", async ({ page }) => {
     await page.goto(`${BASE_URL}/product/${testData.product1.slug}`);
+    // check that the button is not disabled before clicking
+    await page.waitForFunction(() => {
+      const button = document.querySelector("button.btn-dark");
+      return button && !button.classList.contains("disabled");
+    });
     await page.getByRole("button", { name: "ADD TO CART" }).click();
     await expect(page.getByTitle("1")).toBeVisible();
 
+    // check that the button is not disabled before clicking
+    await page.waitForFunction(() => {
+      const button = document.querySelector("button.btn-dark");
+      return button && !button.classList.contains("disabled");
+    });
     await page.goto(`${BASE_URL}/product/${testData.product2.slug}`);
     await page.getByRole("button", { name: "ADD TO CART" }).click();
     await expect(page.getByTitle("2")).toBeVisible();
@@ -343,7 +368,7 @@ test.describe("Order Tests for registered user", () => {
 
   // TODO: Add tests for multiple orders
 
-  // TODO: Add tests for add to cart in home page 
+  // TODO: Add tests for add to cart in home page
 
   /** Failure Test Cases **/
   async function cartToPaymentFailure(
@@ -355,6 +380,11 @@ test.describe("Order Tests for registered user", () => {
   ) {
     // navigate to product page
     await page.goto(`${BASE_URL}/product/${testDataDetails.product1.slug}`);
+    // check that the button is not disabled before clicking
+    await page.waitForFunction(() => {
+      const button = document.querySelector("button.btn-dark");
+      return button && !button.classList.contains("disabled");
+    });
     await page.getByRole("button", { name: "ADD TO CART" }).click();
 
     await page.getByRole("link", { name: "Cart" }).click();
@@ -661,10 +691,15 @@ test.describe("Order Tests for no user", () => {
       waitUntil: "domcontentloaded",
     });
 
-    console.log("Navigation completed, waiting for product details to load");
-
+    // check that product details page is loaded
     await page.waitForSelector(".product-details-info", {
       state: "visible",
+    });
+
+    // check that the button is not disabled before clicking
+    await page.waitForFunction(() => {
+      const button = document.querySelector("button.btn-dark");
+      return button && !button.classList.contains("disabled");
     });
 
     await page.getByRole("button", { name: "ADD TO CART" }).click();
