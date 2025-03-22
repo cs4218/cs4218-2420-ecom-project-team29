@@ -6,11 +6,12 @@ export const createCategoryController = async (req, res) => {
     if (!name) {
       return res.status(401).send({ message: "Name is required" });
     }
-    const existingCategory = await categoryModel.findOne({ name });
+    const inputSlug = slugify(name);
+    const existingCategory = await categoryModel.findOne({ slug: inputSlug });
     if (existingCategory) {
       return res.status(200).send({
         success: true,
-        message: "Category already exists",
+        message: "A similar category already exists",
       });
     }
     const category = await new categoryModel({
@@ -37,6 +38,17 @@ export const updateCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
     const { id } = req.params;
+    if (!name) {
+      return res.status(401).send({ message: "Name is required" });
+    }
+    const inputSlug = slugify(name);
+    const existingCategory = await categoryModel.findOne({ slug: inputSlug });
+    if (existingCategory) {
+      return res.status(401).send({
+        success: false,
+        message: "A similar category already exists",
+      });
+    }
     const category = await categoryModel.findByIdAndUpdate(
       id,
       { name, slug: slugify(name) },

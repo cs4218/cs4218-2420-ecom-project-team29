@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import toast from "react-hot-toast";
@@ -7,10 +7,26 @@ import useCategory from "../hooks/useCategory";
 import { useCart } from "../context/cart";
 import { Badge } from "antd";
 import "../styles/Header.css";
-const Header = () => {
+import axios from "axios";
+
+const Header = ({ reload_categories }) => {
   const [auth, setAuth] = useAuth();
   const [cart] = useCart();
-  const categories = useCategory();
+  const [categories, setCategories] = useState([]);
+
+  const getCategories = async () => {
+    try {
+      const { data } = await axios.get("/api/v1/category/get-category");
+      setCategories(data?.category);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getCategories();
+  }, [reload_categories]);
+
   const handleLogout = () => {
     setAuth({
       ...auth,
@@ -20,6 +36,7 @@ const Header = () => {
     localStorage.removeItem("auth");
     toast.success("Logout Successfully");
   };
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -103,7 +120,7 @@ const Header = () => {
                         <NavLink
                           to={`/dashboard/${
                             auth?.user?.role === 1 ? "admin" : "user"
-                          }`}
+                            }`}
                           className="dropdown-item"
                         >
                           Dashboard

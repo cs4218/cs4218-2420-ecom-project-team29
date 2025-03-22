@@ -20,6 +20,7 @@ jest.mock('../../context/search', () => ({
 }));
 jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
 console.log = jest.fn();
+jest.mock('../../components/Header', () => () => <div>Header</div>);
 
 
 describe('Users Component', () => {
