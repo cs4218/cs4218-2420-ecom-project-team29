@@ -9,6 +9,7 @@ import fs from "fs";
 import {
   getAllOrdersController,
   getOrdersController,
+  orderStatusController,
 } from "../../../controllers/authController";
 
 describe("Order Controller Integration Tests", () => {
@@ -44,7 +45,6 @@ describe("Order Controller Integration Tests", () => {
 
     const savedCategory = await category1.save();
 
-    const photo1 = fs.readFileSync("tests/assets/testProductImage.jpg");
 
     const random2 = Math.random();
     const product1 = new productModel({
@@ -55,7 +55,6 @@ describe("Order Controller Integration Tests", () => {
       quantity: 10,
       category: savedCategory._id,
       shipping: true,
-      photo: photo1,
     });
 
     const product2 = new productModel({
@@ -66,7 +65,6 @@ describe("Order Controller Integration Tests", () => {
       quantity: 20,
       category: savedCategory._id,
       shipping: false,
-      photo: photo1,
     });
 
     // Save products and store the saved instances
@@ -125,6 +123,10 @@ describe("Order Controller Integration Tests", () => {
     };
   });
 
+  afterEach(async () => {
+    jest.restoreAllMocks();
+  });
+
   afterAll(async () => {
     // delete all collections
     if (mongoServer) {
@@ -135,6 +137,7 @@ describe("Order Controller Integration Tests", () => {
         await collection.deleteMany();
       }
     }
+    mongoose.connection.close();
     await mongoose.disconnect();
     await mongoServer.stop();
   });
@@ -144,6 +147,9 @@ describe("Order Controller Integration Tests", () => {
   });
 
   describe("getOrdersController Integration Test", () => {
+    afterEach(async () => {
+      jest.restoreAllMocks();
+    });
     it("should return orders for a specific user", async () => {
       const req = {
         user: { _id: testData.user._id },
@@ -211,6 +217,9 @@ describe("Order Controller Integration Tests", () => {
   });
 
   describe("getAllOrdersController Integration tests", () => {
+    afterEach(async () => {
+      jest.restoreAllMocks();
+    });
     it("should return all orders sorted by creation date", async () => {
       const req = {};
       const res = {
@@ -277,4 +286,82 @@ describe("Order Controller Integration Tests", () => {
       });
     });
   });
+
+  // describe("orderStatusController Integration tests", () => {
+  //   afterEach(async () => {
+  //     jest.restoreAllMocks();
+  //   });
+  //   it("should update the status of an order", async () => {
+  //     const req = {
+  //       params: { orderId: testData.order._id },
+  //       body: { status: "Shipped" },
+  //     };
+  //     const res = {
+  //       json: jest.fn(),
+  //       status: jest.fn().mockReturnThis(),
+  //       send: jest.fn(),
+  //     };
+
+  //     await orderStatusController(req, res);
+
+  //     expect(res.json).toHaveBeenCalledWith(
+  //       expect.objectContaining({
+  //         _id: testData.order._id,
+  //         buyer: expect.objectContaining({ name: testData.user.name }),
+  //         products: expect.arrayContaining([
+  //           expect.objectContaining({
+  //             _id: testData.product1._id,
+  //             name: testData.product1.name,
+  //             description: testData.product1.description,
+  //             price: testData.product1.price,
+  //           }),
+  //         ]),
+  //         status: "Shipped",
+  //       })
+  //     );
+  //   });
+
+  //   it("should handle invalid status values", async () => {
+  //     const req = {
+  //       params: { orderId: testData.order._id },
+  //       body: { status: "Invalid Status" },
+  //     };
+  //     const res = {
+  //       status: jest.fn().mockReturnThis(),
+  //       send: jest.fn(),
+  //     };
+
+  //     await orderStatusController(req, res);
+
+  //     expect(res.status).toHaveBeenCalledWith(400);
+  //     expect(res.send).toHaveBeenCalledWith({
+  //       success: false,
+  //       message: "Invalid status value",
+  //       error: expect.any(Error),
+  //     });
+  //   });
+
+  //   it("should handle database errors", async () => {
+  //     const req = {
+  //       params: { orderId: testData.order._id },
+  //       body: { status: "Shipped" },
+  //     };
+  //     const res = {
+  //       status: jest.fn().mockReturnThis(),
+  //       send: jest.fn(),
+  //     };
+  //     jest.spyOn(orderModel, "findByIdAndUpdate").mockRejectedValueOnce(
+  //       new Error("Database error")
+  //     );
+
+  //     await orderStatusController(req, res);
+
+  //     expect(res.status).toHaveBeenCalledWith(500);
+  //     expect(res.send).toHaveBeenCalledWith({
+  //       success: false,
+  //       message: "Error while updating order",
+  //       error: expect.any(Error),
+  //     });
+  //   });
+  // });
 });
