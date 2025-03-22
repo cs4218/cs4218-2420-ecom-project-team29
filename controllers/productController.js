@@ -46,9 +46,17 @@ export const createProductController = async (req, res) => {
     }
 
     // check if product slug already exists
-    console.log('slugify(name)', slugify(name));
-    const productExist = await productModel.findOne({ slug: slugify(name) });
-    if (productExist) {
+    const productSlugExist = await productModel.findOne({ slug: slugify(name) });
+    if (productSlugExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
+    }
+
+    // check if product name already exists
+    const productNameExist = await productModel.findOne({ name });
+    if (productNameExist) {
       return res.status(500).send({
         success: false,
         error: "Product with a similar name exists",
@@ -231,11 +239,20 @@ export const updateProductController = async (req, res) => {
     }
 
     // check if product slug already exists
-    const productExist = await productModel.findOne({ slug: slugify(name) });
-    if (productExist) {
+    const productSlugExist = await productModel.findOne({ slug: slugify(name), _id: { $ne: req.params.pid } });
+    if (productSlugExist) {
       return res.status(500).send({
         success: false,
-        message: "Product with a similar name exists",
+        error: "Product with a similar name exists",
+      });
+    }
+
+    // check if product name already exists
+    const productNameExist = await productModel.findOne({ name, _id: { $ne: req.params.pid } });
+    if (productNameExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
       });
     }
 
