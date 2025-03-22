@@ -9,7 +9,7 @@ import fs from "fs";
 
 jest.mock("mongoose");
 
-describe("getProductDetailsController", () => {
+describe("getProductDetailsController Integration Test", () => {
   let mongoServer;
   let connection;
   let testData;
