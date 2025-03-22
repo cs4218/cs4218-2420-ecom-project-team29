@@ -62,7 +62,6 @@ describe("Order Controller Integration Tests", () => {
     const savedCategory = await category1.save();
 
     const photo1 = fs.readFileSync("tests/assets/testProductImage.jpg");
-    const photo2 = fs.readFileSync("tests/assets/testProduct2Image.jpg");
 
     const random2 = Math.random();
     const product1 = new productModel({
@@ -84,7 +83,7 @@ describe("Order Controller Integration Tests", () => {
       quantity: 20,
       category: savedCategory._id,
       shipping: false,
-      photo: photo2,
+      photo: photo1,
     });
 
     // Save products and store the saved instances
