@@ -4,10 +4,8 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import { getProductDetailsController } from "../../../controllers/productController";
 import productModel from "../../../models/productModel";
 import categoryModel from "../../../models/categoryModel";
-
 import fs from "fs";
 
-jest.mock("mongoose");
 
 describe("getProductDetailsController Integration Test", () => {
   let mongoServer;
@@ -19,27 +17,8 @@ describe("getProductDetailsController Integration Test", () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     process.env.MONGO_URL_TEST = mongoUri;
-    connection = await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-  });
+    await mongoose.connect(mongoUri);
 
-  afterAll(async () => {
-    if (mongoServer) {
-      const collections = mongoose.connection.collections;
-
-      for (const key in collections) {
-        const collection = collections[key];
-        await collection.deleteMany();
-      }
-    }
-    await mongoose.connection.close();
-    await mongoServer.stop();
-  });
-
-  beforeEach(async () => {
-    // Load test data
     const random = Math.random();
     const category1 = new categoryModel({
       name: `Int Test Category ${random}`,
@@ -49,7 +28,6 @@ describe("getProductDetailsController Integration Test", () => {
     const savedCategory = await category1.save();
 
     const photo1 = fs.readFileSync("tests/assets/testProductImage.jpg");
-    const photo2 = fs.readFileSync("tests/assets/testProduct2Image.jpg");
 
     const random2 = Math.random();
     const product1 = new productModel({
@@ -71,7 +49,7 @@ describe("getProductDetailsController Integration Test", () => {
       quantity: 20,
       category: savedCategory._id,
       shipping: false,
-      photo: photo2,
+      photo: photo1,
     });
 
     // Save products and store the saved instances
@@ -83,6 +61,25 @@ describe("getProductDetailsController Integration Test", () => {
       product1: savedProduct1,
       product2: savedProduct2,
     };
+  });
+
+  afterAll(async () => {
+    if (mongoServer) {
+      const collections = mongoose.connection.collections;
+
+      for (const key in collections) {
+        const collection = collections[key];
+        await collection.deleteMany();
+      }
+    }
+    await mongoose.connection.close();
+    await mongoServer.stop();
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+
+    testData = null;
   });
 
   it("should return product details for valid product IDs", async () => {
