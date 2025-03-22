@@ -46,7 +46,9 @@ const CreateProduct = () => {
       productData.append("quantity", quantity);
       productData.append("photo", photo);
       productData.append("category", category);
-      productData.append("shipping", shipping);
+      if (shipping) {
+        productData.append("shipping", shipping);
+      }
       const { data } = await axios.post("/api/v1/product/create-product", productData);
       if (data?.success) {
         toast.success("Product created successfully");
@@ -56,13 +58,17 @@ const CreateProduct = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
   return (
     <Layout title={"Dashboard - Create Product"}>
-      <div className="container-fluid m-3 p-3">
+      <div className="container-fluid p-5">
         <div className="row">
           <div className="col-md-3">
             <AdminMenu />
@@ -75,11 +81,15 @@ const CreateProduct = () => {
                 placeholder="Select a category"
                 size="large"
                 showSearch
-                className="form-select mb-3"
+                className="form-select mb-3 p-0"
                 onChange={(value) => {
                   setCategory(value);
                 }}
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }
                 data-testid="category-select"
+                style={{ backgroundImage: "none" }}
               >
                 {categories?.map((c) => (
                   <Option key={c._id} value={c._id}>
@@ -155,11 +165,15 @@ const CreateProduct = () => {
                   placeholder="Select shipping"
                   size="large"
                   showSearch
-                  className="form-select mb-3"
+                  className="form-select mb-3 p-0"
                   onChange={(value) => {
                     setShipping(value);
                   }}
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
                   data-testid="shipping-select"
+                  style={{ backgroundImage: "none" }}
                 >
                   <Option value="0">No</Option>
                   <Option value="1">Yes</Option>

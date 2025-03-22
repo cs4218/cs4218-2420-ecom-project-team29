@@ -70,6 +70,7 @@ describe("createProductController", () => {
       },
     };
     fs.readFileSync = jest.fn().mockReturnValue(Buffer.from("data"));
+    productModel.findOne = jest.fn().mockReturnValue(false);
   });
 
   it("success creating product", async () => {
@@ -162,7 +163,7 @@ describe("createProductController", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Photo is required and should be less then 1mb",
+      error: "Photo size should be at most 1MB",
     });
   });
 
@@ -275,6 +276,7 @@ describe("updateProductController", () => {
       findByIdAndUpdate: jest.fn().mockResolvedValue(mockProduct),
       save: jest.fn().mockResolvedValue(mockProduct),
     });
+    productModel.findOne = jest.fn().mockReturnValue(false)
     productModel.prototype.save = jest.fn().mockResolvedValue(mockProduct);
   });
 
@@ -368,7 +370,7 @@ describe("updateProductController", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Photo is required and should be less then 1mb",
+      error: "Photo size should be at most 1MB",
     });
   });
 
