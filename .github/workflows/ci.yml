@@ -36,7 +36,7 @@ jobs:
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
           BRAINTREE_PRIVATE_KEY: BRAINTREE_PRIVATE_KEY
           JWT_SECRET: JWT_SECRET
-  single test:
+  single-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
