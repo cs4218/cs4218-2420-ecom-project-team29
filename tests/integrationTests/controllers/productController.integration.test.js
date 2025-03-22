@@ -7,7 +7,7 @@ import categoryModel from "../../../models/categoryModel";
 
 import fs from "fs";
 
-jest.mock("mongoose"); 
+jest.mock("mongoose");
 
 describe("getProductDetailsController", () => {
   let mongoServer;
@@ -40,33 +40,32 @@ describe("getProductDetailsController", () => {
       slug: `int-test-category-${random}`,
     });
 
-    
-    // const testImage = fs.readFileSync("./../../assets/testProductImage.jpg");
-    // const testImage2 = fs.readFileSync("./../../assets/testProduct2Image.jpg");
-
     const savedCategory = await category1.save();
+
+    const photo1 = fs.readFileSync("tests/assets/testProductImage.jpg");
+    const photo2 = fs.readFileSync("tests/assets/testProduct2Image.jpg");
 
     const random2 = Math.random();
     const product1 = new productModel({
-      name: `Int Test Product ${random2}`, 
+      name: `Int Test Product ${random2}`,
       slug: `int-test-product-${random2}`,
       price: 100,
       description: "Description for product 1",
       quantity: 10,
       category: savedCategory._id,
       shipping: true,
-      //photo: testImage,
+      photo: photo1,
     });
 
     const product2 = new productModel({
-      name: `Int Test Product 2 ${random2}`, 
+      name: `Int Test Product 2 ${random2}`,
       slug: `int-test-product-2-${random2}`,
       price: 200,
       description: "Description for product 2",
       quantity: 20,
       category: savedCategory._id,
       shipping: false,
-      //photo: testImage2,
+      photo: photo2,
     });
 
     // Save products and store the saved instances
@@ -102,7 +101,7 @@ describe("getProductDetailsController", () => {
     expect(res.send).toHaveBeenCalledWith({
       success: true,
       message: "Product details fetched successfully",
-      products: [ 
+      products: [
         expect.objectContaining({
           _id: savedProduct1._id,
           name: savedProduct1.name,
@@ -124,6 +123,85 @@ describe("getProductDetailsController", () => {
           slug: savedProduct2.slug,
         }),
       ],
+    });
+  });
+
+  it("should return empty objects for non-existing product IDs", async () => {
+    const nonExistingId = new mongoose.Types.ObjectId();
+
+    const req = {
+      query: { ids: `${testData.product1._id},${nonExistingId}` },
+    };
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await getProductDetailsController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Product details fetched successfully",
+      products: [
+        expect.objectContaining({
+          _id: testData.product1._id,
+          name: testData.product1.name,
+          price: testData.product1.price,
+          description: testData.product1.description,
+          quantity: testData.product1.quantity,
+          category: testData.product1.category,
+          shipping: testData.product1.shipping,
+          slug: testData.product1.slug,
+        }),
+        { _id: nonExistingId.toString() },
+      ],
+    });
+  });
+
+  it("should return empty objects for all non-existing product IDs", async () => {
+    const nonExistingId1 = new mongoose.Types.ObjectId();
+    const nonExistingId2 = new mongoose.Types.ObjectId();
+
+    const req = {
+      query: { ids: `${nonExistingId1},${nonExistingId2}` },
+    };
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await getProductDetailsController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Product details fetched successfully",
+      products: [
+        { _id: nonExistingId1.toString() },
+        { _id: nonExistingId2.toString() },
+      ],
+    });
+  });
+
+  it("should return a 400 error for a mix of valid and invalid product IDs", async () => {
+    const req = {
+      query: { ids: `${testData.product1._id},invalidID` },
+    };
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await getProductDetailsController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Invalid product Id(s) provided",
     });
   });
 
@@ -186,6 +264,32 @@ describe("getProductDetailsController", () => {
       success: false,
       message: "Error while getting product details",
       error: expect.any(Error),
+    });
+  });
+
+  it("should return empty objects if no products exist in the database", async () => {
+    // Clear all products from the database
+    await productModel.deleteMany({});
+
+    const req = {
+      query: { ids: `${testData.product1._id},${testData.product2._id}` },
+    };
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await getProductDetailsController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Product details fetched successfully",
+      products: [
+        { _id: testData.product1._id.toString() },
+        { _id: testData.product2._id.toString() },
+      ],
     });
   });
 });
