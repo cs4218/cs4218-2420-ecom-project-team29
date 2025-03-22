@@ -36,3 +36,29 @@ jobs:
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
           BRAINTREE_PRIVATE_KEY: BRAINTREE_PRIVATE_KEY
           JWT_SECRET: JWT_SECRET
+  single test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies for client
+        working-directory: client
+        run: npm ci
+  
+      - name: Install dependencies for root
+        run: npm ci
+
+      - name: Run Single Test (Debugging)
+        run: jest tests/integrationTests/controllers/productController.integration.test.js --runInBand --verbose
+        env:
+          BRAINTREE_MERCHANT_ID: BRAINTREE_MERCHANT_ID
+          BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
+          BRAINTREE_PRIVATE_KEY: BRAINTREE_PRIVATE_KEY
+          JWT_SECRET: JWT_SECRET
