@@ -4,12 +4,10 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import { getProductDetailsController } from "../../../controllers/productController";
 import productModel from "../../../models/productModel";
 import categoryModel from "../../../models/categoryModel";
-import fs from "fs";
 
 
 describe("getProductDetailsController Integration Test", () => {
   let mongoServer;
-  let connection;
   let testData;
 
   beforeAll(async () => {
@@ -19,18 +17,17 @@ describe("getProductDetailsController Integration Test", () => {
     process.env.MONGO_URL_TEST = mongoUri;
     await mongoose.connect(mongoUri);
 
-    const random = Math.random();
     const category1 = new categoryModel({
-      name: `Int Test Category ${random}`,
-      slug: `int-test-category-${random}`,
+      name: `Int Test Category`,
+      slug: `int-test-category`,
     });
 
     const savedCategory = await category1.save();
 
     const random2 = Math.random();
     const product1 = new productModel({
-      name: `Int Test Product ${random2}`,
-      slug: `int-test-product-${random2}`,
+      name: `Int Test Product`,
+      slug: `int-test-product`,
       price: 100,
       description: "Description for product 1",
       quantity: 10,
@@ -39,8 +36,8 @@ describe("getProductDetailsController Integration Test", () => {
     });
 
     const product2 = new productModel({
-      name: `Int Test Product 2 ${random2}`,
-      slug: `int-test-product-2-${random2}`,
+      name: `Int Test Product 2`,
+      slug: `int-test-product-2`,
       price: 200,
       description: "Description for product 2",
       quantity: 20,
