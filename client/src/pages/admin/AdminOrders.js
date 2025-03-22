@@ -55,7 +55,7 @@ const AdminOrders = () => {
             <h1>All Orders</h1>
             {orders?.map((o, i) => {
               return (
-                <div className="border shadow" key={i}>
+                <div className="border shadow" key={i} data-testid={`order-${o._id}`}>
                   <table className="table">
                     <thead>
                       <tr>

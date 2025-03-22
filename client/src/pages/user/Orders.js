@@ -33,7 +33,7 @@ const Orders = () => {
             {orders?.length !== 0 ? 
             (orders?.map((o, i) => {
               return (
-                <div className="border shadow" key={`${o._id}${i}`}>
+                <div className="border shadow" key={`${o._id}${i}`} data-testid={`order-${o._id}`}>
                   <table className="table">
                     <thead>
                       <tr>
