@@ -105,7 +105,7 @@ const ProductDetails = () => {
               <div className="card-body">
                 <div className="card-name-price">
                   <h5 className="card-title">{p.name}</h5>
-                  <h5 className="card-title card-price">
+                  <h5 className="card-price">
                     {p.price.toLocaleString("en-US", {
                       style: "currency",
                       currency: "USD",
@@ -113,14 +113,14 @@ const ProductDetails = () => {
                   </h5>
                 </div>
                 <p className="card-text ">
-                  {p.description.substring(0, 60)}...
+                  {p.description.substring(0, 94)}...
                 </p>
                 <div className="card-name-price">
                   <button
                     className="btn btn-info ms-1"
                     onClick={() => navigate(`/product/${p.slug}`)}
                   >
-                    More Details
+                    MORE DETAILS
                   </button>
                   {/* <button
                       className="btn btn-dark ms-1"
