@@ -56,7 +56,7 @@ jobs:
         run: npm ci
 
       - name: Run Single Test (Debugging)
-        run: jest tests/integrationTests/controllers/productController.integration.test.js --runInBand --verbose
+        run: node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js tests/integrationTests/controllers/productController.integration.test.js --runInBand --verbose
         env:
           BRAINTREE_MERCHANT_ID: BRAINTREE_MERCHANT_ID
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
