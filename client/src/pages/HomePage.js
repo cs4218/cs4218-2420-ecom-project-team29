@@ -88,11 +88,17 @@ const HomePage = () => {
     }
     setChecked(all);
   };
-  useEffect(() => {
-    if (!checked.length || !radio.length) getAllProducts();
-  }, [checked.length, radio.length]);
+  // useEffect(() => {
+  //   // if (!checked.length) {
+  //   //   if (!radio.length) getAllProducts();
+  //   //   else filterProduct();
+  //   // }
+
+  //   if (!checked.length && !radio.length) getAllProducts();
+  // }, [checked.length, radio.length]);
 
   useEffect(() => {
+    if (!checked.length && !radio.length) getAllProducts();
     if (checked.length || radio.length) filterProduct();
   }, [checked, radio]);
 
