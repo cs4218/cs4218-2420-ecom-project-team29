@@ -6,7 +6,10 @@ import userModel from "../../../models/userModel";
 import categoryModel from "../../../models/categoryModel";
 import productModel from "../../../models/productModel";
 import fs from "fs";
-import { getAllOrdersController, getOrdersController } from "../../../controllers/authController";
+import {
+  getAllOrdersController,
+  getOrdersController,
+} from "../../../controllers/authController";
 
 describe("Order Controller Integration Tests", () => {
   let mongoServer;
@@ -21,6 +24,15 @@ describe("Order Controller Integration Tests", () => {
   });
 
   afterAll(async () => {
+    // delete all collections
+    if (mongoServer) {
+      const collections = mongoose.connection.collections;
+
+      for (const key in collections) {
+        const collection = collections[key];
+        await collection.deleteMany();
+      }
+    }
     await mongoose.disconnect();
     await mongoServer.stop();
   });

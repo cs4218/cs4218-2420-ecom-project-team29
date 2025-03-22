@@ -26,8 +26,14 @@ describe("getProductDetailsController Integration Test", () => {
   });
 
   afterAll(async () => {
-    // Close the connection after tests
-    await mongoose.connection.dropDatabase();
+    if (mongoServer) {
+      const collections = mongoose.connection.collections;
+
+      for (const key in collections) {
+        const collection = collections[key];
+        await collection.deleteMany();
+      }
+    }
     await mongoose.connection.close();
     await mongoServer.stop();
   });
