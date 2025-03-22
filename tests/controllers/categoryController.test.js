@@ -48,7 +48,7 @@ describe("createCategoryController", () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith({
             success: true,
-            message: "Category already exists",
+            message: "A similar category already exists",
         });
     })
 
@@ -100,6 +100,7 @@ describe("updateCategoryController", () => {
     it("Success updating category with status 200", async () => {
         req.body = { name: "category1" };
         req.params.id = "1";
+        categoryModel.findOne = jest.fn().mockResolvedValue(false); // no existing category
         categoryModel.findByIdAndUpdate = jest.fn().mockResolvedValue(true);
         await updateCategoryController(req, res);
 
