@@ -47,6 +47,11 @@ describe('Auth Middleware', () => {
 
       expect(JWT.verify).toHaveBeenCalledWith('Bearer token', process.env.JWT_SECRET);
       expect(console.log).toHaveBeenCalledWith(error);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error in auth middleware",
+        error,
+      });
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -76,7 +81,7 @@ describe('Auth Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
-        message: 'UnAuthorized Access',
+        message: 'Unauthorized Access',
       });
       expect(next).not.toHaveBeenCalled();
     });
