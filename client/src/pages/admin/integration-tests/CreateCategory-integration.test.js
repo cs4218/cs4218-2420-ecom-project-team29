@@ -3,19 +3,20 @@ import toast from "react-hot-toast";
 import { render, screen, fireEvent, waitFor, within, getByTestId } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import axios from "axios";
-import CreateCategory from "./CreateCategory";
+import { BrowserRouter } from "react-router-dom";
+import CreateCategory from "../CreateCategory";
+import { AuthProvider } from "../../../context/auth";
+import { CartProvider } from "../../../context/cart";
+import { SearchProvider } from "../../../context/search";
+import { expect } from "@playwright/test";
 
 jest.mock("axios");
-jest.mock("react-hot-toast");
-
+jest.spyOn(toast, "success");
+jest.spyOn(toast, "error");
 
 console.log = jest.fn();
 
-jest.mock("../../components/Layout", () => ({ children }) => (
-    <div>{children}</div>
-));
-jest.mock("../../components/AdminMenu", () => () => <div>Mock AdminMenu</div>);
-jest.mock("../../components/Form/CategoryForm", () =>
+jest.mock("../../../components/Form/CategoryForm", () =>
     ({ handleSubmit, setValue, value }) =>
     (
         <form onSubmit={handleSubmit}>
@@ -29,7 +30,17 @@ jest.mock("../../components/Form/CategoryForm", () =>
     )
 );
 
+window.matchMedia = window.matchMedia || function () {
+    return {
+        matches: false,
+        addListener: function () { },
+        removeListener: function () { }
+    };
+};
+
 const mockCategories = [{ _id: "1", name: "Cars" }, { _id: "2", name: "Books" }];
+const mockAuth = { user: { name: "admin", email: "admin@email.com" }, token: "sometoken" };
+localStorage.setItem("auth", JSON.stringify(mockAuth));
 
 describe("CreateCategory Component", () => {
 
@@ -38,8 +49,19 @@ describe("CreateCategory Component", () => {
     });
 
     it("Error when cannot get categories", async () => {
+
         axios.get.mockResolvedValue(new Error('Internal Server Error'));
-        render(<CreateCategory />);
+        render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(() => {
             expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category");
@@ -48,7 +70,17 @@ describe("CreateCategory Component", () => {
 
     it("Header and current categories are listed", async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
-        const { getByText } = render(<CreateCategory />);
+        const { getByText } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(() => {
             expect(getByText("Manage Category")).toBeInTheDocument();
@@ -60,7 +92,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.post.mockResolvedValue({ status: 201, data: { success: true } });
 
-        const { getByPlaceholderText, getByText } = render(<CreateCategory />);
+        const { getByPlaceholderText, getByText } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         fireEvent.change(document.getElementById("category-input"), { target: { value: "New Category" } });
         fireEvent.click(getByText("Submit"));
@@ -75,7 +117,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.post.mockResolvedValue(new Error('Internal Server Error'));
 
-        const { getByText } = render(<CreateCategory />);
+        const { getByText } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         fireEvent.change(document.getElementById("category-input"), { target: { value: "New Category" } });
         fireEvent.click(getByText("Submit"));
@@ -90,7 +142,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue({ data: { success: true } });
 
-        const { getByText, getByTestId } = render(<CreateCategory />);
+        const { getByText, getByTestId } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(async () => {
             fireEvent.click(getByTestId("edit-button-2"));
@@ -106,7 +168,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue({ data: { success: true } });
 
-        const { getByText, getByTestId } = render(<CreateCategory />);
+        const { getByText, getByTestId } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(async () => {
             fireEvent.click(getByTestId("edit-button-2"));
@@ -121,7 +193,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue(new Error('Internal Server Error'));
 
-        const { getByText, getByTestId } = render(<CreateCategory />);
+        const { getByText, getByTestId } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(async () => {
             fireEvent.click(getByTestId("edit-button-2"));
@@ -137,7 +219,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.delete.mockResolvedValue({ data: { success: true } });
 
-        const { getByText, getByTestId } = render(<CreateCategory />);
+        const { getByText, getByTestId } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(async () => {
             fireEvent.click(getByTestId("delete-button-2"));
@@ -150,7 +242,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.delete.mockResolvedValue(new Error('Internal Server Error'));
 
-        const { getByText, getByTestId } = render(<CreateCategory />);
+        const { getByText, getByTestId } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(async () => {
             fireEvent.click(getByTestId("delete-button-2"));
@@ -163,7 +265,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.delete.mockResolvedValue({ data: { success: false, message: "error message" } });
 
-        const { getByText, getByTestId } = render(<CreateCategory />);
+        const { getByText, getByTestId } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(async () => {
             fireEvent.click(getByTestId("delete-button-2"));
@@ -176,7 +288,17 @@ describe("CreateCategory Component", () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
         axios.put.mockResolvedValue({ data: { success: false, message: "error message" } });
 
-        const { getByText, getByTestId } = render(<CreateCategory />);
+        const { getByText, getByTestId } = render(
+            <AuthProvider>
+                <CartProvider>
+                    <SearchProvider>
+                        <BrowserRouter>
+                            <CreateCategory />
+                        </BrowserRouter>
+                    </SearchProvider>
+                </CartProvider>
+            </AuthProvider>
+        );
 
         await waitFor(async () => {
             fireEvent.click(getByTestId("edit-button-2"));
@@ -187,5 +309,6 @@ describe("CreateCategory Component", () => {
             expect(toast.error).toHaveBeenCalledWith("error message");
         });
     });
+
 
 });
