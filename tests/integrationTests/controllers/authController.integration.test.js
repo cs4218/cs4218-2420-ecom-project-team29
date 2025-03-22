@@ -21,24 +21,7 @@ describe("Order Controller Integration Tests", () => {
     const mongoUri = mongoServer.getUri();
     process.env.MONGO_URL_TEST = mongoUri;
     await mongoose.connect(mongoUri);
-  });
 
-  afterAll(async () => {
-    // delete all collections
-    if (mongoServer) {
-      const collections = mongoose.connection.collections;
-
-      for (const key in collections) {
-        const collection = collections[key];
-        await collection.deleteMany();
-      }
-    }
-    await mongoose.disconnect();
-    await mongoServer.stop();
-  });
-
-  beforeEach(async () => {
-    await mongoose.connection.db.dropDatabase();
 
     const random = Math.random();
     testUserWithPassword = {
@@ -140,6 +123,24 @@ describe("Order Controller Integration Tests", () => {
       order: savedOrder,
       order2: savedOrder2,
     };
+  });
+
+  afterAll(async () => {
+    // delete all collections
+    if (mongoServer) {
+      const collections = mongoose.connection.collections;
+
+      for (const key in collections) {
+        const collection = collections[key];
+        await collection.deleteMany();
+      }
+    }
+    await mongoose.disconnect();
+    await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
   });
 
   describe("getOrdersController Integration Test", () => {
