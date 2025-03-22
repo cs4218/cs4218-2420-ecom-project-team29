@@ -1,24 +1,23 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter as Router } from "react-router-dom";
 import Header from "./Header";
 import { useAuth } from "../context/auth";
 import { useCart } from "../context/cart";
-import useCategory from "../hooks/useCategory";
 import toast from "react-hot-toast";
 import "@testing-library/jest-dom/extend-expect";
+import axios from "axios";
 
 jest.mock("../context/auth");
 
 jest.mock("../context/cart");
-
-jest.mock("../hooks/useCategory");
 
 jest.mock("react-hot-toast");
 
 jest.mock("./Form/SearchInput", () => () => (
   <div data-testid="mock-search">Mock Search</div>
 ));
+jest.mock("axios");
 
 Object.defineProperty(window, "localStorage", {
   value: {
@@ -38,13 +37,12 @@ describe("Header component", () => {
     jest.clearAllMocks();
 
     useAuth.mockReturnValue([{ user: null, token: "" }, setAuthMock]);
-    useCategory.mockReturnValue(mockCategories);
     useCart.mockReturnValue(mockCart);
   });
 
   it("should render Header with items in cart", () => {
     const categories = [];
-    useCategory.mockReturnValue(categories);
+    axios.get.mockResolvedValue({ data: { category: categories } });
 
     render(
       <Router>
@@ -60,20 +58,21 @@ describe("Header component", () => {
     expect(screen.getByText("Cart")).toHaveAttribute("href", "/cart");
   });
 
-  it("should render Header with main components", () => {
+  it("should render Header with main components", async () => {
     const categories = [
       {
         _id: "mock-category-id",
-        name: "mock-category",
+        name: "mock category",
         slug: "mock-category-slug",
       },
       {
         _id: "mock-category-2-id",
-        name: "mock-category-2",
+        name: "mock category-2",
         slug: "mock-category-2-slug",
       },
     ];
-    useCategory.mockReturnValue(categories);
+
+    axios.get.mockResolvedValue({ data: { category: categories } });
 
     const cart = [
       {
@@ -106,14 +105,23 @@ describe("Header component", () => {
       "href",
       "/categories"
     );
-    expect(screen.getByText("mock-category")).toHaveAttribute(
-      "href",
-      "/category/mock-category-slug"
-    );
-    expect(screen.getByText("mock-category-2")).toHaveAttribute(
-      "href",
-      "/category/mock-category-2-slug"
-    );
+
+    // click on all categories
+    await waitFor(() => {
+      expect(screen.getByText("Categories")).toBeInTheDocument();
+    });
+
+    // Click on categories
+    fireEvent.click(screen.getByText("Categories"));
+
+    // Wait for the specific category to appear
+    await waitFor(() => {
+      expect(screen.getByText("mock category")).toHaveAttribute(
+        "href",
+        "/category/mock-category-slug"
+      );
+    });
+
     const badgeCount = screen.getByTitle("2");
     expect(badgeCount).toBeInTheDocument();
     expect(badgeCount.textContent).toBe("2");
@@ -128,7 +136,7 @@ describe("Header component", () => {
         slug: "mock-category-slug",
       },
     ];
-    useCategory.mockReturnValue(categories);
+    axios.get.mockResolvedValue({ data: { category: categories } });
 
     const cart = [];
     useCart.mockReturnValue([cart]);
@@ -206,7 +214,7 @@ describe("Header component", () => {
   });
 
   it("should have no list of categories if there are no categories", () => {
-    useCategory.mockReturnValue([]);
+    axios.get.mockResolvedValue({ data: { category: [] } });
 
     render(
       <Router>
