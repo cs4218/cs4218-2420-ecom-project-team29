@@ -53,7 +53,7 @@ describe("Orders Component", () => {
           _id: "Product2",
           name: "Test Product Name 2",
           description:
-            "Testing Product Description 2 that is realllllllyyy supppppppperrrr duppppppperrrr longggggggggggg !!! 1123456789 !@#$%^&*(){}|:",
+            "Testing Product Description 2",
           price: 200.11,
         },
       ],
@@ -130,7 +130,7 @@ describe("Orders Component", () => {
       expect(screen.getByText(/Price : 200\.20/)).toBeInTheDocument(); // 2nd Product price
       //screen.debug();
       expect(
-        screen.getByText("This is the description of the...")
+        screen.getByText("This is the description of the second product")
       ).toBeInTheDocument();
       expect(screen.getByText("2 days ago")).toBeInTheDocument(); // Order date
     });
@@ -166,7 +166,7 @@ describe("Orders Component", () => {
       expect(screen.getByText("Test Product Name 2")).toBeInTheDocument(); // 2nd Product name
       expect(screen.getByText(/Price : 200\.11/)).toBeInTheDocument(); // 2nd Product price
       expect(
-        screen.getByText("Testing Product Description 2 ...")
+        screen.getByText("Testing Product Description 2")
       ).toBeInTheDocument(); // 2nd Product description
     });
   });

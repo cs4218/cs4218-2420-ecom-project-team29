@@ -8,10 +8,12 @@ import toast from "react-hot-toast";
 import Layout from "./../components/Layout";
 import { AiOutlineReload } from "react-icons/ai";
 import "../styles/Homepages.css";
+import { useAuth } from "../context/auth";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useCart();
+  const [auth] = useAuth();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [checked, setChecked] = useState([]);
@@ -182,12 +184,22 @@ const HomePage = () => {
                     <button
                       className="btn btn-dark ms-1"
                       onClick={() => {
-                        setCart([...cart, p]);
+                        if (!auth?.user?.email) {
+                          toast.error("Please log in to add items to the cart");
+                          return;
+                        }
+
+                        const userCartKey = `cart${auth.user.email}`;
+                        const updatedCart = [...cart, p._id];
+                        console.log(updatedCart);
+
+                        setCart(updatedCart);
                         localStorage.setItem(
-                          "cart",
-                          JSON.stringify([...cart, p])
+                          userCartKey,
+                          JSON.stringify(updatedCart)
                         );
-                        toast.success("Item Added to cart");
+                        console.log("cart", cart);
+                        toast.success("Item added to cart");
                       }}
                     >
                       ADD TO CART
@@ -206,14 +218,7 @@ const HomePage = () => {
                   setPage(page + 1);
                 }}
               >
-                {loading ? (
-                  "Loading ..."
-                ) : (
-                  <>
-                    {" "}
-                    Loadmore 
-                  </>
-                )}
+                {loading ? "Loading ..." : <> Loadmore</>}
               </button>
             )}
           </div>

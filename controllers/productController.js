@@ -6,6 +6,7 @@ import fs from "fs";
 import slugify from "slugify";
 import braintree from "braintree";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -114,6 +115,42 @@ export const getSingleProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error while getting single product",
+      error,
+    });
+  }
+};
+
+// get all product details with array of product's id
+export const getProductDetailsController = async (req, res) => {
+  const idsString = req.query.ids;
+  console.log(idsString);
+  if (!idsString) {
+    return res.status(400).send({
+      success: false,
+      message: "Ids are required",
+    });
+  }
+
+  const ids = idsString.split(",");
+  if (!ids.every(id => mongoose.Types.ObjectId.isValid(id))) {
+    return res.status(400).send({
+      success: false,
+      message: "Invalid product Id(s) provided",
+    });
+  }
+  try {
+    const products = await productModel.find({ _id: { $in: ids } });
+    console.log(products);
+    res.status(200).send({
+      success: true,
+      message: "Product details fetched successfully",
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while getting product details",
       error,
     });
   }
@@ -362,32 +399,60 @@ export const braintreeTokenController = async (req, res) => {
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
-    let total = 0;
-    cart.map((i) => {
-      total += i.price;
-    });
-    let newTransaction = gateway.transaction.sale(
-      {
-        amount: total,
-        paymentMethodNonce: nonce,
-        options: {
-          submitForSettlement: true,
-        },
-      },
-      function (error, result) {
-        if (result) {
-          const order = new orderModel({
-            products: cart,
-            payment: result,
-            buyer: req.user._id,
-          }).save();
-          res.json({ ok: true });
-        } else {
-          res.status(500).send(error);
-        }
-      }
-    );
+    
+    
+    // Validate inputs
+    if (!nonce || !cart || !Array.isArray(cart) || cart.length === 0) {
+      return res.status(400).json({ 
+        ok: false, 
+        message: "Invalid payment information" 
+      });
+    }
+    
+    let total = cart.reduce((accumulator, item) => {
+      return accumulator + item.price;
+    }, 0);
+    console.log(total);
+    
+    // Convert callback to Promise for cleaner async/await
+    const processTransaction = () => {
+      return new Promise((resolve, reject) => {
+        gateway.transaction.sale({
+          amount: total,
+          paymentMethodNonce: nonce,
+          options: {
+            submitForSettlement: true,
+          },
+        }, function(error, result) {
+          if (error) reject(error);
+          else resolve(result);
+        });
+      });
+    };
+    
+    const result = await processTransaction();
+    
+    if (result.success) {
+      const order = await new orderModel({
+        products: cart,
+        payment: result,
+        buyer: req.user._id,
+      }).save();
+      
+      return res.json({ ok: true });
+    } else {
+      return res.status(400).json({ 
+        ok: false, 
+        message: "Payment failed", 
+        result 
+      });
+    }
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ 
+      ok: false, 
+      message: "Internal server error",
+      error: error.message 
+    });
   }
 };

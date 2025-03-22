@@ -656,10 +656,7 @@ describe("getOrders Controller Test", () => {
 
     // Mock Populate & Find functions
     mockPopulateBuyer = jest.fn().mockResolvedValue(mockOrders);
-    mockPopulateProducts = jest
-      .fn()
-      .mockReturnValue({ populate: mockPopulateBuyer });
-    mockFind = jest.fn().mockReturnValue({ populate: mockPopulateProducts });
+    mockFind = jest.fn().mockReturnValue({ populate: mockPopulateBuyer });
 
     orderModel.find = mockFind;
   });
@@ -673,7 +670,6 @@ describe("getOrders Controller Test", () => {
 
     expect(orderModel.find).toHaveBeenCalledWith({ buyer: "user1" });
     expect(orderModel.find).toHaveBeenCalledWith({ buyer: req.user._id });
-    expect(mockPopulateProducts).toHaveBeenCalledWith("products", "-photo");
     expect(mockPopulateBuyer).toHaveBeenCalledWith("buyer", "name");
     expect(res.json).toHaveBeenCalledWith(mockOrders);
     expect(res.status).not.toHaveBeenCalled();
@@ -805,7 +801,6 @@ describe("getAllOrders Controller Test", () => {
     await authController.getAllOrdersController(req, res);
 
     expect(orderModel.find).toHaveBeenCalledWith({});
-    expect(mockQuery.populate).toHaveBeenCalledWith("products", "-photo");
     expect(mockQuery.populate).toHaveBeenCalledWith("buyer", "name");
     expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: -1 });
 
@@ -834,12 +829,9 @@ describe("getAllOrders Controller Test", () => {
   it("should return empty array when no orders exists", async () => {
     const mockSort = jest.fn().mockResolvedValue([]);
     const mockPopulateBuyer = jest.fn().mockReturnValue({ sort: mockSort });
-    const mockPopulate = jest
-      .fn()
-      .mockReturnValue({ populate: mockPopulateBuyer });
 
     orderModel.find.mockReturnValue({
-      populate: mockPopulate,
+      populate: mockPopulateBuyer,
     });
 
     await authController.getAllOrdersController(req, res);

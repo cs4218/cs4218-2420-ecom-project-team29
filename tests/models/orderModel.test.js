@@ -1,6 +1,7 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import orderModel from "../../models/orderModel";
+import { mock } from "node:test";
 
 let mongo;
 
@@ -35,24 +36,39 @@ afterEach(async () => {
 });
 describe("Order Model Tests", () => {
   const mockUserId = new mongoose.Types.ObjectId("67a33e7fdebc7593b711f99e");
-  const mockProductId = new mongoose.Types.ObjectId("67a336241d58aec6404ecedf");
-  const mockProductId1 = new mongoose.Types.ObjectId(
-    "67b6cf3b20c63ccb0d33106b"
-  );
-  const mockProductId2 = new mongoose.Types.ObjectId(
-    "67beb59fad534bfa7d718b43"
-  );
-  const mockProductId3 = new mongoose.Types.ObjectId(
-    "67c711658e64b7370fff9390"
-  );
+  const mockProduct = {
+    _id: new mongoose.Types.ObjectId("67b6cf3b20c63ccb0d33106b"),
+    name: "First Product",
+    description: "This is the description of the first product",
+    price: 100,
+
+  }
+  const mockProduct1 = {
+    _id: new mongoose.Types.ObjectId("67beb59fad534bfa7d718b42"),
+    name: "Second Product",
+    description: "This is the description of the second product",
+    price: 200.2,
+  }
+  const mockProduct2 = {
+    _id: new mongoose.Types.ObjectId("67c711658e64b7370fff9390"),
+    name: "Third Product",
+    description: "This is the description of the third product",
+    price: 300.3,
+  }
+  const mockProduct3 = {
+    _id: new mongoose.Types.ObjectId("67c711658e64b7370fff9391"),
+    name: "Fourth Product",
+    description: "This is the description of the fourth product",
+    price: 400.4,
+  }
 
   // Success Case
 
   it("should create a new order with valid data returned", async () => {
     const orderData = {
-      products: [mockProductId],
+      products: [mockProduct],
       buyer: mockUserId,
-      payment: { method: "credit_card", amount: 29.99 },
+      payment: { method: "credit_card", amount: 100 },
       status: "Processing",
     };
 
@@ -60,7 +76,7 @@ describe("Order Model Tests", () => {
     const savedOrder = await order.save();
 
     expect(savedOrder._id).toBeDefined();
-    expect(savedOrder.products[0].toString()).toBe(mockProductId.toString());
+    expect(savedOrder.products[0]._id.toString()).toBe(mockProduct._id.toString());
     expect(savedOrder.buyer.toString()).toBe(mockUserId.toString());
     expect(savedOrder.status).toBe("Processing");
     expect(savedOrder.createdAt).toBeDefined();
@@ -84,17 +100,17 @@ describe("Order Model Tests", () => {
 
   it("should handle multiple products in an order", async () => {
     const order = new orderModel({
-      products: [mockProductId1, mockProductId2, mockProductId3],
+      products: [mockProduct, mockProduct1, mockProduct2],
       buyer: mockUserId,
-      payment: { method: "credit_card", amount: 89.97 },
+      payment: { method: "credit_card", amount: 600.50 },
     });
 
     const savedOrder = await order.save();
 
     expect(savedOrder.products.length).toBe(3);
-    expect(savedOrder.products[0].toString()).toBe(mockProductId1.toString());
-    expect(savedOrder.products[1].toString()).toBe(mockProductId2.toString());
-    expect(savedOrder.products[2].toString()).toBe(mockProductId3.toString());
+    expect(savedOrder.products[0]._id.toString()).toBe(mockProduct._id.toString());
+    expect(savedOrder.products[1]._id.toString()).toBe(mockProduct1._id.toString());
+    expect(savedOrder.products[2]._id.toString()).toBe(mockProduct2._id.toString());
   });
 
   it("should not create a order with empty products", async () => {
@@ -145,7 +161,7 @@ describe("Order Model Tests", () => {
 
   it("should not create a order with no buyer", async () => {
     const orderData = {
-      products: [mockProductId],
+      products: [mockProduct],
       payment: { method: "credit_card", amount: 29.99 },
       status: "Processing",
     };
@@ -169,7 +185,7 @@ describe("Order Model Tests", () => {
   // Payment Tests
   it("should not create a order with no payment", async () => {
     const orderData = {
-      products: [mockProductId],
+      products: [mockProduct],
       buyer: mockUserId,
       status: "Processing",
     };
@@ -193,9 +209,9 @@ describe("Order Model Tests", () => {
 
   it('should set default status to "Not Processed" when not provided', async () => {
     const orderData = {
-      products: [mockProductId],
+      products: [mockProduct],
       buyer: mockUserId,
-      payment: { method: "credit_card", amount: 29.99 },
+      payment: { method: "credit_card", amount: 100 },
     };
 
     const order = new orderModel(orderData);
@@ -206,12 +222,11 @@ describe("Order Model Tests", () => {
 
   it("should reject invalid status", async () => {
     const mockUserId = new mongoose.Types.ObjectId();
-    const mockProductId = new mongoose.Types.ObjectId();
 
     const orderData = {
-      products: [mockProductId],
+      products: [mockProduct],
       buyer: mockUserId,
-      payment: { method: "credit_card", amount: 29.99 },
+      payment: { method: "credit_card", amount: 100 },
       status: "Invalid Status",
     };
 
@@ -234,9 +249,9 @@ describe("Order Model Tests", () => {
       const mockUserId = new mongoose.Types.ObjectId();
 
       const orderData = {
-        products: [mockProductId],
+        products: [mockProduct],
         buyer: mockUserId,
-        payment: { method: "credit_card", amount: 29.99 },
+        payment: { method: "credit_card", amount: 100 },
         status: statusValue,
       };
 
@@ -251,9 +266,9 @@ describe("Order Model Tests", () => {
     'should reject "%s" as an invalid status value',
     async (invalidStatus) => {
       const orderData = {
-        products: [new mongoose.Types.ObjectId()],
+        products: [mockProduct],
         buyer: mockUserId,
-        payment: { method: "credit_card", amount: 29.99 },
+        payment: { method: "credit_card", amount: 100 },
         status: invalidStatus,
       };
 
@@ -268,9 +283,9 @@ describe("Order Model Tests", () => {
   it("should allow updating status to any valid status using findByIdAndUpdate", async () => {
     // create order with default status - "Not Processed"
     const orderData = {
-      products: [mockProductId],
+      products: [mockProduct],
       buyer: mockUserId,
-      payment: { method: "credit_card", amount: 15.0 },
+      payment: { method: "credit_card", amount: 100},
     };
 
     const order = new orderModel(orderData);
@@ -299,9 +314,9 @@ describe("Order Model Tests", () => {
 
   it("should not allow updating status to invalid status using findByIdAndUpdate", async () => {
     const orderData = {
-      products: [mockProductId],
+      products: [mockProduct],
       buyer: mockUserId,
-      payment: { method: "credit_card", amount: 15.0 },
+      payment: { method: "credit_card", amount: 100 },
     };
 
     const order = new orderModel(orderData);
