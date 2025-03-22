@@ -27,8 +27,6 @@ describe("getProductDetailsController Integration Test", () => {
 
     const savedCategory = await category1.save();
 
-    const photo1 = fs.readFileSync("tests/assets/testProductImage.jpg");
-
     const random2 = Math.random();
     const product1 = new productModel({
       name: `Int Test Product ${random2}`,
@@ -38,7 +36,6 @@ describe("getProductDetailsController Integration Test", () => {
       quantity: 10,
       category: savedCategory._id,
       shipping: true,
-      photo: photo1,
     });
 
     const product2 = new productModel({
@@ -49,7 +46,6 @@ describe("getProductDetailsController Integration Test", () => {
       quantity: 20,
       category: savedCategory._id,
       shipping: false,
-      photo: photo1,
     });
 
     // Save products and store the saved instances
@@ -79,7 +75,6 @@ describe("getProductDetailsController Integration Test", () => {
   afterEach(async () => {
     jest.restoreAllMocks();
 
-    testData = null;
   });
 
   it("should return product details for valid product IDs", async () => {
