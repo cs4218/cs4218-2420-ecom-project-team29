@@ -14,6 +14,8 @@ console.log = jest.fn();
 jest.mock("../../components/Layout", () => ({ children }) => (
     <div>{children}</div>
 ));
+jest.mock('../../components/Header', () => () => <div>Header</div>);
+
 jest.mock("../../components/AdminMenu", () => () => <div>Mock AdminMenu</div>);
 jest.mock("../../components/Form/CategoryForm", () =>
     ({ handleSubmit, setValue, value }) =>
