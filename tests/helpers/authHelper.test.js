@@ -14,7 +14,7 @@ describe("Auth Helper", () => {
     it("should hash the password correctly", async () => {
       const password = "password123";
       const hashedPassword = "hashedPassword123";
-      bcrypt.hash.mockResolvedValueOnce(hashedPassword);
+      bcrypt.hash.mockResolvedValue(hashedPassword);
 
       const result = await hashPassword(password);
 
@@ -27,10 +27,13 @@ describe("Auth Helper", () => {
       const error = new Error("Hashing error");
       bcrypt.hash.mockRejectedValue(error);
 
+      console.log = jest.fn();
+
       const result = await hashPassword(password);
 
       expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
       expect(result).toBeUndefined();
+      expect(console.log).toHaveBeenCalledWith(error);
     });
   });
 
@@ -38,7 +41,7 @@ describe("Auth Helper", () => {
     it("should compare the password correctly", async () => {
       const password = "password123";
       const hashedPassword = "hashedPassword123";
-      bcrypt.compare.mockResolvedValueOnce(true);
+      bcrypt.compare.mockResolvedValue(true);
 
       const result = await comparePassword(password, hashedPassword);
 
@@ -49,7 +52,7 @@ describe("Auth Helper", () => {
     it("should return false for incorrect password", async () => {
       const password = "password123";
       const hashedPassword = "hashedPassword123";
-      bcrypt.compare.mockResolvedValueOnce(false);
+      bcrypt.compare.mockResolvedValue(false);
 
       const result = await comparePassword(password, hashedPassword);
 
