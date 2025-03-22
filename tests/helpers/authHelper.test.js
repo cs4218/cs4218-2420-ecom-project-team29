@@ -2,10 +2,7 @@ import { comparePassword, hashPassword } from "../../helpers/authHelper";
 import bcrypt from "bcrypt";
 import { afterAll, beforeAll, jest } from "@jest/globals";
 
-// Skip entire test suite if running in CI
-const testFn = process.env.CI ? describe.skip : describe;
-
-testFn("Auth Helper", () => {
+describe("Auth Helper", () => {
   beforeAll(() => {
     jest.spyOn(bcrypt, "compare").mockImplementation(jest.fn());
     jest.spyOn(bcrypt, "hash").mockImplementation(jest.fn());

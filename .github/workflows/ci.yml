@@ -34,7 +34,6 @@ jobs:
           npm run test:frontend
           npm run test:backend -- --runInBand
         env:
-          CI: true
           BRAINTREE_MERCHANT_ID: BRAINTREE_MERCHANT_ID
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
           BRAINTREE_PRIVATE_KEY: BRAINTREE_PRIVATE_KEY
