@@ -1,6 +1,6 @@
 import { expect, jest } from "@jest/globals";
-import { deleteCategoryCOntroller, updateCategoryController, createCategoryController } from "../../controllers/categoryController";
-import categoryModel from "../../models/categoryModel";
+import { deleteCategoryCOntroller, updateCategoryController, createCategoryController } from "../../../controllers/categoryController";
+import categoryModel from "../../../models/categoryModel";
 
 
 jest.mock("../../models/categoryModel");

@@ -1,6 +1,6 @@
 import { expect, jest } from "@jest/globals";
-import userModel from "../../models/userModel";
-import orderModel from "../../models/orderModel.js";
+import userModel from "../../../models/userModel.js";
+import orderModel from "../../../models/orderModel.js";
 
 jest.mock("jsonwebtoken", () => ({
   sign: jest.fn().mockReturnValue("token"),
@@ -20,8 +20,8 @@ jest.mock("validator", () => ({
   isMobilePhone: mockIsMobilePhone,
 }));
 
-const authController = await import("../../controllers/authController");
-const authHelper = await import("../../helpers/authHelper");
+const authController = await import("../../../controllers/authController.js");
+const authHelper = await import("../../../helpers/authHelper.js");
 
 describe("Register Controller Test", () => {
   let req, res;

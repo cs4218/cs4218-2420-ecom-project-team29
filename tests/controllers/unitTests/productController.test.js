@@ -12,9 +12,9 @@ import {
     searchProductController,
     realtedProductController,
     productCategoryController,
- } from "../../controllers/productController";
-import productModel from "../../models/productModel";
-import categoryModel from "../../models/categoryModel";
+ } from "../../../controllers/productController";
+import productModel from "../../../models/productModel";
+import categoryModel from "../../../models/categoryModel";
 import fs from "fs";
 
 jest.mock("../../models/productModel");
@@ -1390,3 +1390,5 @@ describe('productCategoryController Tests', () => {
         });
     });
 });
+
+
