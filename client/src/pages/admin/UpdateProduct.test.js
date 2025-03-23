@@ -30,6 +30,8 @@ jest.mock('../../hooks/useCategory', () => jest.fn(() => []));
 jest.mock("../../components/Layout", () => ({ children }) => (
     <div>{children}</div>
 ));
+jest.mock('../../components/Header', () => () => <div>Header</div>);
+
 
 console.log = jest.fn();
 
