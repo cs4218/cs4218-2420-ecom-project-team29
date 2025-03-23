@@ -31,7 +31,6 @@ jobs:
 
       - name: Run tests
         run: |
-          n# Print system resources before test
           free -h
           df -h
           
