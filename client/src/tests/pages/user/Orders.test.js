@@ -1,10 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  render,
-  screen,
-  act,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import axios from "axios";
 import "@testing-library/jest-dom";
 import { AuthProvider } from "../../../context/auth";
@@ -60,11 +55,6 @@ describe("Orders Page Integration Tests", () => {
         status: loginResponse?.status,
         data: loginResponse?.data,
       });
-      console.log("API Response:", {
-        status: loginResponse?.status,
-        data: loginResponse?.data,
-      });
-
       authToken = loginResponse?.data?.token;
 
       expect(loginResponse).toBeDefined();
@@ -99,20 +89,23 @@ describe("Orders Page Integration Tests", () => {
     await renderOrdersPage();
     // add a delay to allow the orders to load
 
-
     await waitFor(
       () => {
         expect(screen.getAllByText("green").length).toBe(2);
-        expect(screen.getAllByText("Superstar Roll (8 pcs)").length).toBe(2);
+
         expect(screen.getAllByText("Not Processed").length).toBe(2);
         expect(screen.getAllByText("Success").length).toBe(2);
-
+        expect(screen.getAllByText("Superstar Roll (8 pcs)").length).toBe(2);
         expect(screen.getAllByText("Price : 19.99").length).toBe(2);
         expect(screen.getByText("Pahit Pink Gin")).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            "The Pink Gin was first popularised by the British Royal Navy as a remedy for sea sickness in colonial Malaya. A mix of Gin and Bitters, it soon became known in the region as Gin Pahit – Pahit translates to “bitter” in Malay."
+          )
+        ).toBeInTheDocument();
         expect(screen.getByText("Price : 108.00")).toBeInTheDocument();
       },
       { timeout: 20000 }
     );
   });
-
 });
