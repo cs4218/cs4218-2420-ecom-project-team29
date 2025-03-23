@@ -1,69 +1,34 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { render, screen, act, fireEvent, waitFor  } from "@testing-library/react";
 import { testApi, apiConfig } from './testConfig';
-import { useCart } from "../context/cart";
-import { useAuth } from "../context/auth";
-import { useNavigate, BrowserRouter, MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AuthProvider } from "../context/auth";
+import { SearchProvider } from "../context/search";
+import { CartProvider } from "../context/cart";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import axios from "axios";
-import toast from "react-hot-toast";
 import '@testing-library/jest-dom';
 import HomePage from "../pages/HomePage";
 import ProductDetails from "../pages/ProductDetails";
-import Layout from "../components/Layout";
-import { Prices } from "../components/Prices";
-
-// Mock useCart hook to return null state and a mock function
-jest.mock("../context/cart", () => ({
-    useCart: jest.fn(() => [null, jest.fn()]),
-}));
-
-// Mock useAuth hook to return null state and a mock function for setAuth
-jest.mock("../context/auth", () => ({
-    useAuth: jest.fn(() => [null, jest.fn()]), 
-}));
-
-// Mock useSearch hook to return null state and a mock function
-jest.mock("../context/search", () => ({
-    useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), 
-}));
-
-jest.mock("../hooks/useCategory", () => jest.fn(() => []));
-
-// Mock toast
-jest.mock("react-hot-toast", () => ({
-    success: jest.fn(),
-    error: jest.fn(),
-}));
-
-// Mock the Layout component
-jest.mock("../components/Layout", () => {
-    return ({ children }) => <div>{children}</div>;
-});
-    
-
-// const mockNavigate = jest.fn();
-// jest.mock('react-router-dom', () => ({
-//     ...jest.requireActual('react-router-dom'),
-//     useNavigate: () => mockNavigate,
-// }));
-
-
 
 
 const renderHomePage = async () => {
     await act(async () => {
         render(
-            
-            <MemoryRouter initialEntries={['/']}>
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route 
-                        path="/product/:slug" 
-                        element={<ProductDetails />} 
-                    />
-                </Routes>
-            </MemoryRouter>
-        
+            <AuthProvider>
+                <SearchProvider>
+                    <CartProvider>
+                        <MemoryRouter initialEntries={['/']}>
+                            <Routes>
+                                <Route path="/" element={<HomePage />} />
+                                <Route 
+                                    path="/product/:slug" 
+                                    element={<ProductDetails />} 
+                                />
+                            </Routes>
+                        </MemoryRouter>
+                    </CartProvider>
+                </SearchProvider>
+            </AuthProvider>
         );
     });
 }
