@@ -13,7 +13,7 @@ jest.mock('react-hot-toast');
 
 console.log = jest.fn();
 
-
+jest.mock('../../components/Header', () => () => <div>Header</div>);
 jest.mock('../../components/AdminMenu', () => () => <div>Admin Menu</div>);
 jest.mock("../../context/auth", () => ({
     useAuth: jest.fn(),

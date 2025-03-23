@@ -33,7 +33,11 @@ const UpdateProduct = () => {
         setPrice(data.product.price);
         setQuantity(data.product.quantity);
         setShipping(data.product.shipping);
-        setCategory(data.product.category._id);
+        if (data.product.category) {
+          setCategory(data.product.category._id);
+        } else {
+          toast.error("Category for product not found");
+        }
       } else {
         toast.error(data?.message);
       }
@@ -74,6 +78,9 @@ const UpdateProduct = () => {
       productData.append("quantity", quantity);
       photo && productData.append("photo", photo);
       productData.append("category", category);
+      if (shipping) {
+        productData.append("shipping", shipping);
+      }
       const { data } = await axios.put(`/api/v1/product/update-product/${id}`, productData);
       if (data?.success) {
         toast.success("Product updated successfully");
@@ -83,15 +90,19 @@ const UpdateProduct = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
   //delete a product
   const handleDelete = async () => {
     try {
-      let answer = window.prompt("Are you sure want to delete this product? Type 'yes' to confirm");
-      if (!answer || answer !== "yes") return;
+      let answer = window.prompt("Are you sure want to delete this product? Enter any input to confirm");
+      if (!answer) return;
       const { data } = await axios.delete(`/api/v1/product/delete-product/${id}`);
       if (data?.success) {
         toast.success("Product deleted successfully");

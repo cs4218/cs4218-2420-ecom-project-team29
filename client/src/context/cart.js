@@ -1,4 +1,4 @@
-import { useState, useContext, createContext, useEffect } from "react";
+import React, { useState, useContext, createContext, useEffect } from "react";
 import { useAuth } from "./auth";
 
 const CartContext = createContext();
@@ -12,7 +12,8 @@ const CartProvider = ({ children }) => {
       if (existingCart) {
         setCart(JSON.parse(existingCart));
       } else {
-        setCart([]); 
+        localStorage.setItem(`cart${auth.user.email}`, JSON.stringify([]));
+        setCart([]);
       }
     } else {
       setCart([]); 
