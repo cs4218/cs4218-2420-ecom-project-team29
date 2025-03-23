@@ -14,6 +14,8 @@ console.log = jest.fn();
 jest.mock("../../components/Layout", () => ({ children }) => (
     <div>{children}</div>
 ));
+jest.mock('../../components/Header', () => () => <div>Header</div>);
+
 jest.mock("../../components/AdminMenu", () => () => <div>Mock AdminMenu</div>);
 jest.mock("../../components/Form/CategoryForm", () =>
     ({ handleSubmit, setValue, value }) =>
@@ -58,7 +60,7 @@ describe("CreateCategory Component", () => {
 
     it("Create a new category", async () => {
         axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
-        axios.post.mockResolvedValue({ data: { success: true } });
+        axios.post.mockResolvedValue({ status: 201, data: { success: true } });
 
         const { getByPlaceholderText, getByText } = render(<CreateCategory />);
 
@@ -82,7 +84,7 @@ describe("CreateCategory Component", () => {
 
         await waitFor(() => {
             expect(axios.post).toHaveBeenCalledWith("/api/v1/category/create-category", { name: "New Category" });
-            expect(toast.error).toHaveBeenCalledWith("Something went wrong in input form");
+            expect(toast.error).toHaveBeenCalledWith("Something went wrong");
         });
     });
 

@@ -8,6 +8,7 @@ import CreateProduct from "./CreateProduct";
 
 jest.mock("axios");
 jest.mock("react-hot-toast");
+jest.mock('../../components/Header', () => () => <div>Header</div>);
 
 jest.mock("../../context/auth", () => ({
     useAuth: jest.fn(() => [null, jest.fn()]), 
