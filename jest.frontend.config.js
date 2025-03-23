@@ -26,7 +26,7 @@ export default {
 
   // jest code coverage
   collectCoverage: true,
-  // collectCoverageFrom: ["client/src/components/**", "client/src/context/**", "client/src/hooks/**", "client/src/pages/**"],
-  collectCoverageFrom: ["client/src/pages/HomePage.js"],
+  collectCoverageFrom: ["client/src/components/**", "client/src/context/**", "client/src/hooks/**", "client/src/pages/**"],
+  //collectCoverageFrom: ["client/src/pages/HomePage.js"],
   coverageReporters: ["text", "lcov"],
 };
