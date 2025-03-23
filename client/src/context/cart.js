@@ -9,6 +9,7 @@ const CartProvider = ({ children }) => {
   useEffect(() => {
     if (auth?.user?.email) {
       let existingCart = localStorage.getItem(`cart${auth.user.email}`);
+      console.log(existingCart);
       if (existingCart) {
         setCart(JSON.parse(existingCart));
       } else {

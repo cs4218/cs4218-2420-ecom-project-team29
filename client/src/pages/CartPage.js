@@ -43,8 +43,10 @@ const CartPage = () => {
 
   //get payment gateway token
   const getToken = async () => {
+    console.log("Getting Braintree token");
     try {
       const { data } = await axios.get("/api/v1/product/braintree/token");
+      console.log(data?.clientToken);
       setClientToken(data?.clientToken);
     } catch (error) {
       console.log("Failed to load Braintree token: ", error);
@@ -53,6 +55,7 @@ const CartPage = () => {
 
   // get product details
   const getProductDetails = async () => {
+    console.log("Cart: ", cart);
     if (!cart?.length) {
       setProducts([]);
       setProductStatus("empty");
@@ -76,14 +79,24 @@ const CartPage = () => {
       setProductStatus("Error");
     }
   };
+  useEffect(() => {
+    console.log("Client Token: ", clientToken);
+  }, [clientToken]);
 
   useEffect(() => {
     getToken();
   }, [auth?.token]);
 
   useEffect(() => {
+    console.log("Products: ", products);
+  }, [products]);
+
+  useEffect(() => {
     getProductDetails();
   }, [cart]);
+  useEffect(() => {
+    console.log("show drop in: ", showDropIn);
+  }, [showDropIn]);
 
   //handle payments
   const handlePayment = async () => {
@@ -276,12 +289,13 @@ const CartPage = () => {
                   ""
                 ) : (
                   <>
-                    <DropIn
-                      options={{
-                        authorization: clientToken,
-                      }}
-                      onInstance={(instance) => setInstance(instance)}
-                    />
+                      <DropIn
+                      data-testid="drop-in"
+                        options={{
+                          authorization: clientToken,
+                        }}
+                        onInstance={(instance) => setInstance(instance)}
+                      />
                     <div className="alert alert-warning">
                       PayPal payment option is unavailable.
                     </div>
