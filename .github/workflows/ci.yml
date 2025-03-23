@@ -30,7 +30,9 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test
+        run: |
+          npm run test:backend -- --runInBand --no-coverage
+          npm run test:frontend -- --no-coverage
         env:
           BRAINTREE_MERCHANT_ID: BRAINTREE_MERCHANT_ID
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
