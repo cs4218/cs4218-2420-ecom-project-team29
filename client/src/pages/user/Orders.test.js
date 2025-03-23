@@ -19,6 +19,7 @@ jest.mock("../../context/cart", () => ({
 }));
 
 jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
+jest.mock('../../components/Header', () => () => <div>Header</div>);
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
