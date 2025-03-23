@@ -32,13 +32,17 @@ export const createProductController = async (req, res) => {
       case !price:
         return res.status(500).send({ error: "Price is Required" });
       case price < 0:
-        return res.status(500).send({ error: "Price should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Price should be greater than 0" });
       case !category:
         return res.status(500).send({ error: "Category is Required" });
       case !quantity:
         return res.status(500).send({ error: "Quantity is Required" });
       case quantity < 0:
-        return res.status(500).send({ error: "Quantity should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Quantity should be greater than 0" });
       case photo && photo.size > 1000000:
         return res
           .status(500)
@@ -134,7 +138,7 @@ export const getProductDetailsController = async (req, res) => {
   }
 
   const ids = idsString.split(",");
-  
+
   if (!ids.every((id) => mongoose.Types.ObjectId.isValid(id))) {
     return res.status(400).send({
       success: false,
@@ -224,13 +228,17 @@ export const updateProductController = async (req, res) => {
       case !price:
         return res.status(500).send({ error: "Price is Required" });
       case price < 0:
-        return res.status(500).send({ error: "Price should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Price should be greater than 0" });
       case !category:
         return res.status(500).send({ error: "Category is Required" });
       case !quantity:
         return res.status(500).send({ error: "Quantity is Required" });
       case quantity < 0:
-        return res.status(500).send({ error: "Quantity should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Quantity should be greater than 0" });
       case photo && photo.size > 1000000:
         return res
           .status(500)
@@ -313,7 +321,7 @@ export const productListController = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage)
       .sort({ createdAt: -1 });
-    res.status(200).send({                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    res.status(200).send({
       success: true,
       products,
     });
@@ -416,60 +424,65 @@ export const braintreeTokenController = async (req, res) => {
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
-    
-    
+
     // Validate inputs
     if (!nonce || !cart || !Array.isArray(cart) || cart.length === 0) {
-      return res.status(400).json({ 
-        ok: false, 
-        message: "Invalid payment information" 
+      return res.status(400).json({
+        ok: false,
+        message: "Invalid payment information",
       });
     }
-    
-    let total = cart.reduce((accumulator, item) => {
-      return accumulator + item.price;
-    }, 0);
+
+    console.log(cart);
+    let total = 0;
+    // add total
+    cart.map((item) => {
+      total = total + item.price;
+    });
     console.log(total);
-    
+
     // Convert callback to Promise for cleaner async/await
     const processTransaction = () => {
       return new Promise((resolve, reject) => {
-        gateway.transaction.sale({
-          amount: total,
-          paymentMethodNonce: nonce,
-          options: {
-            submitForSettlement: true,
+        gateway.transaction.sale(
+          {
+            amount: total,
+            paymentMethodNonce: nonce,
+            options: {
+              submitForSettlement: true,
+            },
           },
-        }, function(error, result) {
-          if (error) reject(error);
-          else resolve(result);
-        });
+          function (error, result) {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
       });
     };
-    
+
     const result = await processTransaction();
-    
+
     if (result.success) {
       const order = await new orderModel({
         products: cart,
         payment: result,
         buyer: req.user._id,
       }).save();
-      
+
       return res.json({ ok: true });
     } else {
-      return res.status(400).json({ 
-        ok: false, 
-        message: "Payment failed", 
-        result 
+      return res.status(400).json({
+        ok: false,
+        message: "Payment failed",
+        result,
       });
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ 
-      ok: false, 
+    return res.status(500).json({
+      ok: false,
       message: "Internal server error",
-      error: error.message 
+      error: error.message,
     });
   }
 };
