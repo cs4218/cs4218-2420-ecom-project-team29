@@ -4,6 +4,7 @@ import userModel from '../../models/userModel';
 
 describe('User Model Test', () => {
   let mongoServer;
+  const originalMongoUrl = process.env.MONGO_URL;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -21,6 +22,7 @@ describe('User Model Test', () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
     await mongoServer.stop();
+    process.env.MONGO_URL = originalMongoUrl;
   });
 
   it('should create a user successfully', async () => {
