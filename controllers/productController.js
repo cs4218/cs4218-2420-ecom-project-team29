@@ -32,13 +32,17 @@ export const createProductController = async (req, res) => {
       case !price:
         return res.status(500).send({ error: "Price is Required" });
       case price < 0:
-        return res.status(500).send({ error: "Price should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Price should be greater than 0" });
       case !category:
         return res.status(500).send({ error: "Category is Required" });
       case !quantity:
         return res.status(500).send({ error: "Quantity is Required" });
       case quantity < 0:
-        return res.status(500).send({ error: "Quantity should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Quantity should be greater than 0" });
       case photo && photo.size > 1000000:
         return res
           .status(500)
@@ -139,9 +143,11 @@ export const getSingleProductController = async (req, res) => {
 };
 
 // get all product details with array of product's id
+
 export const getProductDetailsController = async (req, res) => {
   const idsString = req.query.ids;
   console.log(idsString);
+
   if (!idsString) {
     return res.status(400).send({
       success: false,
@@ -150,15 +156,30 @@ export const getProductDetailsController = async (req, res) => {
   }
 
   const ids = idsString.split(",");
-  if (!ids.every(id => mongoose.Types.ObjectId.isValid(id))) {
+
+  if (!ids.every((id) => mongoose.Types.ObjectId.isValid(id))) {
     return res.status(400).send({
       success: false,
       message: "Invalid product Id(s) provided",
     });
   }
+
   try {
-    const products = await productModel.find({ _id: { $in: ids } });
-    console.log(products);
+    // Find all products that exist
+    const foundProducts = await productModel.find({ _id: { $in: ids } });
+    console.log(foundProducts);
+
+    // Create a map of found products by ID for easy lookup
+    const productMap = {};
+    foundProducts.forEach((product) => {
+      productMap[product._id.toString()] = product;
+    });
+
+    // Create the final products array with empty objects for missing IDs
+    const products = ids.map((id) => {
+      return productMap[id] || { _id: id };
+    });
+
     res.status(200).send({
       success: true,
       message: "Product details fetched successfully",
@@ -225,13 +246,17 @@ export const updateProductController = async (req, res) => {
       case !price:
         return res.status(500).send({ error: "Price is Required" });
       case price < 0:
-        return res.status(500).send({ error: "Price should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Price should be greater than 0" });
       case !category:
         return res.status(500).send({ error: "Category is Required" });
       case !quantity:
         return res.status(500).send({ error: "Quantity is Required" });
       case quantity < 0:
-        return res.status(500).send({ error: "Quantity should be greater than 0" });
+        return res
+          .status(500)
+          .send({ error: "Quantity should be greater than 0" });
       case photo && photo.size > 1000000:
         return res
           .status(500)
@@ -436,33 +461,38 @@ export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
 
-
     // Validate inputs
     if (!nonce || !cart || !Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({
         ok: false,
-        message: "Invalid payment information"
+        message: "Invalid payment information",
       });
     }
 
-    let total = cart.reduce((accumulator, item) => {
-      return accumulator + item.price;
-    }, 0);
+    console.log(cart);
+    let total = 0;
+    // add total
+    cart.map((item) => {
+      total = total + item.price;
+    });
     console.log(total);
 
     // Convert callback to Promise for cleaner async/await
     const processTransaction = () => {
       return new Promise((resolve, reject) => {
-        gateway.transaction.sale({
-          amount: total,
-          paymentMethodNonce: nonce,
-          options: {
-            submitForSettlement: true,
+        gateway.transaction.sale(
+          {
+            amount: total,
+            paymentMethodNonce: nonce,
+            options: {
+              submitForSettlement: true,
+            },
           },
-        }, function (error, result) {
-          if (error) reject(error);
-          else resolve(result);
-        });
+          function (error, result) {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
       });
     };
 
@@ -480,7 +510,7 @@ export const brainTreePaymentController = async (req, res) => {
       return res.status(400).json({
         ok: false,
         message: "Payment failed",
-        result
+        result,
       });
     }
   } catch (error) {
@@ -488,7 +518,7 @@ export const brainTreePaymentController = async (req, res) => {
     return res.status(500).json({
       ok: false,
       message: "Internal server error",
-      error: error.message
+      error: error.message,
     });
   }
 };
