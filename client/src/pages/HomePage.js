@@ -79,24 +79,32 @@ const HomePage = () => {
   };
 
   // filter by cat
-  const handleFilter = (value, id) => {
-    let all = [...checked];
-    if (value) {
-      all.push(id);
-    } else {
-      all = all.filter((c) => c !== id);
+  const handleFilter = async (value, id) => {
+    try {    
+      let all = [...checked];
+      if (value) {
+        all.push(id);
+      } else {
+        all = all.filter((c) => c !== id);
+      }
+      setChecked(all);
+    } catch (error) {
+      console.log(error);
     }
-    setChecked(all);
   };
 
   useEffect(() => {
-    if (!checked.length && !radio.length) getAllProducts();
-    if (checked.length || radio.length) filterProduct();
+    if (checked.length || radio.length) {
+      filterProduct();
+    } else {
+      getAllProducts(); 
+    }   
   }, [checked, radio]);
 
   //get filterd product
   const filterProduct = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.post("/api/v1/product/product-filters", {
         checked,
         radio,
@@ -104,6 +112,8 @@ const HomePage = () => {
       setProducts(data?.products);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   return (

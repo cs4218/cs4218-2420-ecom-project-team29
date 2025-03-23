@@ -11,7 +11,6 @@ import HomePage from "../pages/HomePage";
 import ProductDetails from "../pages/ProductDetails";
 import Layout from "../components/Layout";
 import { Prices } from "../components/Prices";
-import exp from "constants";
 
 // Mock useCart hook to return null state and a mock function
 jest.mock("../context/cart", () => ({
@@ -112,7 +111,6 @@ describe("HomePage Integration Tests", () => {
             expect(screen.getByText(/All Products/i)).toBeInTheDocument();
             expect(screen.getByText("Filter By Category")).toBeInTheDocument();
             expect(screen.getByText(/MacBook/i)).toBeInTheDocument();
-            //expect(screen.getByText(/Wisepad 3 reader/i)).toBeInTheDocument();
         }, { timeout: axios.defaults.timeout });
     });
 
@@ -287,45 +285,72 @@ describe("HomePage Integration Tests", () => {
         }, { timeout: 15000 });
     }, 15000);
     
-    it("should reset filters", async () => {
-        await renderHomePage();
-
+    
+    describe("Reset Filters tests", () => {
         const originalWindow = window.location;
-        delete window.location;
-        window.location = {
-            ...originalWindow,
-            reload: jest.fn()
-        };
-
-        const checkbox = await screen.findByRole('checkbox', { name: 'Book' });
-        const radioButton = await screen.findByRole('radio', { name: '$0 to 19.99' });
-
-        // Initial state
-        expect(radioButton).not.toBeChecked();
-        expect(checkbox).not.toBeChecked();
-
-
-        await act(async () => {
-            fireEvent.click(checkbox);
-            fireEvent.click(radioButton);
+        const mockReload = jest.fn();
+        beforeEach(() => {
+            delete window.location;
+            window.location = { reload: mockReload };
+        });
+    
+        afterEach(() => {
+            window.location = originalWindow;
         });
 
-        await waitFor(() => {
-            expect(checkbox).toBeChecked();
-            expect(radioButton).toBeChecked();
-            expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
-        }, { timeout: 15000 });
-
-        const resetButton = await screen.findByRole('button', { name: 'RESET FILTERS' });
-
-        await act(async () => {
-            fireEvent.click(resetButton);
+        // mock reload() here as Jest and React Testing Library do not natively support window.location.reload()
+        it('should call window.location.reload when reset button is clicked', async () => {
+            await renderHomePage();
+        
+            // Find and click the reset button
+            const resetButton = await screen.findByRole('button', { name: 'RESET FILTERS' });
+            await act(async () => {
+              fireEvent.click(resetButton);
+            });
+            expect(window.location.reload).toHaveBeenCalled();
         });
+        
+        
+    
+        it("should reset filters", async () => {
+            await renderHomePage();
+    
+            await waitFor(() => {
+                // Wait for products to load
+                const productHeading = screen.getByText('All Products');
+                expect(productHeading).toBeInTheDocument();
+                const initialProduct = screen.getByText(/MacBook/i);
+                expect(initialProduct).toBeInTheDocument();
+            }, { timeout: axios.defaults.timeout });
 
-        await waitFor(() => {
-            expect(screen.getByText(/Macbook/i)).toBeInTheDocument();
-        }, { timeout: 15000 });
-        window.location = originalWindow;
-    }, 15000);
+            const checkbox = await screen.findByRole('checkbox', { name: 'Book' });
+            const radioButton = await screen.findByRole('radio', { name: '$0 to 19.99' });
+    
+            // Initial state
+            expect(radioButton).not.toBeChecked();
+            expect(checkbox).not.toBeChecked();
+    
+            await act(async () => {
+                fireEvent.click(checkbox);
+                fireEvent.click(radioButton);
+            });
+    
+            await waitFor(() => {
+                expect(checkbox).toBeChecked();
+                expect(radioButton).toBeChecked();
+                expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+                expect(screen.getAllByAltText(/Save me an orange/i)).not.toHaveLength(0);
+                expect(screen.getAllByAltText(/Delightful Nyonya Treats/i)).not.toHaveLength(0);
+
+            }, { timeout: 15000 });
+    
+            const resetButton = await screen.findByRole('button', { name: 'RESET FILTERS' });
+            await act(async () => {
+                fireEvent.click(resetButton);
+            });
+            expect(window.location.reload).toHaveBeenCalled();
+        }, 15000);
+       
+    });
        
 });
