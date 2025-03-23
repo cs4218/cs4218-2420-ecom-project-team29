@@ -15,6 +15,7 @@ const CartPage = () => {
   const [clientToken, setClientToken] = useState("");
   const [instance, setInstance] = useState("");
   const [loading, setLoading] = useState(false);
+  const [productStatus, setProductStatus] = useState("empty");
   const [showDropIn, setShowDropIn] = useState(true);
   const navigate = useNavigate();
 
@@ -54,26 +55,25 @@ const CartPage = () => {
   const getProductDetails = async () => {
     if (!cart?.length) {
       setProducts([]);
+      setProductStatus("empty");
       return;
     }
     try {
       // get product ids from cart in local storage
-      setLoading(true);
-      let cartProductIds = JSON.parse(localStorage.getItem(`cart${auth.user.email}`));
+      setProductStatus("loading");
+      let cartProductIds = JSON.parse(
+        localStorage.getItem(`cart${auth.user.email}`)
+      );
+      console.log("Cart Product Ids: ", cartProductIds);
       // get product details from the server
       const { data } = await axios.get("/api/v1/product/get-product-details", {
         params: { ids: cartProductIds.join(",") },
       });
-      let products = [];
-      cartProductIds.forEach((item) => {
-        let product = data.products.find((p) => p._id === item);
-        products.push(product);
-      });
-      setProducts(products);
-      setLoading(false);
+      setProducts(data.products);
+      setProductStatus("Loaded");
     } catch (error) {
       console.log(error);
-      setLoading(false);
+      setProductStatus("Error");
     }
   };
 
@@ -88,8 +88,6 @@ const CartPage = () => {
   //handle payments
   const handlePayment = async () => {
     setLoading(true);
-
-    console.log("Handling Payment");
     // Get payment method nonce
     instance
       .requestPaymentMethod()
@@ -123,9 +121,22 @@ const CartPage = () => {
         console.log(error);
         if (error.name === "DropinError" || error.code) {
           // Braintree-specific errors
-          toast.error(
-            `Something went wrong with your payment information. ${error?.response?.data?.result?.message || ""}`
-          );
+          // check whether is gateway rejected duplicate error:
+          if (
+            error?.response?.data?.result?.message.includes(
+              "Gateway Rejected: duplicate"
+            )
+          ) {
+            toast.error(
+              "Payment failed. You have just made the same order just now, check your orders or try again later."
+            );
+          } else {
+            toast.error(
+              `Something went wrong with your payment information. ${
+                error?.response?.data?.result?.message || ""
+              }`
+            );
+          }
         } else {
           // Other errors
           toast.error(
@@ -133,8 +144,8 @@ const CartPage = () => {
           );
         }
 
-        resetDropIn(() => setLoading(false)); 
-      })
+        resetDropIn(() => setLoading(false));
+      });
   };
 
   // Function to reset the DropIn component
@@ -145,7 +156,6 @@ const CartPage = () => {
       if (callback) callback();
     }, 100);
   };
-  
 
   return (
     <Layout>
@@ -158,7 +168,9 @@ const CartPage = () => {
                 : `Hello  ${auth?.token && auth?.user?.name}`}
               <p className="text-center">
                 {cart?.length
-                  ? `You Have ${cart.length} ${cart.length === 1 ? "item" : "items"} in your cart ${
+                  ? `You Have ${cart.length} ${
+                      cart.length === 1 ? "item" : "items"
+                    } in your cart ${
                       auth?.token ? "" : "Please login to checkout!"
                     }`
                   : " Your Cart Is Empty"}
@@ -169,36 +181,51 @@ const CartPage = () => {
         <div className="container">
           <div className="row">
             <div className="col-md-7  p-0 m-0">
-              {loading ? (
+              {productStatus === "loading" ? (
                 <div className="text-center" data-testid="loading">
                   <h2>Loading...</h2>
                 </div>
-                ) : (products && products?.map((p) => (
-                <div className="row card flex-row h-full" key={p._id} data-testid={`cart-item-${p._id}`}>
-                  <div className="col-md-4">
-                    <img
-                      src={`/api/v1/product/product-photo/${p?._id}`}
-                      className="card-img-top"
-                      alt={p?.name}
-                      width="100%"
-                      height={"130px"}
-                    />
+              ) : (
+                products &&
+                products?.map((p) => (
+                  <div
+                    className="row card flex-row h-full"
+                    key={p._id}
+                    data-testid={`cart-item-${p._id}`}
+                  >
+                    {p.name && p.description ? (
+                      <>
+                        <div className="col-md-4">
+                          <img
+                            src={`/api/v1/product/product-photo/${p?._id}`}
+                            className="card-img-top"
+                            alt={p?.name}
+                            width="100%"
+                            height={"130px"}
+                          />
+                        </div>
+                        <div className="col-md-4">
+                          <p>{p.name}</p>
+                          <p>{p.description}</p>
+                          <p>Price: {p.price.toFixed(2)}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="col-md-8">
+                        <h2>Product not found</h2>
+                      </div>
+                    )}
+                    <div className="col-md-4 cart-remove-btn">
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => removeCartItem(p._id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
-                  <div className="col-md-4">
-                    <p>{p.name}</p>
-                    <p>{p.description}</p>
-                    <p>Price: {p.price.toFixed(2)}</p>
-                  </div>
-                  <div className="col-md-4 cart-remove-btn">
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => removeCartItem(p._id)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              )))}
+                ))
+              )}
             </div>
             <div className="col-md-5 cart-summary ">
               <h2>Cart Summary</h2>
