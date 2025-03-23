@@ -162,7 +162,7 @@ const HomePage = () => {
                 />
                 <div className="card-body">
                   <div className="card-name-price">
-                    <h5 className="card-title">{p.name}</h5>
+                    <h5 className="card-title" >{p.name}</h5>
                     <h5 className="card-price">
                       {p.price.toLocaleString("en-US", {
                         style: "currency",

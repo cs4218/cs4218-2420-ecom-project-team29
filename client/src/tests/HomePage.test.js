@@ -150,19 +150,68 @@ describe("HomePage Integration Tests", () => {
         }, { timeout: axios.defaults.timeout });
 
         const radioButton = await screen.findByRole('radio', { name: '$0 to 19' });
-        fireEvent.click(radioButton);
-      
 
+        // initial state
+        expect(radioButton).not.toBeChecked();
+
+        await act(async () => {
+            fireEvent.click(radioButton);
+        });
+
+        
         await waitFor(() => {
             expect(radioButton).toBeChecked();
-            screen.debug();
-            expect(screen.queryByText(/Macbook/i)).toBeNull();
-            expect(screen.queryByText(/Wisepad 3 reader/i)).not.toBeInTheDocument();
-            expect(screen.getByText(/Save me an orange/i)).toBeInTheDocument();
+            expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+
+           
+            const expectedItems = [
+                /Save me an orange/i,
+                /Yellow Bird Drink/i,
+                /Shirley Temple Drink/i,
+                /Delightful Nyonya Treats/i,
+                /Garlic Butter Chicken/i,
+                /Superstar Roll/i,
+
+            ];
+
+            expectedItems.forEach(product => {
+                expect(screen.getAllByText(product)).not.toHaveLength(0);
+            });
+            
         }, { timeout: 15000 });
 
     }, 15000);
 
+    it("should filter products by category", async () => {
+        await renderHomePage();
+
+        await waitFor(() => {
+            // Wait for products to load
+            const productHeading = screen.getByText('All Products');
+            expect(productHeading).toBeInTheDocument();
+            const categoryFilterHeading = screen.getByText('Filter By Category');
+            expect(categoryFilterHeading).toBeInTheDocument();
+            const initialProduct = screen.getByText(/MacBook/i);
+            expect(initialProduct).toBeInTheDocument();
+        }, { timeout: axios.defaults.timeout });
+
+        const checkbox = await screen.findByRole('checkbox', { name: 'Book' });
+        // Initial state
+        expect(checkbox).not.toBeChecked();
+        await act(async () => {
+            fireEvent.click(checkbox);
+        });
+
+        await waitFor(() => {
+            expect(checkbox).toBeChecked();
+            expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+            expect(screen.getByText(/Save me an orange/i)).toBeInTheDocument();
+            expect(screen.getByText(/You become what you think/i)).toBeInTheDocument();
+            expect(screen.getByText(/The journey to the west/i)).toBeInTheDocument();
+            expect(screen.getByText(/Delightful nyonya Treats/i)).toBeInTheDocument();         
+        }, { timeout: 15000 });
+
+    }, 15000);
  
        
 });
