@@ -182,7 +182,10 @@ const HomePage = () => {
                       More Details
                     </button>
                     <button
-                      className="btn btn-dark ms-1"
+                      className={`btn btn-dark ms-1 ${
+                        p?.name ? "" : "disabled"
+                      }`}
+                      data-testid={`add-to-cart-${p.slug}`}
                       onClick={() => {
                         if (!auth?.user?.email) {
                           toast.error("Please log in to add items to the cart");
