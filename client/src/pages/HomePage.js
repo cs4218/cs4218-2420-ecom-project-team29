@@ -88,7 +88,7 @@ const HomePage = () => {
     }
     setChecked(all);
   };
-  
+
   useEffect(() => {
     if (!checked.length && !radio.length) getAllProducts();
     if (checked.length || radio.length) filterProduct();
@@ -124,6 +124,7 @@ const HomePage = () => {
               <Checkbox
                 key={c._id}
                 onChange={(e) => handleFilter(e.target.checked, c._id)}
+                style={{ margin: 0, marginLeft:8, padding: 2}}
               >
                 {c.name}
               </Checkbox>
@@ -162,7 +163,7 @@ const HomePage = () => {
                 <div className="card-body">
                   <div className="card-name-price">
                     <h5 className="card-title">{p.name}</h5>
-                    <h5 className="card-title card-price">
+                    <h5 className="card-price">
                       {p.price.toLocaleString("en-US", {
                         style: "currency",
                         currency: "USD",
@@ -170,14 +171,14 @@ const HomePage = () => {
                     </h5>
                   </div>
                   <p className="card-text ">
-                    {p.description.substring(0, 60)}...
+                    {p.description.substring(0, 50)}...
                   </p>
                   <div className="card-name-price">
                     <button
                       className="btn btn-info ms-1"
                       onClick={() => navigate(`/product/${p.slug}`)}
                     >
-                      More Details
+                      MORE DETAILS
                     </button>
                     <button
                       className="btn btn-dark ms-1"
