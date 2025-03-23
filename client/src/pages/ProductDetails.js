@@ -44,7 +44,7 @@ const ProductDetails = () => {
   };
   return (
     <Layout>
-      <div className="row container product-details">
+      <div className="row container product-details" data-testid="product-details-page">
         <div className="col-md-6">
           {product._id && (
             <img
