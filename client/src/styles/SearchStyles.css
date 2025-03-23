@@ -1,0 +1,61 @@
+
+.search .card {
+    background-color: goldenrod;
+    width: 18rem;
+  }
+
+.search .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search .card-title {
+    font-size:large;
+    color: black;
+    font-weight: bold;
+    height: 46px;
+    flex: 3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.search .card-name-price {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+
+.search .card-price {
+    color: green;
+    font-weight: bold;
+    font-size: 17px;
+    flex:1;
+    margin-left: auto;
+}
+.search button {
+    border-radius: 0;
+    width: 100%;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.search .card-text {
+    color: rgb(90, 89, 89);
+    height: 48px;
+}
+
+
+.search .card img:hover {
+    transform: scale(0.9);
+  }
+  
+.search .card-img-top {
+    height: 300px !important;
+}
