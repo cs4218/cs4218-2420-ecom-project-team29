@@ -24,7 +24,7 @@ export default {
   testPathIgnorePatterns: ["/_site/"],
 
   // jest code coverage
-  collectCoverage: true,
+  collectCoverage: false,
   collectCoverageFrom: ["client/src/components/**", "client/src/context/**", "client/src/hooks/**", "client/src/pages/**"],
   coverageReporters: ["text", "lcov"],
 };
