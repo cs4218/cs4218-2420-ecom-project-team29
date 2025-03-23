@@ -32,7 +32,6 @@ jest.mock("../../components/Layout", () => ({ children }) => (
 ));
 jest.mock('../../components/Header', () => () => <div>Header</div>);
 
-
 console.log = jest.fn();
 
 jest.mock("antd", () => {
@@ -173,7 +172,7 @@ describe("UpdateProduct Component", () => {
         );
         
         await waitFor(() => {
-            window.prompt = jest.fn(() => 'no')
+            window.prompt = jest.fn()
             fireEvent.click(getByTestId("delete-product-btn"));
             expect(axios.delete).not.toHaveBeenCalled()
         });

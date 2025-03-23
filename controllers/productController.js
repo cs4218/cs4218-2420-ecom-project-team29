@@ -42,7 +42,25 @@ export const createProductController = async (req, res) => {
       case photo && photo.size > 1000000:
         return res
           .status(500)
-          .send({ error: "Photo is required and should be less then 1mb" });
+          .send({ error: "Photo size should be at most 1MB" });
+    }
+
+    // check if product slug already exists
+    const productSlugExist = await productModel.findOne({ slug: slugify(name) });
+    if (productSlugExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
+    }
+
+    // check if product name already exists
+    const productNameExist = await productModel.findOne({ name });
+    if (productNameExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
     }
 
     const products = new productModel({ ...req.fields, slug: slugify(name) });
@@ -217,7 +235,25 @@ export const updateProductController = async (req, res) => {
       case photo && photo.size > 1000000:
         return res
           .status(500)
-          .send({ error: "Photo is required and should be less then 1mb" });
+          .send({ error: "Photo size should be at most 1MB" });
+    }
+
+    // check if product slug already exists
+    const productSlugExist = await productModel.findOne({ slug: slugify(name), _id: { $ne: req.params.pid } });
+    if (productSlugExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
+    }
+
+    // check if product name already exists
+    const productNameExist = await productModel.findOne({ name, _id: { $ne: req.params.pid } });
+    if (productNameExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
     }
 
     const products = await productModel.findByIdAndUpdate(
@@ -296,7 +332,7 @@ export const productListController = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage)
       .sort({ createdAt: -1 });
-    res.status(200).send({                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    res.status(200).send({
       success: true,
       products,
     });
@@ -399,21 +435,21 @@ export const braintreeTokenController = async (req, res) => {
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
-    
-    
+
+
     // Validate inputs
     if (!nonce || !cart || !Array.isArray(cart) || cart.length === 0) {
-      return res.status(400).json({ 
-        ok: false, 
-        message: "Invalid payment information" 
+      return res.status(400).json({
+        ok: false,
+        message: "Invalid payment information"
       });
     }
-    
+
     let total = cart.reduce((accumulator, item) => {
       return accumulator + item.price;
     }, 0);
     console.log(total);
-    
+
     // Convert callback to Promise for cleaner async/await
     const processTransaction = () => {
       return new Promise((resolve, reject) => {
@@ -423,36 +459,36 @@ export const brainTreePaymentController = async (req, res) => {
           options: {
             submitForSettlement: true,
           },
-        }, function(error, result) {
+        }, function (error, result) {
           if (error) reject(error);
           else resolve(result);
         });
       });
     };
-    
+
     const result = await processTransaction();
-    
+
     if (result.success) {
       const order = await new orderModel({
         products: cart,
         payment: result,
         buyer: req.user._id,
       }).save();
-      
+
       return res.json({ ok: true });
     } else {
-      return res.status(400).json({ 
-        ok: false, 
-        message: "Payment failed", 
-        result 
+      return res.status(400).json({
+        ok: false,
+        message: "Payment failed",
+        result
       });
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ 
-      ok: false, 
+    return res.status(500).json({
+      ok: false,
       message: "Internal server error",
-      error: error.message 
+      error: error.message
     });
   }
 };
