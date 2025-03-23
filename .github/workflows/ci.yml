@@ -11,8 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: "--max_old_space_size=4096"
 
     steps:
       - name: Checkout Repository
@@ -32,7 +30,9 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test
+        run: |
+          npx jest --clearCache
+          npm run test
         env:
           BRAINTREE_MERCHANT_ID: BRAINTREE_MERCHANT_ID
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
