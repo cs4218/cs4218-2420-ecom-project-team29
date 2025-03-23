@@ -1,3 +1,7 @@
+import { TextEncoder, TextDecoder } from 'text-encoding';
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 import React, { useEffect } from "react";
 import { render, screen, act, fireEvent, waitFor  } from "@testing-library/react";
 import { testApi, apiConfig } from './testConfig';
@@ -10,7 +14,6 @@ import '@testing-library/jest-dom';
 import HomePage from "../pages/HomePage";
 import Layout from "../components/Layout";
 import { Prices } from "../components/Prices";
-
 // Mock useCart hook to return null state and a mock function
 jest.mock("../context/cart", () => ({
     useCart: jest.fn(() => [null, jest.fn()]),
@@ -48,7 +51,43 @@ const renderHomePage = async () => {
     });
 }
 
+let server;
+
+beforeAll(async () => {
+    try {
+      // Set NODE_ENV to test to prevent auto-starting the server
+      process.env.DEV_ENV = 'integration-test';
+      
+      // Use dynamic import to load the server and startServer function
+      const serverModule = await import("../../../server.js");
+      const app = serverModule.default;
+      const { startServer } = serverModule;
+      
+      // Start the server on our test port
+      server = app.listen(6061);
+      
+      // Configure axios to use the test port
+      axios.defaults.baseURL = `http://localhost:6061`;
+      
+      console.log(`Test server started on port 6061`);
+    } catch (error) {
+      console.error("Failed to start test server:", error);
+      throw error;
+    }
+  });
+  
+  // Single afterAll callback to clean up
+  afterAll((done) => {
+    if (server) {
+      console.log("Closing test server");
+      server.close(done);
+    } else {
+      done();
+    }
+  });
+
 describe("HomePage", () => {
+    
     beforeEach(() => {
         jest.clearAllMocks();
         axios.defaults.baseURL = apiConfig.baseURL;
