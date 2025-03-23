@@ -21,8 +21,6 @@ beforeAll(async () => {
 afterAll(async () => {
   // Clean up environment variable
   delete process.env.JWT_SECRET;
-  
-  await mongoose.disconnect();
   await mongod.stop();
 });
 
