@@ -31,20 +31,8 @@ jobs:
 
       - name: Run tests
         run: |
-          # Print system resources before test
-          free -h
-          df -h
-          
-          # Run tests with more verbose logging
           npx jest --clearCache
-          
-          # Store the test command in a variable and run it
-          (npm run test:backend) || {
-            echo "Tests failed, checking system logs..."
-            dmesg | tail -n 100 || true
-            journalctl -n 100 || true
-            exit 1
-          }
+          npm run test:backend -- --logHeapUsage
         env:
           BRAINTREE_MERCHANT_ID: BRAINTREE_MERCHANT_ID
           BRAINTREE_PUBLIC_KEY: BRAINTREE_PUBLIC_KEY
