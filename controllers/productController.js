@@ -46,7 +46,25 @@ export const createProductController = async (req, res) => {
       case photo && photo.size > 1000000:
         return res
           .status(500)
-          .send({ error: "Photo is required and should be less then 1mb" });
+          .send({ error: "Photo size should be at most 1MB" });
+    }
+
+    // check if product slug already exists
+    const productSlugExist = await productModel.findOne({ slug: slugify(name) });
+    if (productSlugExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
+    }
+
+    // check if product name already exists
+    const productNameExist = await productModel.findOne({ name });
+    if (productNameExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
     }
 
     const products = new productModel({ ...req.fields, slug: slugify(name) });
@@ -242,7 +260,25 @@ export const updateProductController = async (req, res) => {
       case photo && photo.size > 1000000:
         return res
           .status(500)
-          .send({ error: "Photo is required and should be less then 1mb" });
+          .send({ error: "Photo size should be at most 1MB" });
+    }
+
+    // check if product slug already exists
+    const productSlugExist = await productModel.findOne({ slug: slugify(name), _id: { $ne: req.params.pid } });
+    if (productSlugExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
+    }
+
+    // check if product name already exists
+    const productNameExist = await productModel.findOne({ name, _id: { $ne: req.params.pid } });
+    if (productNameExist) {
+      return res.status(500).send({
+        success: false,
+        error: "Product with a similar name exists",
+      });
     }
 
     const products = await productModel.findByIdAndUpdate(

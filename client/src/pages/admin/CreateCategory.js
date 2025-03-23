@@ -12,22 +12,32 @@ const CreateCategory = () => {
   const [visible, setVisible] = useState(false);
   const [selected, setSelected] = useState(null);
   const [updatedName, setUpdatedName] = useState("");
+  const [reload_categories, setReloadCategories] = useState(false);
   //handle Form
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/api/v1/category/create-category", {
+      const { data, status } = await axios.post("/api/v1/category/create-category", {
         name,
       });
       if (data?.success) {
-        toast.success(`${name} is created`);
-        getAllCategory();
+        if (status === 201) {
+          toast.success(`${name} is created`);
+          getAllCategory();
+          setReloadCategories(!reload_categories);
+        } else { // message for duplicate category
+          toast.success(data.message);
+        }
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong in input form");
+      if (error.response?.status === 401) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 
@@ -58,15 +68,18 @@ const CreateCategory = () => {
       );
       if (data.success) {
         toast.success(`${updatedName} is updated`);
-        setSelected(null);
-        setUpdatedName("");
-        setVisible(false);
         getAllCategory();
+        setReloadCategories(!reload_categories);
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error("Something went wrong");
+      console.log(error);
+      if (error.response?.status === 401) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
   //delete category
@@ -77,8 +90,8 @@ const CreateCategory = () => {
       );
       if (data.success) {
         toast.success(`Category is deleted`);
-
         getAllCategory();
+        setReloadCategories(!reload_categories);
       } else {
         toast.error(data.message);
       }
@@ -87,15 +100,15 @@ const CreateCategory = () => {
     }
   };
   return (
-    <Layout title={"Dashboard - Create Category"}>
-      <div className="container-fluid m-3 p-3">
+    <Layout title={"Dashboard - Create Category"} reload_categories={reload_categories}>
+      <div className="container-fluid p-5">
         <div className="row">
           <div className="col-md-3">
             <AdminMenu />
           </div>
           <div className="col-md-9">
             <h1>Manage Category</h1>
-            <div className="p-3 w-50">
+            <div className="pb-3 w-50">
               <CategoryForm
                 handleSubmit={handleSubmit}
                 value={name}
@@ -146,6 +159,7 @@ const CreateCategory = () => {
               onCancel={() => setVisible(false)}
               footer={null}
               open={visible}
+              title="Update Category"
             >
               <CategoryForm
                 value={updatedName}

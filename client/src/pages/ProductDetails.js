@@ -5,12 +5,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../styles/ProductDetailsStyles.css";
 import { useAuth } from "../context/auth";
 import toast from "react-hot-toast";
+import { useCart } from "../context/cart";
 
 const ProductDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [auth] = useAuth();
-  const [cart, setCart] = useAuth();
+  const [cart, setCart] = useCart();
   const [product, setProduct] = useState({});
   const [relatedProducts, setRelatedProducts] = useState([]);
 
@@ -43,7 +44,7 @@ const ProductDetails = () => {
   };
   return (
     <Layout>
-      <div className="row container product-details">
+      <div className="row container product-details" data-testid="product-details-page">
         <div className="col-md-6">
           {product._id && (
             <img
@@ -69,7 +70,7 @@ const ProductDetails = () => {
           </h6>
           <h6>Category: {product?.category?.name}</h6>
           <button
-            className="btn btn-dark ms-1"
+            className={`btn btn-dark ms-1 ${product?.name ? "" : "disabled"}`}
             onClick={() => {
               if (!auth?.user?.email) {
                 toast.error("Please log in to add items to the cart");
@@ -77,6 +78,7 @@ const ProductDetails = () => {
               }
 
               const userCartKey = `cart${auth.user.email}`;
+
               const updatedCart = [...cart, product._id];
 
               setCart(updatedCart);
@@ -123,7 +125,8 @@ const ProductDetails = () => {
                     More Details
                   </button>
                   {/* <button
-                      className="btn btn-dark ms-1"
+                      className={`btn btn-dark ms-1 ${product?.name ? "" : "disabled"}`}
+
                       onClick={() => {
                         if (!auth?.user?.email) {
                           toast.error("Please log in to add items to the cart");

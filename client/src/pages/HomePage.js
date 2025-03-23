@@ -79,26 +79,32 @@ const HomePage = () => {
   };
 
   // filter by cat
-  const handleFilter = (value, id) => {
-    let all = [...checked];
-    if (value) {
-      all.push(id);
-    } else {
-      all = all.filter((c) => c !== id);
+  const handleFilter = async (value, id) => {
+    try {    
+      let all = [...checked];
+      if (value) {
+        all.push(id);
+      } else {
+        all = all.filter((c) => c !== id);
+      }
+      setChecked(all);
+    } catch (error) {
+      console.log(error);
     }
-    setChecked(all);
   };
-  useEffect(() => {
-    if (!checked.length || !radio.length) getAllProducts();
-  }, [checked.length, radio.length]);
 
   useEffect(() => {
-    if (checked.length || radio.length) filterProduct();
+    if (checked.length || radio.length) {
+      filterProduct();
+    } else {
+      getAllProducts(); 
+    }   
   }, [checked, radio]);
 
   //get filterd product
   const filterProduct = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.post("/api/v1/product/product-filters", {
         checked,
         radio,
@@ -106,6 +112,8 @@ const HomePage = () => {
       setProducts(data?.products);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -126,6 +134,7 @@ const HomePage = () => {
               <Checkbox
                 key={c._id}
                 onChange={(e) => handleFilter(e.target.checked, c._id)}
+                style={{ margin: 0, marginLeft:8, padding: 2}}
               >
                 {c.name}
               </Checkbox>
@@ -163,8 +172,8 @@ const HomePage = () => {
                 />
                 <div className="card-body">
                   <div className="card-name-price">
-                    <h5 className="card-title">{p.name}</h5>
-                    <h5 className="card-title card-price">
+                    <h5 className="card-title" >{p.name}</h5>
+                    <h5 className="card-price">
                       {p.price.toLocaleString("en-US", {
                         style: "currency",
                         currency: "USD",
@@ -172,17 +181,20 @@ const HomePage = () => {
                     </h5>
                   </div>
                   <p className="card-text ">
-                    {p.description.substring(0, 60)}...
+                    {p.description.substring(0, 50)}...
                   </p>
                   <div className="card-name-price">
                     <button
                       className="btn btn-info ms-1"
                       onClick={() => navigate(`/product/${p.slug}`)}
                     >
-                      More Details
+                      MORE DETAILS
                     </button>
                     <button
-                      className="btn btn-dark ms-1"
+                      className={`btn btn-dark ms-1 ${
+                        p?.name ? "" : "disabled"
+                      }`}
+                      data-testid={`add-to-cart-${p.slug}`}
                       onClick={() => {
                         if (!auth?.user?.email) {
                           toast.error("Please log in to add items to the cart");
