@@ -5,6 +5,9 @@ import "@testing-library/jest-dom";
 import { AuthProvider } from "../../../context/auth";
 import Orders from "../../../pages/user/Orders";
 import { apiConfig, testApi } from "../../testConfig";
+import { CartProvider } from "../../../context/cart";
+import { SearchProvider } from "../../../context/search";
+import UserMenu from "../../../components/UserMenu";
 
 // Mock the Layout component
 jest.mock("../../../components/Layout", () => {
@@ -27,8 +30,12 @@ jest.mock("../../../components/UserMenu", () => {
 const renderOrdersPage = async () => {
   await act(async () => {
     render(
-      <AuthProvider value={[{}, jest.fn()]}>
-        <Orders />
+      <AuthProvider>
+        <CartProvider>
+          <SearchProvider>
+            <Orders />
+          </SearchProvider>
+        </CartProvider>
       </AuthProvider>
     );
   });
