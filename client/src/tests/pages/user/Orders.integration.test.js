@@ -114,5 +114,12 @@ describe("Orders Page Integration Tests", () => {
       },
       { timeout: 20000 }
     );
+
+    const images = screen.getAllByAltText("Superstar Roll (8 pcs)");
+    const targetImage = images[0];
+    expect(targetImage).toHaveAttribute(
+      "src",
+      `/api/v1/product/product-photo/67df7a8c606a143f0519a122`
+    );
   });
 });
