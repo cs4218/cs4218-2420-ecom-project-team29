@@ -149,7 +149,7 @@ describe("HomePage Integration Tests", () => {
             expect(initialProduct).toBeInTheDocument();
         }, { timeout: axios.defaults.timeout });
 
-        const radioButton = await screen.findByRole('radio', { name: '$0 to 19' });
+        const radioButton = await screen.findByRole('radio', { name: '$0 to 19.99' });
 
         // initial state
         expect(radioButton).not.toBeChecked();
@@ -205,10 +205,17 @@ describe("HomePage Integration Tests", () => {
         await waitFor(() => {
             expect(checkbox).toBeChecked();
             expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
-            expect(screen.getByText(/Save me an orange/i)).toBeInTheDocument();
-            expect(screen.getByText(/You become what you think/i)).toBeInTheDocument();
-            expect(screen.getByText(/The journey to the west/i)).toBeInTheDocument();
-            expect(screen.getByText(/Delightful nyonya Treats/i)).toBeInTheDocument();         
+            
+            const expectedItems = [
+                /Save me an orange/i,
+                /You become what you think/i,
+                /The journey to the west/i,
+                /Delightful nyonya Treats/i
+            ];
+        
+            expectedItems.forEach(pattern => {
+                expect(screen.getByText(pattern)).toBeInTheDocument();
+            });       
         }, { timeout: 15000 });
 
     }, 15000);
