@@ -39,7 +39,7 @@ jobs:
           npx jest --clearCache
           
           # Store the test command in a variable and run it
-          (npm run test:backend -- --runInBand) || {
+          (npm run test:backend) || {
             echo "Tests failed, checking system logs..."
             dmesg | tail -n 100 || true
             journalctl -n 100 || true
