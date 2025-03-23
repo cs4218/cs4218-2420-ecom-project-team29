@@ -19,7 +19,9 @@ describe('User Model Test', () => {
   });
 
   afterAll(async () => {
+    console.log("connections", mongoose.connections);
     await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
     await mongoServer.stop();
     process.env.MONGO_URL = originalMongoUrl;
   });

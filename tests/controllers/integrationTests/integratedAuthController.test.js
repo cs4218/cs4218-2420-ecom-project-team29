@@ -21,6 +21,9 @@ beforeAll(async () => {
 afterAll(async () => {
   // Clean up environment variable
   delete process.env.JWT_SECRET;
+  console.log("connections", mongoose.connections);
+  
+  await mongoose.connection.close();
   await mongod.stop();
 });
 
