@@ -26,8 +26,6 @@ jobs:
         run: |
           npm cache clean --force
           rm -rf node_modules
-          rm -rf ~/.npm
-          rm -rf package-lock.json
 
       - name: Install dependencies for client
         working-directory: client
