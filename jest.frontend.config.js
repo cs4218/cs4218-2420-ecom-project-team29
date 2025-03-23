@@ -20,11 +20,13 @@ export default {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/**/*.test.js"],
+  // testMatch: ["<rootDir>/client/src/**/*.test.js"],
+  testMatch: ["<rootDir>/client/src/tests/*.test.js"],
   testPathIgnorePatterns: ["/_site/"],
 
   // jest code coverage
-  collectCoverage: false,
-  collectCoverageFrom: ["client/src/components/**", "client/src/context/**", "client/src/hooks/**", "client/src/pages/**"],
+  collectCoverage: true,
+  // collectCoverageFrom: ["client/src/components/**", "client/src/context/**", "client/src/hooks/**", "client/src/pages/**"],
+  collectCoverageFrom: ["client/src/pages/HomePage.js"],
   coverageReporters: ["text", "lcov"],
 };

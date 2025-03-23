@@ -111,18 +111,19 @@ describe("HomePage Integration Tests", () => {
             expect(screen.getByText(/All Products/i)).toBeInTheDocument();
             expect(screen.getByText("Filter By Category")).toBeInTheDocument();
             expect(screen.getByText(/MacBook/i)).toBeInTheDocument();
-            //expect(screen.getByText(/Wisepad 3 reader/i)).toBeInTheDocument();
         }, { timeout: axios.defaults.timeout });
     });
 
     it("should navigate to product details page after click the More Details Button", async () => {
         await renderHomePage();
 
-        // Wait for products to load
-        const productHeading = await screen.findByText('All Products');
-        expect(productHeading).toBeInTheDocument();
-        const product = await screen.findByText(/Macbook/i);
-        expect(product).toBeInTheDocument();
+        await waitFor(() => {
+            // Wait for products to load
+            const productHeading = screen.getByText('All Products');
+            expect(productHeading).toBeInTheDocument();
+            const initialProduct = screen.getByText(/MacBook/i);
+            expect(initialProduct).toBeInTheDocument();
+        }, { timeout: axios.defaults.timeout });
 
         const detailsButtons = await screen.findAllByRole('button', {
             name: /more details/i
@@ -149,20 +150,207 @@ describe("HomePage Integration Tests", () => {
             expect(initialProduct).toBeInTheDocument();
         }, { timeout: axios.defaults.timeout });
 
-        const radioButton = await screen.findByRole('radio', { name: '$0 to 19' });
-        fireEvent.click(radioButton);
-      
+        const radioButton = await screen.findByRole('radio', { name: '$0 to 19.99' });
 
+        // initial state
+        expect(radioButton).not.toBeChecked();
+
+        await act(async () => {
+            fireEvent.click(radioButton);
+        });
+
+        
         await waitFor(() => {
             expect(radioButton).toBeChecked();
-            screen.debug();
-            expect(screen.queryByText(/Macbook/i)).toBeNull();
-            expect(screen.queryByText(/Wisepad 3 reader/i)).not.toBeInTheDocument();
-            expect(screen.getByText(/Save me an orange/i)).toBeInTheDocument();
+            expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+
+           
+            const expectedItems = [
+                /Save me an orange/i,
+                /Yellow Bird Drink/i,
+                /Shirley Temple Drink/i,
+                /Delightful Nyonya Treats/i,
+                /Garlic Butter Chicken/i,
+                /Superstar Roll/i,
+
+            ];
+
+            expectedItems.forEach(product => {
+                expect(screen.getAllByText(product)).not.toHaveLength(0);
+            });
+            
         }, { timeout: 15000 });
 
     }, 15000);
 
- 
+    it("should filter products by category", async () => {
+        await renderHomePage();
+
+        const checkbox = await screen.findByRole('checkbox', { name: 'Book' });
+        // Initial state
+        expect(checkbox).not.toBeChecked();
+        await act(async () => {
+            fireEvent.click(checkbox);
+        });
+
+        await waitFor(() => {
+            expect(checkbox).toBeChecked();
+            expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+
+            const expectedItems = [
+                /Save me an orange/i,
+                /You become what you think/i,
+                /The journey to the west/i,
+                /Delightful nyonya Treats/i,
+            ];
+        
+            expectedItems.forEach(product => {
+                expect(screen.getAllByText(product)).not.toHaveLength(0);
+            });    
+        }, { timeout: 15000 });
+
+    }, 15000);
+
+    it("should filter products by categories", async () => {
+        await renderHomePage(); 
+    
+        const bookCheckbox = await screen.findByRole('checkbox', { name: 'Book' });
+        const drinkCheckbox = await screen.findByRole('checkbox', { name: 'Drink' });
+
+        // Initial state
+        expect(bookCheckbox).not.toBeChecked();
+        expect(drinkCheckbox).not.toBeChecked();
+
+        await act(async () => {
+            fireEvent.click(bookCheckbox);
+            fireEvent.click(drinkCheckbox);
+        });
+
+        await waitFor(() => {
+            expect(bookCheckbox).toBeChecked();
+            expect(drinkCheckbox).toBeChecked();
+            expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+
+            const expectedItems = [
+                /Save me an orange/i,
+                /You become what you think/i,
+                /The journey to the west/i,
+                /Yellow Bird Drink/i,
+                /Shirley Temple Drink/i,
+                /Pahit Pink Gin/i,
+                /Kubota Senjyu Ginjyo/i,
+                /Jack Daniels/i,
+                /Sapporo/i,
+                /Delightful nyonya Treats/i,
+            ];
+        
+            expectedItems.forEach(product => {
+                expect(screen.getAllByText(product)).not.toHaveLength(0);
+            });  
+        }, { timeout: 15000 });
+    }, 15000);
+
+    it("should filter products by both category and price range", async () => {
+        await renderHomePage(); 
+    
+        const radioButton = await screen.findByRole('radio', { name: '$20 to 39.99' });
+        const bookCheckbox = await screen.findByRole('checkbox', { name: 'Book' });
+        const drinkCheckbox = await screen.findByRole('checkbox', { name: 'Drink' });
+
+        // initial state
+        expect(radioButton).not.toBeChecked();
+        expect(bookCheckbox).not.toBeChecked();
+        expect(drinkCheckbox).not.toBeChecked();
+
+        await act(async () => {
+            fireEvent.click(bookCheckbox);
+            fireEvent.click(drinkCheckbox);
+            fireEvent.click(radioButton);
+        });
+
+        await waitFor(() => {
+            expect(radioButton).toBeChecked();
+            expect(bookCheckbox).toBeChecked();
+            expect(drinkCheckbox).toBeChecked();
+            expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+
+            const expectedItems = [
+                /You become what you think/i,
+                /Sapporo/i,
+            ];
+        
+            expectedItems.forEach(product => {
+                expect(screen.getAllByText(product)).not.toHaveLength(0);
+            });  
+        }, { timeout: 15000 });
+    }, 15000);
+    
+    
+    describe("Reset Filters tests", () => {
+        const originalWindow = window.location;
+        const mockReload = jest.fn();
+        beforeEach(() => {
+            delete window.location;
+            window.location = { reload: mockReload };
+        });
+    
+        afterEach(() => {
+            window.location = originalWindow;
+        });
+
+        // mock reload() here as Jest and React Testing Library do not natively support window.location.reload()
+        it('should call window.location.reload when reset button is clicked', async () => {
+            await renderHomePage();
+        
+            // Find and click the reset button
+            const resetButton = await screen.findByRole('button', { name: 'RESET FILTERS' });
+            await act(async () => {
+              fireEvent.click(resetButton);
+            });
+            expect(window.location.reload).toHaveBeenCalled();
+        });
+        
+        
+    
+        it("should reset filters", async () => {
+            await renderHomePage();
+    
+            await waitFor(() => {
+                // Wait for products to load
+                const productHeading = screen.getByText('All Products');
+                expect(productHeading).toBeInTheDocument();
+                const initialProduct = screen.getByText(/MacBook/i);
+                expect(initialProduct).toBeInTheDocument();
+            }, { timeout: axios.defaults.timeout });
+
+            const checkbox = await screen.findByRole('checkbox', { name: 'Book' });
+            const radioButton = await screen.findByRole('radio', { name: '$0 to 19.99' });
+    
+            // Initial state
+            expect(radioButton).not.toBeChecked();
+            expect(checkbox).not.toBeChecked();
+    
+            await act(async () => {
+                fireEvent.click(checkbox);
+                fireEvent.click(radioButton);
+            });
+    
+            await waitFor(() => {
+                expect(checkbox).toBeChecked();
+                expect(radioButton).toBeChecked();
+                expect(screen.queryByText(/Macbook/i)).not.toBeInTheDocument();
+                expect(screen.getAllByAltText(/Save me an orange/i)).not.toHaveLength(0);
+                expect(screen.getAllByAltText(/Delightful Nyonya Treats/i)).not.toHaveLength(0);
+
+            }, { timeout: 15000 });
+    
+            const resetButton = await screen.findByRole('button', { name: 'RESET FILTERS' });
+            await act(async () => {
+                fireEvent.click(resetButton);
+            });
+            expect(window.location.reload).toHaveBeenCalled();
+        }, 15000);
+       
+    });
        
 });
