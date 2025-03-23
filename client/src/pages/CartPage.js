@@ -55,6 +55,7 @@ const CartPage = () => {
   const getProductDetails = async () => {
     if (!cart?.length) {
       setProducts([]);
+      setProductStatus("empty");
       return;
     }
     try {
@@ -68,13 +69,7 @@ const CartPage = () => {
       const { data } = await axios.get("/api/v1/product/get-product-details", {
         params: { ids: cartProductIds.join(",") },
       });
-      console.log("Product Details: ", data.products);
-      let products = [];
-      cartProductIds.forEach((item) => {
-        let product = data.products.find((p) => p._id === item);
-        products.push(product);
-      });
-      setProducts(products);
+      setProducts(data.products);
       setProductStatus("Loaded");
     } catch (error) {
       console.log(error);
@@ -93,8 +88,6 @@ const CartPage = () => {
   //handle payments
   const handlePayment = async () => {
     setLoading(true);
-
-    console.log("Handling Payment");
     // Get payment method nonce
     instance
       .requestPaymentMethod()
