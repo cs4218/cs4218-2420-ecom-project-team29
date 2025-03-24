@@ -32,6 +32,13 @@ export default {
   //   "<rootDir>/client/src/pages/Auth/**/.(?!integration).test.js",
   //   "<rootDir>/client/src/pages/Auth/.(?!integration).test.js",
   // ],
+
+  // Zihui's tests only:
+  // testMatch: [
+  //   // "<rootDir>/client/src/pages/ProductDetails.test.js",
+  //   "<rootDir>/client/src/tests/pages/HomePage.integration.test.js",
+  //   "<rootDir>/client/src/tests/pages/Search.integration.test.js",
+  // ],
   testPathIgnorePatterns: ["/_site/"],
 
   // jest code coverage
@@ -42,6 +49,16 @@ export default {
     "client/src/hooks/**",
     "client/src/pages/**",
   ],
+
+  // // Zihui's tests only:
+  // collectCoverageFrom: [
+  //   "client/src/components/Form/SearchInput.js",
+  //   "client/src/context/search.js",
+  //   "client/src/pages/HomePage.js",
+  //   "client/src/pages/Policy.js",
+  //   "client/src/pages/Search.js",
+  //   "client/src/pages/Contact.js",
+  // ],
     
   coverageReporters: ["text", "lcov"],
 };

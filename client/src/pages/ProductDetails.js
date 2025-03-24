@@ -115,14 +115,14 @@ const ProductDetails = () => {
                   </h5>
                 </div>
                 <p className="card-text ">
-                  {p.description.substring(0, 60)}...
+                  {p.description.substring(0, 50)}...
                 </p>
                 <div className="card-name-price">
                   <button
                     className="btn btn-info ms-1"
                     onClick={() => navigate(`/product/${p.slug}`)}
                   >
-                    More Details
+                    MORE DETAILS
                   </button>
                   {/* <button
                       className={`btn btn-dark ms-1 ${product?.name ? "" : "disabled"}`}
