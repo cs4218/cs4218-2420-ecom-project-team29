@@ -15,7 +15,7 @@ const Search = () => {
   const [values, setValues] = useSearch();
   return (
     <Layout title={"Search results"}>
-      <div className="container search">
+      <div className="container search" data-testid="search-page">
         <div >
           <div className="text-center">
             <h1>Search Results</h1>

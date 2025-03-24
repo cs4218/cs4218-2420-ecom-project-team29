@@ -1,14 +1,17 @@
 import React from "react";
 import { render, screen, act, fireEvent, waitFor  } from "@testing-library/react";
 import { testApi, apiConfig } from './testConfig';
-import { AuthProvider } from "../context/auth";
-import { SearchProvider } from "../context/search";
-import { CartProvider } from "../context/cart";
+import { AuthProvider } from "../../context/auth";
+import { SearchProvider } from "../../context/search";
+import { CartProvider } from "../../context/cart";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import axios from "axios";
 import '@testing-library/jest-dom';
-import HomePage from "../pages/HomePage";
-import ProductDetails from "../pages/ProductDetails";
+import HomePage from "../../pages/HomePage";
+import ProductDetails from "../../pages/ProductDetails";
+import Contact from "../../pages/Contact";
+import Search from "../../pages/Search";
+import Policy from "../../pages/Policy";
 
 
 const renderHomePage = async () => {
@@ -24,6 +27,9 @@ const renderHomePage = async () => {
                                     path="/product/:slug" 
                                     element={<ProductDetails />} 
                                 />
+                                <Route path="/contact" element={<Contact />} />
+                                <Route path="/search" element={<Search />} />
+                                <Route path="/policy" element={<Policy />} />
                             </Routes>
                         </MemoryRouter>
                     </CartProvider>
@@ -318,4 +324,47 @@ describe("HomePage Integration Tests", () => {
        
     });
        
+    describe("View Pages", () => {
+        it("should navigate to contact page after click the Contact Link", async () => {
+            await renderHomePage();
+    
+            await waitFor(() => {
+                // Wait for products to load
+                const productHeading = screen.getByText('All Products');
+                expect(productHeading).toBeInTheDocument();
+                const initialProduct = screen.getByText(/MacBook/i);
+                expect(initialProduct).toBeInTheDocument();
+            }, { timeout: axios.defaults.timeout });
+    
+
+            const contactLink = await screen.findByText(/Contact/i);
+            await act(async () => {
+                fireEvent.click(contactLink);
+            });
+            const contactPage = await screen.findByTestId('contact-page');
+            expect(contactPage).toBeInTheDocument();
+        }, 15000);
+
+        it("should navigate to policy page after click the Privacy Policy Link", async () => {
+            await renderHomePage();
+    
+            await waitFor(() => {
+                // Wait for products to load
+                const productHeading = screen.getByText('All Products');
+                expect(productHeading).toBeInTheDocument();
+                const initialProduct = screen.getByText(/MacBook/i);
+                expect(initialProduct).toBeInTheDocument();
+            }, { timeout: axios.defaults.timeout });
+    
+
+            const policyLink = await screen.findByText(/Privacy Policy/i);
+            await act(async () => {
+                fireEvent.click(policyLink);
+            });
+            const policyPage = await screen.findByTestId('policy-page');
+            expect(policyPage).toBeInTheDocument();
+        }, 15000);
+    });
+
+
 });
