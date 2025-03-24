@@ -21,7 +21,7 @@ export default {
 
   // only run these tests
   // For running all test files:
-  // testMatch: ["<rootDir>/client/src/**/*.test.js"],
+  testMatch: ["<rootDir>/client/src/**/*.test.js"],
   // For running unit tests only:
   // testMatch: [
   //   "<rootDir>/client/src/pages/admin/*.test.js",
@@ -34,31 +34,31 @@ export default {
   // ],
 
   // Zihui's tests only:
-  testMatch: [
-    // "<rootDir>/client/src/pages/ProductDetails.test.js",
-    "<rootDir>/client/src/tests/pages/Search.integration.test.js"
-
-  ],
+  // testMatch: [
+  //   // "<rootDir>/client/src/pages/ProductDetails.test.js",
+  //   "<rootDir>/client/src/tests/pages/HomePage.integration.test.js",
+  //   "<rootDir>/client/src/tests/pages/Search.integration.test.js",
+  // ],
   testPathIgnorePatterns: ["/_site/"],
 
   // jest code coverage
   collectCoverage: true,
-  // collectCoverageFrom: [
-  //   "client/src/components/**",
-  //   "client/src/context/**",
-  //   "client/src/hooks/**",
-  //   "client/src/pages/**",
-  // ],
-
-  // Zihui's tests only:
   collectCoverageFrom: [
-    "client/src/components/Form/SearchInput.js",
-    "client/src/context/search.js",
-    "client/src/pages/HomePage.js",
-    "client/src/pages/Policy.js",
-    "client/src/pages/Search.js",
-    "client/src/pages/Contact.js",
+    "client/src/components/**",
+    "client/src/context/**",
+    "client/src/hooks/**",
+    "client/src/pages/**",
   ],
+
+  // // Zihui's tests only:
+  // collectCoverageFrom: [
+  //   "client/src/components/Form/SearchInput.js",
+  //   "client/src/context/search.js",
+  //   "client/src/pages/HomePage.js",
+  //   "client/src/pages/Policy.js",
+  //   "client/src/pages/Search.js",
+  //   "client/src/pages/Contact.js",
+  // ],
     
   coverageReporters: ["text", "lcov"],
 };

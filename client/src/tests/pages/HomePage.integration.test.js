@@ -50,14 +50,14 @@ describe("HomePage Integration Tests", () => {
 
     beforeAll(async () => {
         try {
-            console.log('Testing connection to:', axios.defaults.baseURL + '/api/v1/category/get-category');
+            // console.log('Testing connection to:', axios.defaults.baseURL + '/api/v1/category/get-category');
             
             const response = await testApi.get('/api/v1/category/get-category');
 
-            console.log('API Response:', {
-                status: response?.status,
-                data: response?.data
-            });
+            // console.log('API Response:', {
+            //     status: response?.status,
+            //     data: response?.data
+            // });
 
             expect(response).toBeDefined();
             expect(response.status).toBeDefined();
@@ -363,6 +363,68 @@ describe("HomePage Integration Tests", () => {
             });
             const policyPage = await screen.findByTestId('policy-page');
             expect(policyPage).toBeInTheDocument();
+        }, 15000);
+
+        it("should navigate to search result page after click the Search Button with a input", async () => {
+            await renderHomePage();
+    
+            await waitFor(() => {
+                // Wait for products to load
+                const productHeading = screen.getByText('All Products');
+                expect(productHeading).toBeInTheDocument();
+                const initialProduct = screen.getByText(/MacBook/i);
+                expect(initialProduct).toBeInTheDocument();
+            }, { timeout: axios.defaults.timeout });
+    
+    
+            const searchButton = await screen.findByRole('button', { name: 'Search' });
+            const searchInput = await screen.findByPlaceholderText(/search/i);
+    
+            await act(async () => {
+                fireEvent.change(searchInput, { target: { value: 'macbook' } });
+                fireEvent.click(searchButton);
+            });
+            
+            const searchPage = await screen.findByTestId('search-page');
+            expect(searchPage).toBeInTheDocument();
+        }, 15000);
+    });
+
+    describe("load more button", () => {    
+        it("should load more products when the load more button is clicked", async () => {
+            await renderHomePage();
+    
+            await waitFor(() => {
+                // Wait for products to load
+                const productHeading = screen.getByText('All Products');
+                expect(productHeading).toBeInTheDocument();
+                const initialProduct = screen.getByText(/MacBook/i);
+                expect(initialProduct).toBeInTheDocument();
+            }, { timeout: axios.defaults.timeout });
+
+            const loadMoreButton = await screen.findByRole('button', { name: 'Loadmore' });
+
+            await act(async () => {
+                fireEvent.click(loadMoreButton);
+            });
+
+            await waitFor(() => {
+                const expectedProducts = [
+                    /Superstar Roll/i,
+                    /Sapporo/i,
+                    // /Jack Daniels/i,
+                    // /Kubota/i,
+                    // /Pahit Pink Gin/i,
+                    // /Shirley/i,
+                ]
+
+                expectedProducts.forEach(product => {
+                    expect(screen.getAllByText(product)).not.toHaveLength(0);
+                });  
+               
+            }, { timeout: 15000 });
+    
+
         }, 15000);
     });
 
