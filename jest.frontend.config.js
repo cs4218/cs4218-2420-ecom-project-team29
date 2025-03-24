@@ -32,8 +32,6 @@ export default {
   //   "<rootDir>/client/src/pages/Auth/**/.(?!integration).test.js",
   //   "<rootDir>/client/src/pages/Auth/.(?!integration).test.js",
   // ],
-  // Previous frontend test config from main:
-  // testMatch: ["<rootDir>/client/src/tests/*.test.js"],
   testPathIgnorePatterns: ["/_site/"],
 
   // jest code coverage
@@ -44,6 +42,6 @@ export default {
     "client/src/hooks/**",
     "client/src/pages/**",
   ],
-  //collectCoverageFrom: ["client/src/pages/HomePage.js"],
+    
   coverageReporters: ["text", "lcov"],
 };
