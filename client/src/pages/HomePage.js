@@ -30,7 +30,7 @@ const HomePage = () => {
         setCategories(data?.category);
       }
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 
@@ -47,7 +47,7 @@ const HomePage = () => {
       setProducts(data.products);
     } catch (error) {
       setLoading(false);
-      console.log(error);
+      //console.log(error);
     }
   };
 
@@ -57,7 +57,7 @@ const HomePage = () => {
       const { data } = await axios.get("/api/v1/product/product-count");
       setTotal(data?.total);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 
@@ -73,7 +73,7 @@ const HomePage = () => {
       setLoading(false);
       setProducts([...products, ...data?.products]);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       setLoading(false);
     }
   };
@@ -89,7 +89,7 @@ const HomePage = () => {
       }
       setChecked(all);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 
@@ -111,7 +111,7 @@ const HomePage = () => {
       });
       setProducts(data?.products);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     } finally {
       setLoading(false);
     }
