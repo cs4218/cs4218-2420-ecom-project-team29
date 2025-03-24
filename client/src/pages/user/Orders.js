@@ -32,7 +32,7 @@ const Orders = () => {
             {orders?.length !== 0 ? 
             (orders?.map((o, i) => {
               return (
-                <div className="border shadow" key={`${o._id}${i}`}>
+                <div className="border shadow" key={`${o._id}${i}`} data-testid={`order-${o._id}`}>
                   <table className="table">
                     <thead>
                       <tr>
@@ -71,7 +71,7 @@ const Orders = () => {
                           <p>{p.name}</p>
                           <p>{p.description}</p>
 
-                          <p>Price : {p.price.toFixed(2)}</p>
+                          <p>Price: {p.price.toFixed(2)}</p>
                         </div>
                       </div>
                     ))}

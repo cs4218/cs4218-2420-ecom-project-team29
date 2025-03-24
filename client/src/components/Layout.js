@@ -2,10 +2,10 @@ import React from 'react'
 import Footer from './Footer';
 import Header from './Header';
 import { Helmet } from "react-helmet";
-import  { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 
-const Layout = ({ children, title, description, keywords, author }) => {
+const Layout = ({ children, title, description, keywords, author, reload_categories }) => {
   return (
     <div>
       <Helmet>
@@ -15,7 +15,7 @@ const Layout = ({ children, title, description, keywords, author }) => {
         <meta name="author" content={author} />
         <title>{title}</title>
       </Helmet>
-      <Header />
+      <Header reload_categories={reload_categories} />
       <main style={{ minHeight: "70vh" }}>
         <Toaster />
         {children}
