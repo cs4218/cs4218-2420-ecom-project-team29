@@ -216,7 +216,7 @@ describe("Login Controller Test", () => {
       await authController.loginController(req, res);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
-        message: "Invalid email or password" 
+        message: "Invalid credentials" 
       });
     });
 
@@ -226,23 +226,23 @@ describe("Login Controller Test", () => {
       await authController.loginController(req, res);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
-        message: "Invalid email or password" 
+        message: "Invalid credentials" 
       });
     });
   });
 
-  it("should return email is not registered", async () => {
+  it("should return invalid credentials for non-existent email", async () => {
     userModel.findOne = jest.fn().mockResolvedValue(null);
 
     await authController.loginController(req, res);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Email is not registered",
+      message: "Invalid credentials",
     });
   });
 
-  it("should return invalid password", async () => {
+  it("should return invalid credentials for wrong password", async () => {
     userModel.findOne = jest.fn().mockResolvedValue(mockUser);
     authHelper.comparePassword.mockResolvedValueOnce(false);
 
@@ -250,7 +250,7 @@ describe("Login Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Invalid password",
+      message: "Invalid credentials",
     });
   });
 
