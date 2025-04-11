@@ -195,7 +195,7 @@ describe("Login Controller Integration Tests", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Invalid password"
+      message: "Invalid credentials"
     });
   });
 
@@ -216,7 +216,7 @@ describe("Login Controller Integration Tests", () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Email is not registered"
+      message: "Invalid credentials"
     });
   });
 });
